@@ -1,0 +1,25 @@
+{
+  "name": "qwq-my",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "node scripts/seed-database.mjs",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "mongodb": "7.2.0",
+    "next": "16.2.7",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "redis": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.16",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
+  }
+}

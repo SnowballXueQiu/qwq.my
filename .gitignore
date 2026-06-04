@@ -1,0 +1,7 @@
+.next/
+.pnpm-store/
+node_modules/
+.env.local
+data/presence.json
+macos-presence-probe/.build/
+macos-presence-probe/dist/
