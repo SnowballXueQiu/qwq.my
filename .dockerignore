@@ -3,4 +3,6 @@ node_modules
 .pnpm-store
 macos-presence-probe/.build
 macos-presence-probe/dist
+docker/mongo-data
+docker/redis-data
 .DS_Store

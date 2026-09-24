@@ -1,14 +1,10 @@
-import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/admin-auth";
-import { deletePost, updatePost } from "@/lib/posts";
+import { createPost, getPosts } from "@/lib/posts";
 import type { Post } from "@/lib/post-types";
 
-export const runtime = "nodejs";
-
-type RouteContext = {
-  params: Promise<{ slug: string }>;
-};
+export const dynamic = "force-dynamic";
 
 function isPost(value: unknown): value is Post {
   if (!value || typeof value !== "object") return false;
@@ -26,38 +22,28 @@ function isPost(value: unknown): value is Post {
   );
 }
 
-export async function PUT(request: Request, context: RouteContext) {
+export async function GET() {
+  return NextResponse.json(await getPosts(), {
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+export async function POST(request: Request) {
   if (!isAdminRequest(request)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const { slug } = await context.params;
   const body = await request.json();
-
-  if (!isPost(body) || body.slug !== slug) {
+  if (!isPost(body)) {
     return NextResponse.json({ error: "Invalid post payload." }, { status: 400 });
   }
 
-  const saved = await updatePost(slug, body);
+  const saved = await createPost({ ...body, views: body.views ?? 0, likes: body.likes ?? 0 });
   revalidatePath("/");
-  revalidatePath(`/writing/${slug}`);
   revalidatePath("/admin/posts");
   revalidatePath("/admin/site");
-
-  return NextResponse.json(saved);
-}
-
-export async function DELETE(request: Request, context: RouteContext) {
-  if (!isAdminRequest(request)) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
-  const { slug } = await context.params;
-  await deletePost(slug);
-  revalidatePath("/");
-  revalidatePath(`/writing/${slug}`);
-  revalidatePath("/admin/posts");
-  revalidatePath("/admin/site");
-
-  return NextResponse.json({ ok: true });
+  revalidatePath(`/writing/${saved.slug}`);
+  return NextResponse.json(saved, { status: 201 });
 }

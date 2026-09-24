@@ -3,6 +3,7 @@ import { SketchIcon } from "@/app/components/SketchIcon";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getFriendApplications } from "@/lib/friend-applications";
 import { getMediaAssets } from "@/lib/media";
+import { getPosts } from "@/lib/posts";
 import { getSiteContent } from "@/lib/site-content";
 import { AdminSiteEditor } from "./AdminSiteEditor";
 
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminSitePage() {
   await requireAdmin();
-  const [content, applications, mediaAssets] = await Promise.all([getSiteContent(), getFriendApplications(), getMediaAssets()]);
+  const [content, applications, mediaAssets, posts] = await Promise.all([getSiteContent(), getFriendApplications(), getMediaAssets(), getPosts()]);
 
   return (
     <main className="admin-page">
@@ -26,10 +27,10 @@ export default async function AdminSitePage() {
           <div>
             <p className="article-kicker">SSR site backend</p>
             <h1>Control room</h1>
-            <p>Edit title, favicon, hero, projects, friends, me cards, copyright, and review incoming friend requests.</p>
+            <p>Edit title, favicon, hero, articles, projects, friends, me cards, copyright, media, and incoming friend requests.</p>
           </div>
         </header>
-        <AdminSiteEditor applications={applications} content={content} mediaAssets={mediaAssets} />
+        <AdminSiteEditor applications={applications} content={content} mediaAssets={mediaAssets} posts={posts} />
       </section>
     </main>
   );

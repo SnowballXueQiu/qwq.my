@@ -1,10 +1,10 @@
 import { DecorativeDoodles } from "@/app/components/DecorativeDoodles";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { SketchIcon } from "@/app/components/SketchIcon";
-import { getStaticSiteContent } from "@/lib/site-content-data";
+import { getSiteContent } from "@/lib/site-content";
 import { FriendApplication } from "./FriendApplication";
 
-const content = getStaticSiteContent();
+export const dynamic = "force-dynamic";
 
 const rules = [
   "Before applying, please make sure your site already links back to mine.",
@@ -15,7 +15,9 @@ const rules = [
   "Commercial and non-personal websites are not accepted.",
 ];
 
-export default function FriendsPage() {
+export default async function FriendsPage() {
+  const content = await getSiteContent();
+
   return (
     <div className="app-root">
       <DecorativeDoodles />
@@ -63,9 +65,11 @@ export default function FriendsPage() {
               <p>
                 <strong>Site Description:</strong> Soft hand-drawn notes, projects, and presence.
               </p>
-              <p>
-                <strong>Owner Avatar:</strong> <a href="/assets/hero-mascot.png">Click to download</a>
-              </p>
+              {content.site.heroImageUrl ? (
+                <p>
+                  <strong>Owner Avatar:</strong> <a href={content.site.heroImageUrl}>Click to view</a>
+                </p>
+              ) : null}
               <p>
                 <strong>Owner Name:</strong> snowball
               </p>

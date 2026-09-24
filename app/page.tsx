@@ -7,14 +7,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { DecorativeDoodles } from "./components/DecorativeDoodles";
 import { SketchIcon } from "./components/SketchIcon";
 import { getBrowserStorageItem, removeBrowserStorageItem, setBrowserStorageItem } from "@/lib/browser-storage";
-import { getStaticPosts, parsePostDate } from "@/lib/post-data";
+import { DEFAULT_POSTS, DEFAULT_SITE_CONTENT } from "@/lib/default-content";
+import { parsePostDate } from "@/lib/post-data";
 import type { PresenceState } from "@/lib/presence-types";
 import type { Post, SortMode, Topic } from "@/lib/post-types";
-import { getStaticSiteContent } from "@/lib/site-content-data";
 import type { SiteContent } from "@/lib/site-content-types";
-
-const posts = getStaticPosts();
-const initialSiteContent = getStaticSiteContent();
 
 const topicOptions: { value: Topic; label: string }[] = [
   { value: "all", label: "all notes" },
@@ -43,7 +40,8 @@ function HomePage() {
   const [presence, setPresence] = useState({ bpm: 72, online: 1 });
   const [probePresence, setProbePresence] = useState<PresenceState | null>(null);
   const [viewStats, setViewStats] = useState({ totalPageViews: 0, pageViews: 0 });
-  const [siteContent, setSiteContent] = useState<SiteContent>(initialSiteContent);
+  const [siteContent, setSiteContent] = useState<SiteContent>(DEFAULT_SITE_CONTENT);
+  const [posts, setPosts] = useState<Post[]>(DEFAULT_POSTS);
   const navRef = useRef<HTMLElement>(null);
   const pendingIndicatorRef = useRef<{ left: number; width: number } | null>(null);
   const [navIndicator, setNavIndicator] = useState({ left: 0, width: 0, ready: false });
@@ -97,10 +95,13 @@ function HomePage() {
   }, [activeSection]);
 
   useEffect(() => {
-    fetch("/api/site-content")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((content: SiteContent | null) => {
+    Promise.all([
+      fetch("/api/site-content").then((response) => (response.ok ? response.json() : null)),
+      fetch("/api/posts").then((response) => (response.ok ? response.json() : null)),
+    ])
+      .then(([content, nextPosts]: [SiteContent | null, Post[] | null]) => {
         if (content?.site) setSiteContent(content);
+        if (Array.isArray(nextPosts)) setPosts(nextPosts);
       })
       .catch(() => {});
   }, []);
@@ -458,24 +459,30 @@ function HomePage() {
 
                 <div className="hero-buttons">
                   <a className="button primary" href="/me">
-                    {siteContent.site.primaryButtonLabel}
+                    About me
                   </a>
                   <a className="button secondary" href="#projects">
-                    {siteContent.site.secondaryButtonLabel}
+                    View projects
                   </a>
                 </div>
 
                 <div className="connect-row" aria-label="Social links">
                   <span>Let's connect</span>
-                  <a href={siteContent.site.githubUrl} aria-label="GitHub">
-                    <SketchIcon name="github" />
-                  </a>
-                  <a href={siteContent.site.xUrl} aria-label="X">
-                    <SketchIcon name="x" />
-                  </a>
-                  <a href={`mailto:${siteContent.site.email}`} aria-label="Email">
-                    <SketchIcon name="mail" />
-                  </a>
+                  {siteContent.site.showGithub ? (
+                    <a href={siteContent.site.githubUrl} aria-label="GitHub">
+                      <SketchIcon name="github" />
+                    </a>
+                  ) : null}
+                  {siteContent.site.showX ? (
+                    <a href={siteContent.site.xUrl} aria-label="X">
+                      <SketchIcon name="x" />
+                    </a>
+                  ) : null}
+                  {siteContent.site.showEmail ? (
+                    <a href={`mailto:${siteContent.site.email}`} aria-label="Email">
+                      <SketchIcon name="mail" />
+                    </a>
+                  ) : null}
                   <a href="/me" aria-label="About">
                     <SketchIcon name="heart" />
                   </a>
@@ -584,6 +591,12 @@ function HomePage() {
                         <span>{project.status}</span>
                       </div>
                       <p>{project.summary}</p>
+                      {project.githubUrl ? (
+                        <a className="project-github-link" href={project.githubUrl}>
+                          <SketchIcon name="github" />
+                          GitHub
+                        </a>
+                      ) : null}
                       <div className="post-meta">
                         {project.tags.map((tag) => (
                           <span className="tag" key={tag}>
@@ -622,7 +635,7 @@ function HomePage() {
                   <SketchIcon name="pencil" />
                 </span>
                 <div>
-                  <Link className="editing-link" href="/admin/posts">
+                  <Link className="editing-link" href="/admin/site">
                     <strong>
                       {editingTitle}
                       <span className="typing-dots" aria-hidden="true"></span>
@@ -703,6 +716,10 @@ function PostCard({ post }: { post: Post }) {
         <p>{post.summary}</p>
         <div className="post-meta">
           <span>{post.date}</span>
+          <span>•</span>
+          <span>{post.views} views</span>
+          <span>•</span>
+          <span>{post.likes} likes</span>
           <span>•</span>
           {post.tags.map((tag) => (
             <span className="tag" key={tag}>

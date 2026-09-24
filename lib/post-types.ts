@@ -11,5 +11,9 @@ export type Post = {
   tags: string[];
   read: number;
   color: PostColor;
-  content: string[];
+  content: string;
+  views: number;
+  likes: number;
+  createdAt?: string;
+  updatedAt?: string;
 };

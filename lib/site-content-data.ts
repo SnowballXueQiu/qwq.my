@@ -1,6 +1,5 @@
-import content from "@/data/site-content.json";
-import type { SiteContent } from "./site-content-types";
+import { DEFAULT_SITE_CONTENT } from "./default-content";
 
-export function getStaticSiteContent(): SiteContent {
-  return content as SiteContent;
+export function getStaticSiteContent() {
+  return DEFAULT_SITE_CONTENT;
 }

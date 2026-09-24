@@ -1,31 +1,8 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { getCollection } from "./database";
+import { DEFAULT_PRESENCE } from "./default-content";
 import type { PresencePayload, PresenceState } from "./presence-types";
 
-const presenceFile = path.join(process.cwd(), "data", "presence.json");
 const staleAfterMs = 45_000;
-
-const fallbackPresence: PresenceState = {
-  status: "offline",
-  location: "Shanghai",
-  bpm: 72,
-  device: {
-    name: "Mac",
-    os: "macOS",
-  },
-  activeApp: {
-    name: "Unknown",
-  },
-  editing: {
-    isEditor: true,
-    editor: "Next.js",
-    file: "app/page.tsx",
-    branch: "main",
-  },
-  updatedAt: new Date(0).toISOString(),
-  stale: true,
-};
 
 export async function getPresence(): Promise<PresenceState> {
   const collection = await getCollection("presence");
@@ -34,13 +11,7 @@ export async function getPresence(): Promise<PresenceState> {
     if (document) return withStaleStatus(document as PresenceState);
   }
 
-  try {
-    const raw = await readFile(presenceFile, "utf-8");
-    const state = JSON.parse(raw) as PresenceState;
-    return withStaleStatus(state);
-  } catch {
-    return fallbackPresence;
-  }
+  return DEFAULT_PRESENCE;
 }
 
 export async function updatePresence(payload: PresencePayload): Promise<PresenceState> {
@@ -55,15 +26,13 @@ export async function updatePresence(payload: PresencePayload): Promise<Presence
     stale: false,
   });
 
-  await mkdir(path.dirname(presenceFile), { recursive: true });
-  await writeFile(presenceFile, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
-
   const collection = await getCollection("presence");
   if (collection) {
     await collection.updateOne({ _id: "current" }, { $set: { ...next, _id: "current" } }, { upsert: true });
+    return next;
   }
 
-  return next;
+  throw new Error("MongoDB is required to update presence.");
 }
 
 function withStaleStatus(state: PresenceState): PresenceState {

@@ -1,7 +1,7 @@
-import profile from "@/data/me-profile.json";
+import { DEFAULT_SITE_CONTENT } from "./default-content";
 
-export type MeProfile = typeof profile;
+export type MeProfile = typeof DEFAULT_SITE_CONTENT.me;
 
 export function getMeProfile(): MeProfile {
-  return profile;
+  return DEFAULT_SITE_CONTENT.me;
 }

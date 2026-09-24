@@ -29,6 +29,9 @@ export async function PUT(request: Request) {
     typeof content.site.title !== "string" ||
     typeof content.site.faviconUrl !== "string" ||
     typeof content.site.heroImageUrl !== "string" ||
+    typeof content.site.showGithub !== "boolean" ||
+    typeof content.site.showX !== "boolean" ||
+    typeof content.site.showEmail !== "boolean" ||
     !content.about ||
     typeof content.about.copyright !== "string"
   ) {

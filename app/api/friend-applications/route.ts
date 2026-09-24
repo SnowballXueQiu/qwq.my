@@ -39,7 +39,11 @@ export async function POST(request: Request) {
     avatarUrl,
     email: payload.email.trim(),
     intro: payload.intro.trim(),
-  });
+  }).catch(() => null);
+
+  if (!saved) {
+    return NextResponse.json({ error: "MongoDB is required to save friend applications." }, { status: 503 });
+  }
 
   return NextResponse.json(saved, { status: 201 });
 }

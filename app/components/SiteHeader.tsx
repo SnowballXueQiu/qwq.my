@@ -205,7 +205,7 @@ export function SiteHeader({ active = "" }: { active?: string }) {
       </nav>
 
       <div className="theme-actions" aria-label="Page tools">
-        <Link className="icon-button" href="/admin/posts" aria-label="Open blog backend">
+        <Link className="icon-button" href="/admin/site" aria-label="Open admin backend">
           ✎
         </Link>
         <Link className="icon-button moon" href="/admin/site" aria-label="Open site backend">

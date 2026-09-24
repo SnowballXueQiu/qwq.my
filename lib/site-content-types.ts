@@ -6,6 +6,7 @@ export type SiteProject = {
   status: string;
   tags: string[];
   color: PostColor | "mint";
+  githubUrl: string;
 };
 
 export type FriendLink = {
@@ -14,9 +15,32 @@ export type FriendLink = {
   description: string;
 };
 
-export type MeCard = {
+export type MeModuleItem = {
   title: string;
+  subtitle: string;
+  url: string;
+  meta: string;
+  color?: PostColor | "mint" | "yellow";
+  past?: boolean;
+};
+
+export type MeModuleLink = {
+  label: string;
+  value: string;
+  url: string;
+  enabled: boolean;
+};
+
+export type MeCard = {
+  id: string;
+  kind: "intro" | "links" | "timeline" | "skills" | "text";
   summary: string;
+  title: string;
+  enabled: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
+  items: MeModuleItem[];
+  links: MeModuleLink[];
 };
 
 export type StatisticItem = {
@@ -45,12 +69,13 @@ export type SiteSettings = {
   heroTagline: string;
   heroImageUrl: string;
   heroImageAlt: string;
-  primaryButtonLabel: string;
-  secondaryButtonLabel: string;
   projectsIntro: string;
   githubUrl: string;
   xUrl: string;
   email: string;
+  showGithub: boolean;
+  showX: boolean;
+  showEmail: boolean;
 };
 
 export type SiteContent = {

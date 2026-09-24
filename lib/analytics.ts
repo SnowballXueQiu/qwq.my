@@ -1,19 +1,10 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { getCollection, getRedisClient } from "./database";
+import { DEFAULT_ANALYTICS } from "./default-content";
 
 export type AnalyticsState = {
   totalPageViews: number;
   pages: Record<string, number>;
   updatedAt: string;
-};
-
-const analyticsFile = path.join(process.cwd(), "data", "analytics.json");
-
-const fallbackAnalytics: AnalyticsState = {
-  totalPageViews: 0,
-  pages: {},
-  updatedAt: new Date(0).toISOString(),
 };
 
 export async function getAnalytics(): Promise<AnalyticsState> {
@@ -35,17 +26,7 @@ export async function getAnalytics(): Promise<AnalyticsState> {
     if (document) return document as AnalyticsState;
   }
 
-  try {
-    const raw = await readFile(analyticsFile, "utf-8");
-    const parsed = JSON.parse(raw) as AnalyticsState;
-    return {
-      totalPageViews: parsed.totalPageViews ?? 0,
-      pages: parsed.pages ?? {},
-      updatedAt: parsed.updatedAt ?? new Date(0).toISOString(),
-    };
-  } catch {
-    return fallbackAnalytics;
-  }
+  return DEFAULT_ANALYTICS;
 }
 
 export async function recordPageView(page: string): Promise<AnalyticsState> {
@@ -77,9 +58,6 @@ export async function recordPageView(page: string): Promise<AnalyticsState> {
     },
     updatedAt: new Date().toISOString(),
   };
-
-  await mkdir(path.dirname(analyticsFile), { recursive: true });
-  await writeFile(analyticsFile, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
 
   const collection = await getCollection("analytics");
   if (collection) {

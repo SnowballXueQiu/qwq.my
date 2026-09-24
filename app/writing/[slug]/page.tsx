@@ -1,24 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MarkdownArticle } from "@/app/components/MarkdownArticle";
 import { SketchIcon } from "@/app/components/SketchIcon";
-import { getStaticPosts } from "@/lib/post-data";
-import { getPost } from "@/lib/posts";
+import { getPost, recordPostView } from "@/lib/posts";
+import { LikePostButton } from "./LikePostButton";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export const revalidate = 60;
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return getStaticPosts().map((post) => ({ slug: post.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPost(slug);
+  const post = await recordPostView(slug);
 
   if (!post) {
     return {
@@ -62,14 +58,15 @@ export default async function WritingDetailPage({ params }: PageProps) {
                   {tag}
                 </span>
               ))}
+              <span className="tag">{post.views} views</span>
+              <span className="tag">{post.likes} likes</span>
             </div>
+            <LikePostButton slug={post.slug} initialLikes={post.likes} />
           </div>
         </header>
 
         <div className="article-body">
-          {post.content.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
+          <MarkdownArticle content={post.content} />
         </div>
       </article>
     </main>

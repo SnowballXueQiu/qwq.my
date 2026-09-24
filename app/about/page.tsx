@@ -1,59 +1,25 @@
 import { DecorativeDoodles } from "@/app/components/DecorativeDoodles";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { SketchIcon } from "@/app/components/SketchIcon";
-import { getStaticPosts } from "@/lib/post-data";
-import { getStaticSiteContent } from "@/lib/site-content-data";
+import { getPosts } from "@/lib/posts";
+import { getSiteContent } from "@/lib/site-content";
 
-const content = getStaticSiteContent();
-const posts = getStaticPosts();
+export const dynamic = "force-dynamic";
 
-const aboutStatistics = [
-  {
-    label: "Blog posts",
-    value: String(posts.length),
-    note: "SSG pages",
-  },
-  {
-    label: "Projects",
-    value: String(content.projects.length),
-    note: "active ideas",
-  },
-  {
-    label: "Friends",
-    value: String(content.friends.length),
-    note: "approved links",
-  },
-  {
-    label: "Presence",
-    value: "Live",
-    note: "probe package",
-  },
-];
+export default async function AboutPage() {
+  const [content, posts] = await Promise.all([getSiteContent(), getPosts()]);
+  const aboutStatistics = [
+    { label: "Blog posts", value: String(posts.length), note: "MongoDB posts" },
+    { label: "Projects", value: String(content.projects.length), note: "configurable" },
+    { label: "Friends", value: String(content.friends.length), note: "approved links" },
+    { label: "Presence", value: "Live", note: "probe package" },
+  ];
+  const aboutLinks = [
+    { label: "Author", url: "/me", note: "snowball, frontend engineer and interface tinkerer" },
+    { label: "GitHub", url: content.site.githubUrl, note: "project source and issue notes" },
+    { label: "Presence Probe", url: "/downloads/Presence-Probe.zip", note: "download the macOS reporter app package" },
+  ];
 
-const aboutLinks = [
-  {
-    label: "Author",
-    url: "/me",
-    note: "snowball, frontend engineer and interface tinkerer",
-  },
-  {
-    label: "Design source",
-    url: "https://x.com/vereisyaps/status/2060820483797332132",
-    note: "visual inspiration reference for the hand-drawn qwq.my mood",
-  },
-  {
-    label: "GitHub",
-    url: "https://github.com/",
-    note: "project source and issue notes",
-  },
-  {
-    label: "Presence Probe",
-    url: "/downloads/Presence-Probe.zip",
-    note: "download the macOS reporter app package",
-  },
-];
-
-export default function AboutPage() {
   return (
     <div className="app-root">
       <DecorativeDoodles />
