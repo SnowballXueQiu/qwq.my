@@ -1,4 +1,3 @@
-import { posts } from "@/content/posts";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { skills } from "@/content/skills";
@@ -7,6 +6,7 @@ import { emit } from "@/lib/fx";
 import type { Locale } from "@/lib/i18n";
 import { scrollToTarget } from "@/lib/scroll";
 import { sheets } from "@/lib/sheets";
+import type { PostMeta } from "@/lib/postTypes";
 import type { Expression } from "@/lib/store";
 
 export type Line = { kind: "in" | "out" | "err" | "ok" | "accent"; text: string };
@@ -18,6 +18,7 @@ export type Context = {
   close: () => void;
   navigate: (href: string) => void;
   history: string[];
+  posts: PostMeta[];
 };
 
 type Command = {
@@ -35,6 +36,11 @@ const accent = (text: string): Line => ({ kind: "accent", text });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const SECTIONS = sheets.filter((s) => s !== "hero");
+/** Filled in by the terminal so `read <Tab>` can complete post slugs. */
+let postSlugs: string[] = [];
+export const setPostSlugs = (slugs: string[]) => {
+  postSlugs = slugs;
+};
 const FACES: Expression[] = ["QwQ", "OwO", ">w<", "QAQ", "@w@", "-w-", "^w^"];
 
 function gpu() {
@@ -127,16 +133,16 @@ export const commands: Record<string, Command> = {
   blog: {
     summary: { zh: "列出文章", en: "list posts" },
     run: (_, ctx) => {
-      posts.forEach((p, i) => ctx.print(`[${i + 1}] ${p.date}  ${p.title[ctx.locale]}`));
+      ctx.posts.forEach((p, i) => ctx.print(`[${i + 1}] ${p.date}  ${p.title}`));
       ctx.print(t(ctx, "用 read <编号> 阅读", "use read <n> to read one"));
     },
   },
   read: {
     summary: { zh: "阅读文章", en: "read a post" },
     usage: "<n|slug>",
-    args: () => posts.map((p) => p.slug),
+    args: () => postSlugs,
     run: ([arg], ctx) => {
-      const p = posts[Number(arg) - 1] ?? posts.find((q) => q.slug === arg);
+      const p = ctx.posts[Number(arg) - 1] ?? ctx.posts.find((q) => q.slug === arg);
       if (!p) return ctx.print(err(`read: ${arg ?? ""}: ${t(ctx, "找不到", "not found")}`));
       ctx.navigate(`/${ctx.locale}/blog/${p.slug}`);
     },

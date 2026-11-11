@@ -1,0 +1,36 @@
+---
+title: 用 GLSL 撕开一张纸
+date: 2026-11-11
+summary: Voronoi 碎片、顶点着色器，以及只用一次绘制调用撕开整张纸。
+tags: [three.js, GLSL]
+---
+
+这个网站开场的那张图纸，其实是 170 块碎片拼成的。它们静止时严丝合缝，你一滚动，就从 QwQ 的脸开始往外裂。
+
+## 一次绘制调用
+
+所有碎片合并成一个 `BufferGeometry`。每个顶点除了位置和法线，还带着三样东西：
+
+- `aCenter`：所在碎片的中心
+- `aRand`：一组随机数，决定旋转轴和飞行距离
+- `aDelay`：离裂口有多远，0 到 1
+
+顶点着色器拿全局的 `uBreak` 减去自己的延迟，就知道这块碎片该进行到哪一步了：
+
+```glsl
+float local = uBreak - aDelay * 0.6;
+if (local > 0.0) {
+  float t = clamp((local - 0.06) / 0.5, 0.0, 1.0);
+  mat3 R = rotateAxis(axis, t * t * (2.5 + aRand.x * 5.0));
+  pos = aCenter + R * (pos - aCenter);
+  pos += away * t * t * (16.0 + aRand.y * 18.0);
+}
+```
+
+## 那个 `if` 很重要
+
+一开始我没有写 `if`。结果静止的纸面上冒出一堆随机黑点：`aCenter + (pos - aCenter)` 这一来一回的浮点误差，让相邻碎片的公共顶点错开了半个像素。
+
+> 静止的东西就别碰它。
+
+还有一个坑：碎片的侧壁如果正好贴在正面的边缘，深度测试时会和正面打架，描边 pass 就把它当成折痕画出来。解决办法是把侧壁往里缩 15%。

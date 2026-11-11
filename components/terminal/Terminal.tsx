@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
 import { lockScroll } from "@/lib/scroll";
-import { complete, run, type Line } from "./commands";
+import type { PostMeta } from "@/lib/postTypes";
+import { complete, run, setPostSlugs, type Line } from "./commands";
 
 const PROMPT = "visitor@qwq.my:~$";
 
@@ -14,7 +15,7 @@ const greeting = (locale: Locale): Line[] => [
 ];
 
 /** A drop-down shell over the scene. ` or ⌘K toggles it. */
-export function Terminal({ locale }: { locale: Locale }) {
+export function Terminal({ locale, posts }: { locale: Locale; posts: PostMeta[] }) {
   const [open, setOpen] = useState(false);
   const [lines, setLines] = useState<Line[]>(() => greeting(locale));
   const [value, setValue] = useState("");
@@ -26,6 +27,8 @@ export function Terminal({ locale }: { locale: Locale }) {
   const router = useRouter();
 
   const close = useCallback(() => setOpen(false), []);
+
+  useEffect(() => setPostSlugs(posts.map((p) => p.slug)), [posts]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -66,6 +69,7 @@ export function Terminal({ locale }: { locale: Locale }) {
     await run(command, {
       locale,
       history: history.current,
+      posts,
       print: (...out) => setLines((l) => [...l, ...out.map((o) => (typeof o === "string" ? { kind: "out" as const, text: o } : o))]),
       clear: () => setLines([]),
       close,

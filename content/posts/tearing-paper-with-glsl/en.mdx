@@ -1,0 +1,36 @@
+---
+title: Tearing paper with GLSL
+date: 2026-11-11
+summary: Voronoi shards, a vertex shader, and one draw call to rip the whole sheet.
+tags: [three.js, GLSL]
+---
+
+The drawing sheet you land on is really 170 shards. At rest they fit perfectly; scroll, and they split open outward from QwQ's face.
+
+## One draw call
+
+Every shard is merged into a single `BufferGeometry`. Besides position and normal, each vertex carries:
+
+- `aCenter` — the centre of its shard
+- `aRand` — a random triple for spin axis and flight distance
+- `aDelay` — how far it is from the tear, 0 to 1
+
+The vertex shader subtracts its delay from a global `uBreak` to know where in the motion it is:
+
+```glsl
+float local = uBreak - aDelay * 0.6;
+if (local > 0.0) {
+  float t = clamp((local - 0.06) / 0.5, 0.0, 1.0);
+  mat3 R = rotateAxis(axis, t * t * (2.5 + aRand.x * 5.0));
+  pos = aCenter + R * (pos - aCenter);
+  pos += away * t * t * (16.0 + aRand.y * 18.0);
+}
+```
+
+## That `if` matters
+
+Without it, the resting sheet was covered in random black specks: the float round-trip in `aCenter + (pos - aCenter)` nudged shared vertices half a pixel apart.
+
+> If it isn't moving, don't touch it.
+
+One more trap: shard walls whose rims sit exactly on the face edges z-fight the faces, and the outline pass inks them as creases. Shrinking the walls by 15% fixes it.

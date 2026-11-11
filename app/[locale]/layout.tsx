@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { profile } from "@/content/profile";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
+import { listPosts } from "@/lib/posts";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
 import { GameHUD } from "@/components/game/GameHUD";
@@ -11,6 +13,7 @@ import { BootScreen } from "@/components/ui/BootScreen";
 import { CrashOverlay } from "@/components/ui/CrashOverlay";
 import { CrosshairCursor } from "@/components/ui/CrosshairCursor";
 import { SheetFrame } from "@/components/ui/SheetFrame";
+import { RouteSync } from "@/components/ui/RouteSync";
 import { ToneSync } from "@/components/ui/ToneSync";
 import "../globals.css";
 
@@ -42,6 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await getLocale();
   const dict = await getDictionary();
+  const posts = await listPosts(locale);
 
   return (
     <html
@@ -55,11 +59,14 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           {dict.controls.skip}
         </a>
         <SmoothScroll />
-        <SceneLoader titles={dict.sheets} />
+        <SceneLoader titles={dict.sheets} postCount={posts.length} />
         <ToneSync />
+        <Suspense fallback={null}>
+          <RouteSync />
+        </Suspense>
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
         {children}
-        <Terminal locale={locale} />
+        <Terminal locale={locale} posts={posts} />
         <GameHUD labels={dict.game} />
         <CrashOverlay />
         <BootScreen />

@@ -18,9 +18,11 @@ import { WritingStage } from "./stages/WritingStage";
 export default function SceneCanvas({
   onReady,
   titles,
+  postCount,
 }: {
   onReady?: () => void;
   titles: Record<SheetId, string>;
+  postCount: number;
 }) {
   return (
     <Canvas
@@ -41,7 +43,7 @@ export default function SceneCanvas({
       <SkillsStage />
       <ProjectsStage />
       <TimelineStage />
-      <WritingStage />
+      <WritingStage postCount={postCount} />
       <FinaleStage />
       <OverviewMap titles={titles} />
       <BugGame />

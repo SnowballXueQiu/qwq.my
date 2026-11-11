@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { posts } from "@/content/posts";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { skills } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
+import { listPosts } from "@/lib/posts";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
@@ -17,6 +17,7 @@ import { SheetSection } from "@/components/sections/SheetSection";
 export default async function Home() {
   const locale = await getLocale();
   const dict = await getDictionary();
+  const posts = await listPosts(locale);
   const s = dict.sheets;
 
   return (
@@ -130,7 +131,7 @@ export default async function Home() {
                     className="group flex items-baseline gap-3 py-2"
                   >
                     <span className="label shrink-0 text-ink-soft">{post.date}</span>
-                    <span className="truncate font-medium group-hover:text-accent">{post.title[locale]}</span>
+                    <span className="truncate font-medium group-hover:text-accent">{post.title}</span>
                     <span className="ml-auto text-accent opacity-0 transition-opacity group-hover:opacity-100">→</span>
                   </Link>
                 </li>

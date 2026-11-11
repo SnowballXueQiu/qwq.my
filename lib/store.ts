@@ -10,6 +10,9 @@ type SiteState = {
   /** 0 = paper scene, 1 = dark scene. Drives both CSS and the shader inversion. */
   tone: number;
   expression: Expression;
+  /** On a reading page (blog, project) rather than the home film. */
+  reading: boolean;
+  setReading: (reading: boolean) => void;
   setSheet: (sheet: number) => void;
   setProgress: (progress: number) => void;
   setTone: (tone: number) => void;
@@ -23,6 +26,8 @@ export const useSite = create<SiteState>((set) => ({
   progress: 0,
   tone: 0,
   expression: "QwQ",
+  reading: false,
+  setReading: (reading) => set({ reading }),
   setSheet: (sheet) => set({ sheet }),
   setProgress: (progress) => set({ progress }),
   setTone: (tone) => set({ tone }),

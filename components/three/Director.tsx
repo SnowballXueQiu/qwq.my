@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
+import { useSite } from "@/lib/store";
 import { pipelineTarget } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
 import { buildCameraKeys } from "./world";
@@ -81,15 +82,17 @@ export function Director() {
   }, [fx]);
 
   useFrame((state, delta) => {
-    const s = getSceneTime();
+    // Reading pages keep the sheet whole and park QwQ in the corner to read along.
+    const reading = useSite.getState().reading;
+    const s = reading ? 0 : getSceneTime();
     const now = state.clock.elapsedTime;
 
     frameState.s = s;
-    frameState.depth = smooth(0.1, 0.36, s);
-    frameState.breakAmount = smooth(0.3, 0.95, s) * 1.7;
-    frameState.leap = smooth(0.4, 0.66, s);
-    frameState.park = smooth(0.74, 1.0, s);
-    frameState.finale = smooth(5.58, 5.96, s);
+    frameState.depth = reading ? 1 : smooth(0.1, 0.36, s);
+    frameState.breakAmount = reading ? 0 : smooth(0.3, 0.95, s) * 1.7;
+    frameState.leap = reading ? 1 : smooth(0.4, 0.66, s);
+    frameState.park = reading ? 1 : smooth(0.74, 1.0, s);
+    frameState.finale = reading ? 0 : smooth(5.58, 5.96, s);
 
     sampleCamera(s, pos, target);
     frameState.cameraZ = pos.z;

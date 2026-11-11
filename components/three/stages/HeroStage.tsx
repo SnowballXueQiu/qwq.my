@@ -50,8 +50,8 @@ export function HeroStage() {
     let y = mix(hero.y, near.halfH * 0.04, leap);
     let z = mix(-HERO_DIST, -6.5, leap);
     let s = hero.scale;
-    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.8), park);
-    y = mix(y, -corner.halfH * (portrait ? 0.78 : 0.7), park);
+    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.82), park);
+    y = mix(y, -corner.halfH * (portrait ? 0.62 : 0.42), park);
     z = mix(z, -9, park);
     s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), park);
     // Land exactly where it started: the last sheet mirrors the first.

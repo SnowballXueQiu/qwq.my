@@ -85,5 +85,15 @@
     "retry": "Retry",
     "exit": "Exit",
     "start": "Enter debug mode"
+  },
+  "blog": {
+    "title": "Writing",
+    "lead": "Notes on code, coursework, and other things.",
+    "index": "Drawing index",
+    "back": "All posts",
+    "fallback": "This post isn't available in English yet; here is the original.",
+    "more": "More posts",
+    "older": "Older",
+    "newer": "Newer"
   }
 }

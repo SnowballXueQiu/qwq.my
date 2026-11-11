@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BoxGeometry, Group } from "three";
-import { posts } from "@/content/posts";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
 import { cue, frameState, withOverview } from "../frameState";
@@ -30,8 +29,8 @@ const pagePrint = /* glsl */ `
 `;
 
 /** A loose fan of pages, one per post, drifting like a stack someone just threw up in the air. */
-export function WritingStage() {
-  const count = Math.max(posts.length, 4);
+export function WritingStage({ postCount }: { postCount: number }) {
+  const count = Math.min(Math.max(postCount, 4), 9);
   const pages = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { LangToggle } from "./LangToggle";
@@ -80,21 +81,23 @@ export function SheetFrame({
             <QwQLogo className="h-7 w-auto" />
             <span className="label hidden sm:inline">qwq.my</span>
           </Link>
-          <SheetNav locale={locale} titles={dict.sheets} />
+          {/* Pathname-aware pieces suspend for request-time params; keep the frame static around them. */}
+          <Suspense fallback={<span />}>
+            <SheetNav locale={locale} titles={dict.sheets} />
+          </Suspense>
           <div className="flex items-center gap-2">
             <MenuButton labels={dict.menu} />
             <TerminalButton label={dict.controls.terminal} />
-            <LangToggle locale={locale} label={dict.controls.language} />
+            <Suspense fallback={<span className="label border border-ink px-2 py-1">中 / en</span>}>
+              <LangToggle locale={locale} label={dict.controls.language} />
+            </Suspense>
           </div>
         </header>
 
         <div className="flex justify-end">
-          <TitleBlock
-            locale={locale}
-            author={author}
-            labels={dict.titleBlock}
-            titles={dict.sheets}
-          />
+          <Suspense fallback={null}>
+            <TitleBlock locale={locale} author={author} labels={dict.titleBlock} titles={dict.sheets} />
+          </Suspense>
         </div>
       </div>
     </div>

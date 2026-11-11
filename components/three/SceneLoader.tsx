@@ -8,7 +8,7 @@ import type { SheetId } from "@/lib/sheets";
 const SceneCanvas = dynamic(() => import("./SceneCanvas"), { ssr: false });
 
 /** Loads three.js only on the client and fades the canvas in once it has drawn. */
-export function SceneLoader({ titles }: { titles: Record<SheetId, string> }) {
+export function SceneLoader({ titles, postCount }: { titles: Record<SheetId, string>; postCount: number }) {
   const [ready, setReady] = useState(false);
   return (
     <div
@@ -18,6 +18,7 @@ export function SceneLoader({ titles }: { titles: Record<SheetId, string> }) {
     >
       <SceneCanvas
         titles={titles}
+        postCount={postCount}
         onReady={() =>
           requestAnimationFrame(() => {
             setReady(true);
