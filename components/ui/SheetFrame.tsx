@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { LangToggle } from "./LangToggle";
-import { QwQMark } from "./QwQMark";
+import { QwQLogo } from "./QwQLogo";
 import { SheetNav } from "./SheetNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { TitleBlock } from "./TitleBlock";
@@ -76,7 +76,7 @@ export function SheetFrame({
             data-cursor="HOME"
             aria-label="qwq.my"
           >
-            <QwQMark className="h-5 w-auto" />
+            <QwQLogo className="h-7 w-auto" />
             <span className="label hidden sm:inline">qwq.my</span>
           </Link>
           <SheetNav locale={locale} titles={dict.sheets} />
