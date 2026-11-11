@@ -113,7 +113,7 @@ export default async function Home() {
       </SheetSection>
 
       <SheetSection id="timeline" title={s.timeline} length={Math.max(3, timeline.length * 0.7)} sticky>
-        <TimelineReadout events={timeline} locale={locale} />
+        <TimelineReadout events={timeline} locale={locale} playLabel={dict.video.play} />
       </SheetSection>
 
       <SheetSection id="writing" title={s.writing} length={1.6} sticky>

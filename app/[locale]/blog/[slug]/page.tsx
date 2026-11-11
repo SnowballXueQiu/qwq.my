@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { MDXRemote, type MDXRemoteOptions } from "next-mdx-remote-client/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
@@ -32,7 +33,17 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/blog/[sl
   return post ? { title: post.meta.title, description: post.meta.summary } : {};
 }
 
-export default async function PostPage({ params }: PageProps<"/[locale]/blog/[slug]">) {
+export default function PostPage({ params }: PageProps<"/[locale]/blog/[slug]">) {
+  // Reading the slug suspends; every slug is prerendered, so the fallback is only
+  // seen on a cold, uncached navigation.
+  return (
+    <Suspense fallback={<main id="main" className="min-h-svh" />}>
+      <Post params={params} />
+    </Suspense>
+  );
+}
+
+async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["params"] }) {
   const { slug } = await params;
   const locale = await getLocale();
   const dict = await getDictionary();

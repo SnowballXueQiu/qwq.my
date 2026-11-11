@@ -7,7 +7,10 @@ import { locales } from "@/lib/i18n";
 import { listPosts } from "@/lib/posts";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { GameHUD } from "@/components/game/GameHUD";
+import { YearInReviewModal } from "@/components/video/YearInReviewModal";
 import { Terminal } from "@/components/terminal/Terminal";
 import { BootScreen } from "@/components/ui/BootScreen";
 import { CrashOverlay } from "@/components/ui/CrashOverlay";
@@ -46,6 +49,8 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
   const locale = await getLocale();
   const dict = await getDictionary();
   const posts = await listPosts(locale);
+  const videoFile = `/video/year-in-review-2026${locale === "en" ? "-en" : ""}.mp4`;
+  const videoUrl = existsSync(path.join(process.cwd(), "public", videoFile)) ? videoFile : null;
 
   return (
     <html
@@ -68,6 +73,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         {children}
         <Terminal locale={locale} posts={posts} />
         <GameHUD labels={dict.game} />
+        <YearInReviewModal locale={locale} videoUrl={videoUrl} labels={dict.video} />
         <CrashOverlay />
         <BootScreen />
         <CrosshairCursor />

@@ -9,6 +9,7 @@ export type FxEvents = {
   reboot: Record<string, never>;
   game: { open: boolean };
   menu: { open: boolean };
+  video: { open: boolean };
   sceneReady: Record<string, never>;
   /** A bug was squashed at a screen position. */
   hit: { x: number; y: number; points: number; combo: number };

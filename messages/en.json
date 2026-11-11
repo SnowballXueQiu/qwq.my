@@ -95,5 +95,11 @@
     "more": "More posts",
     "older": "Older",
     "newer": "Newer"
+  },
+  "video": {
+    "title": "2026 in review",
+    "download": "Download MP4",
+    "close": "Close",
+    "play": "Play 2026 in review"
   }
 }

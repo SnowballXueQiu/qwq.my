@@ -12,10 +12,16 @@ export type FontName = keyof typeof FONTS;
 
 const cache = new Map<FontName, Promise<Font>>();
 
+let resolveUrl = (path: string) => path;
+/** Lets a host with a different static base (Remotion's staticFile) rewrite font URLs. */
+export const setFontUrlResolver = (fn: (path: string) => string) => {
+  resolveUrl = fn;
+};
+
 export function loadFont(name: FontName) {
   let p = cache.get(name);
   if (!p) {
-    p = fetch(FONTS[name])
+    p = fetch(resolveUrl(FONTS[name]))
       .then((r) => r.json() as Promise<FontData>)
       .then((json) => new Font(json));
     cache.set(name, p);

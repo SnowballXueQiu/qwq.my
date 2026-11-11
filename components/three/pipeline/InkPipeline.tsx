@@ -35,11 +35,22 @@ export type PipelineControls = {
 /** Mutable per-frame look; scenes write here, the pipeline eases toward it. */
 export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, flash: 0, glitch: 0 };
 
+/** Set while another canvas (the year-in-review player) owns the shared shader clock. */
+export const sitePipeline = { paused: false };
+
 /**
  * Takes over rendering: scene → G-buffer (tone/accent/fill + normal/id + depth),
  * then a full-screen composite turns it into ink, then overlays render on top.
  */
-export function InkPipeline() {
+export function InkPipeline({
+  time,
+  controls,
+}: {
+  /** Drive the shader clock from outside (video frames) instead of wall time. */
+  time?: number;
+  /** Fixed look for this canvas; when set, the site's director and CSS are left alone. */
+  controls?: PipelineControls;
+} = {}) {
   const gl = useThree((s) => s.gl);
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
@@ -87,13 +98,6 @@ export function InkPipeline() {
     return { quadScene, quadCamera: new OrthographicCamera(-1, 1, 1, -1, 0, 1), material };
   }, [target]);
 
-  useEffect(() => {
-    const w = Math.max(1, Math.floor(size.width * dpr));
-    const h = Math.max(1, Math.floor(size.height * dpr));
-    target.setSize(w, h);
-    material.uniforms.uResolution.value.set(w, h);
-    material.uniforms.uDpr.value = dpr;
-  }, [size, dpr, target, material]);
 
   useEffect(
     () => () => {
@@ -106,20 +110,39 @@ export function InkPipeline() {
   useFrame((state, delta) => {
     const { scene, camera } = state;
     const u = material.uniforms;
-    sharedUniforms.uTime.value += Math.min(delta, 0.1);
+    // Size the G-buffer here rather than in an effect: a single-frame render
+    // (video stills) can happen before effects run.
+    const w = Math.max(1, Math.floor(size.width * dpr));
+    const h = Math.max(1, Math.floor(size.height * dpr));
+    if (target.width !== w || target.height !== h) {
+      target.setSize(w, h);
+      u.uResolution.value.set(w, h);
+      u.uDpr.value = dpr;
+    }
+    const external = controls !== undefined;
+    if (!external && sitePipeline.paused) return;
+    if (time !== undefined) sharedUniforms.uTime.value = time;
+    else sharedUniforms.uTime.value += Math.min(delta, 0.1);
 
     if (camera instanceof PerspectiveCamera) {
       u.uNear.value = camera.near;
       u.uFar.value = camera.far;
     }
-    const k = 1 - Math.exp(-delta * 10);
-    u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
-    u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
-    u.uFlash.value = pipelineTarget.flash;
-    u.uGlitch.value = pipelineTarget.glitch;
-    // Keep the CSS world in step with the shader's notion of light and dark.
-    const site = useSite.getState();
-    if (Math.abs(site.tone - u.uInvert.value) > 0.01) site.setTone(u.uInvert.value);
+    if (external) {
+      u.uInvert.value = controls.invert;
+      u.uBgInvert.value = controls.bgInvert;
+      u.uFlash.value = controls.flash;
+      u.uGlitch.value = controls.glitch;
+    } else {
+      const k = 1 - Math.exp(-delta * 10);
+      u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
+      u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
+      u.uFlash.value = pipelineTarget.flash;
+      u.uGlitch.value = pipelineTarget.glitch;
+      // Keep the CSS world in step with the shader's notion of light and dark.
+      const site = useSite.getState();
+      if (Math.abs(site.tone - u.uInvert.value) > 0.01) site.setTone(u.uInvert.value);
+    }
 
     camera.layers.set(0);
     gl.setRenderTarget(target);

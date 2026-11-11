@@ -5,9 +5,18 @@ import type { Locale } from "@/lib/i18n";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { Panel } from "./Panel";
 import { useSceneIndex } from "./SceneReadout";
+import { PlayYearButton } from "@/components/video/PlayYearButton";
 
 /** The log line for whichever milestone the camera is driving past. */
-export function TimelineReadout({ events, locale }: { events: TimelineEvent[]; locale: Locale }) {
+export function TimelineReadout({
+  events,
+  locale,
+  playLabel,
+}: {
+  events: TimelineEvent[];
+  locale: Locale;
+  playLabel: string;
+}) {
   const index = useSceneIndex("timeline", events.length);
   return (
     <Panel className="max-w-[420px] font-mono">
@@ -27,6 +36,7 @@ export function TimelineReadout({ events, locale }: { events: TimelineEvent[]; l
       </ol>
       <p className="mt-3 border-t border-rule pt-2 pl-4 text-sm text-ink-soft">{events[index].detail[locale]}</p>
       <p className="label mt-2 text-ink-soft">{"}"}</p>
+      <PlayYearButton label={playLabel} />
     </Panel>
   );
 }

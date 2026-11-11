@@ -6,6 +6,7 @@ import { Group, Vector3, Euler } from "three";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { createInkMaterial } from "../materials/inkMaterial";
 import { clamp01, withOverview } from "../frameState";
+import type { Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { useFont, type FontName } from "./typeface";
 
 type Letter = {
@@ -34,6 +35,8 @@ export type KineticTextProps = Omit<ThreeElements["group"], "children"> & {
   /** How far the letters are scattered before they assemble. */
   scatter?: number;
   seed?: number;
+  /** A preloaded typeface; skips the async load so letters exist on first render (video). */
+  typeface?: Font;
 };
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -52,9 +55,11 @@ export function KineticText({
   align = "center",
   scatter = 14,
   seed = 1,
+  typeface,
   ...group
 }: KineticTextProps) {
-  const font = useFont(fontName);
+  const loaded = useFont(fontName);
+  const font = typeface ?? loaded;
   const root = useRef<Group>(null);
 
   const materials = useMemo(
