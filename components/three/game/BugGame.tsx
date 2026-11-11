@@ -10,7 +10,9 @@ import {
   InstancedMesh,
   Mesh,
   Object3D,
+  Raycaster,
   TetrahedronGeometry,
+  Vector2,
   Vector3,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
@@ -78,14 +80,14 @@ function spawnBug(bugs: Bug[], difficulty: number) {
   slot.alive = true;
   slot.t = 0;
   slot.golden = Math.random() < 0.08;
-  slot.duration = (5.2 - difficulty * 2.8) * (slot.golden ? 0.7 : 1);
+  slot.duration = (6.2 - difficulty * 3.4) * (slot.golden ? 0.7 : 1);
   slot.from.set((Math.random() - 0.5) * 26, (Math.random() - 0.5) * 14, SPAWN_Z);
   slot.to.set((Math.random() - 0.5) * 3.5, (Math.random() - 0.5) * 2, REACH_Z);
   slot.wobble = 2 + Math.random() * 4;
   slot.phase = Math.random() * Math.PI * 2;
 }
 
-const nextSpawnDelay = (difficulty: number) => 1.15 - difficulty * 0.8 + Math.random() * 0.3;
+const nextSpawnDelay = (difficulty: number) => 1.5 - difficulty * 1.05 + Math.random() * 0.3;
 
 /**
  * Debug mode: low-poly bugs crawl out of the depth toward the lens. Squash
@@ -129,6 +131,7 @@ export function BugGame() {
   );
   const groups = useRef<(Group | null)[]>([]);
   const shells = useRef<(Mesh | null)[]>([]);
+  const hitAreas = useRef<(Mesh | null)[]>([]);
   const shardMesh = useRef<InstancedMesh>(null);
   const root = useRef<Group>(null);
   const arena = useRef<Group>(null);
@@ -164,6 +167,27 @@ export function BugGame() {
     if (combo >= 3) emit("face", { expression: "^w^", duration: 0.8 });
     else emit("face", { expression: ">w<", duration: 0.5 });
   };
+
+  // Our own picking: a ray against the live bugs' hit spheres on every pointerdown.
+  // Explicit and predictable, and it only ever considers bugs that are alive.
+  const squashRef = useRef(squash);
+  useEffect(() => {
+    squashRef.current = squash;
+  });
+  useEffect(() => {
+    const ray = new Raycaster();
+    const ndc = new Vector2();
+    const onDown = (e: PointerEvent) => {
+      if (useGame.getState().status !== "playing") return;
+      ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      const targets = hitAreas.current.filter((m, i): m is Mesh => Boolean(m) && bugs.current[i].alive);
+      const hit = ray.intersectObjects(targets, false)[0];
+      if (hit) squashRef.current(hitAreas.current.indexOf(hit.object as Mesh));
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [camera]);
 
   useFrame((state, rawDt) => {
     const dt = Math.min(rawDt, 1 / 30);
@@ -220,6 +244,17 @@ export function BugGame() {
       }
     });
 
+    if (process.env.NODE_ENV !== "production") {
+      // Dev hook: where each live bug is on screen, for automated play-testing.
+      (window as unknown as { __qwqBugs?: number[][] }).__qwqBugs = bugs.current.flatMap((b, i) => {
+        const g = groups.current[i];
+        if (!b.alive || !g) return [];
+        g.getWorldPosition(tmp.w);
+        tmp.w.project(camera);
+        return [[((tmp.w.x + 1) / 2) * size.width, ((1 - tmp.w.y) / 2) * size.height]];
+      });
+    }
+
     const mesh = shardMesh.current;
     if (mesh) {
       shards.current.forEach((s, i) => {
@@ -248,12 +283,6 @@ export function BugGame() {
             groups.current[i] = g;
           }}
           visible={false}
-          onPointerDown={(e) => {
-            // Dead bugs keep their (invisible) hit spheres; let clicks pass through them.
-            if (!bugs.current[i].alive) return;
-            e.stopPropagation();
-            squash(i);
-          }}
         >
           <mesh
             ref={(m) => {
@@ -265,7 +294,12 @@ export function BugGame() {
           <mesh geometry={geo.legsL} material={mats.legs} />
           <mesh geometry={geo.legsR} material={mats.legs} />
           {/* Generous invisible hit area: bugs are small and fast. */}
-          <mesh scale={1.5}>
+          <mesh
+            scale={1.5}
+            ref={(m) => {
+              hitAreas.current[i] = m;
+            }}
+          >
             <sphereGeometry args={[1, 10, 8]} />
             <meshBasicMaterial visible={false} />
           </mesh>

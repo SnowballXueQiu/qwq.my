@@ -72,3 +72,8 @@ function finish() {
   } catch {}
   useGame.setState({ status: "over", best: next });
 }
+
+// Handy for poking at the game from devtools during development.
+if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
+  (window as unknown as { __qwqGame: typeof useGame }).__qwqGame = useGame;
+}
