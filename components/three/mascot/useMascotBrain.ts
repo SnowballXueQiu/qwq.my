@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { on } from "@/lib/fx";
 import { sheets } from "@/lib/sheets";
 import { useSite, type Expression } from "@/lib/store";
@@ -82,38 +82,41 @@ export function useMascotBrain() {
     };
   }, []);
 
-  const poke = () => {
-    const s = state.current;
-    const now = performance.now();
-    s.clicks = [...s.clicks.filter((t) => now - t < 3000), now];
-    if (s.clicks.length >= CRY_CLICKS) {
-      s.cryUntil = now + 3200;
-      s.clicks = [];
-    } else {
-      s.pokedUntil = now + 650;
-    }
-    s.lastActive = now;
-  };
+  // Stable for the component's lifetime: everything reads the ref.
+  return useMemo(() => {
+    const poke = () => {
+      const s = state.current;
+      const now = performance.now();
+      s.clicks = [...s.clicks.filter((t) => now - t < 3000), now];
+      if (s.clicks.length >= CRY_CLICKS) {
+        s.cryUntil = now + 3200;
+        s.clicks = [];
+      } else {
+        s.pokedUntil = now + 650;
+      }
+      s.lastActive = now;
+    };
 
-  const setHovered = (hovered: boolean) => {
-    state.current.hovered = hovered;
-  };
+    const setHovered = (hovered: boolean) => {
+      state.current.hovered = hovered;
+    };
 
-  /** Call once per frame; returns the face to show and updates the store when it changes. */
-  const think = (): Expression => {
-    const s = state.current;
-    const now = performance.now();
-    const site = useSite.getState();
-    let face: Expression = sheets[site.sheet] === "contact" ? "^w^" : "QwQ";
-    if (now - s.lastActive > IDLE_AFTER) face = "-w-";
-    if (s.hovered) face = "OwO";
-    if (now < s.pokedUntil) face = ">w<";
-    if (now < s.dizzyUntil) face = "@w@";
-    if (now < s.cryUntil || s.away) face = "QAQ";
-    if (s.forced && now < s.forcedUntil) face = s.forced;
-    if (face !== site.expression) site.setExpression(face);
-    return face;
-  };
+    /** Call once per frame; returns the face to show and updates the store when it changes. */
+    const think = (): Expression => {
+      const s = state.current;
+      const now = performance.now();
+      const site = useSite.getState();
+      let face: Expression = sheets[site.sheet] === "contact" ? "^w^" : "QwQ";
+      if (now - s.lastActive > IDLE_AFTER) face = "-w-";
+      if (s.hovered) face = "OwO";
+      if (now < s.pokedUntil) face = ">w<";
+      if (now < s.dizzyUntil) face = "@w@";
+      if (now < s.cryUntil || s.away) face = "QAQ";
+      if (s.forced && now < s.forcedUntil) face = s.forced;
+      if (face !== site.expression) site.setExpression(face);
+      return face;
+    };
 
-  return { poke, setHovered, think };
+    return { poke, setHovered, think };
+  }, []);
 }

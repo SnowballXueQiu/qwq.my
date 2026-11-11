@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Group, InstancedMesh, Object3D, Plane, Raycaster, Vector3 } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Group, InstancedMesh, Mesh, Object3D, Plane, Raycaster, Vector2, Vector3 } from "three";
 import type { Expression } from "@/lib/store";
 import { createInkMaterial, Fill, type InkMaterial } from "../materials/inkMaterial";
 import { createGlyphs } from "./glyphs";
@@ -78,8 +78,29 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
   const tears = useRef<InstancedMesh>(null);
   const zees = useRef<Group>(null);
   const hand = useRef<Group>(null);
+  const hitArea = useRef<Mesh>(null);
+  const camera = useThree((s) => s.camera);
+
 
   const brain = useMascotBrain();
+
+  // Pokes are picked with our own ray: R3F's press events don't reach camera-space portals here.
+  useEffect(() => {
+    const ray = new Raycaster();
+    const ndc = new Vector2();
+    const onDown = (e: PointerEvent) => {
+      const mesh = hitArea.current;
+      if (!mesh || !root.current?.visible) return;
+      ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      if (ray.intersectObject(mesh, false).length) {
+        brain.poke();
+        squash.current.velocity -= 7;
+      }
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
+  }, [camera, brain]);
   const springs = useRef(new Map<Object3D, Spring>());
   const squash = useRef(new Spring());
   const tilt = useRef({ x: 0, y: 0 });
@@ -259,14 +280,10 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
         </group>
         {/* Invisible hit area so the whole face is hoverable and pokeable. */}
         <mesh
+          ref={hitArea}
           scale={[3.6, 1.7, 1]}
           onPointerOver={() => brain.setHovered(true)}
           onPointerOut={() => brain.setHovered(false)}
-          onClick={(e) => {
-            e.stopPropagation();
-            brain.poke();
-            squash.current.velocity -= 7;
-          }}
         >
           <sphereGeometry args={[1, 16, 12]} />
           <meshBasicMaterial visible={false} />

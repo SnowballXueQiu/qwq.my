@@ -28,3 +28,7 @@ export const useSite = create<SiteState>((set) => ({
   setTone: (tone) => set({ tone }),
   setExpression: (expression) => set({ expression }),
 }));
+
+if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
+  (window as unknown as { __qwqSite: typeof useSite }).__qwqSite = useSite;
+}
