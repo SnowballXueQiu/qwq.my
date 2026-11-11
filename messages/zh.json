@@ -21,9 +21,6 @@
     "progress": "进度"
   },
   "controls": {
-    "theme": "切换纸面 / 蓝图",
-    "themePaper": "纸面",
-    "themeBlueprint": "蓝图",
     "language": "Switch to English",
     "skip": "跳到正文"
   },

@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-/* Design tokens. Shader uniforms read the same values from lib/tokens.ts. */
+/* Design tokens. Shader uniforms read the same values from lib/tokens.ts.
+   The dark world is the same palette with paper and ink swapped. */
 :root,
-[data-theme="paper"] {
+[data-tone="paper"] {
   --paper: #f1ede4;
   --ink: #141414;
   --accent: #e8402a;
@@ -11,10 +12,9 @@
   color-scheme: light;
 }
 
-[data-theme="blueprint"] {
-  --paper: #0e2a47;
-  --ink: #e6eff8;
-  --accent: #ff6a4d;
+[data-tone="dark"] {
+  --paper: #141414;
+  --ink: #f1ede4;
   color-scheme: dark;
 }
 

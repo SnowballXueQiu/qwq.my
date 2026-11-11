@@ -21,9 +21,6 @@
     "progress": "Progress"
   },
   "controls": {
-    "theme": "Toggle paper / blueprint",
-    "themePaper": "Paper",
-    "themeBlueprint": "Blueprint",
     "language": "切换到中文",
     "skip": "Skip to content"
   },

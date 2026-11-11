@@ -1,0 +1,142 @@
+"use client";
+
+import { useEffect, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import {
+  DepthTexture,
+  GLSL3,
+  HalfFloatType,
+  Mesh,
+  NearestFilter,
+  OrthographicCamera,
+  PerspectiveCamera,
+  PlaneGeometry,
+  Scene,
+  ShaderMaterial,
+  Vector2,
+  Vector3,
+  WebGLRenderTarget,
+} from "three";
+import { useSite } from "@/lib/store";
+import { palette, srgb } from "@/lib/tokens";
+import { sharedUniforms } from "../materials/inkMaterial";
+import { compositeFragment, compositeVertex } from "../shaders/composite.glsl";
+
+/** Layer for annotations drawn straight to screen after the ink composite. */
+export const OVERLAY_LAYER = 1;
+
+export type PipelineControls = {
+  invert: number;
+  bgInvert: number;
+  flash: number;
+  glitch: number;
+};
+
+/** Mutable per-frame look; scenes write here, the pipeline eases toward it. */
+export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, flash: 0, glitch: 0 };
+
+/**
+ * Takes over rendering: scene → G-buffer (tone/accent/fill + normal/id + depth),
+ * then a full-screen composite turns it into ink, then overlays render on top.
+ */
+export function InkPipeline() {
+  const gl = useThree((s) => s.gl);
+  const size = useThree((s) => s.size);
+  const dpr = useThree((s) => s.viewport.dpr);
+
+  const target = useMemo(() => {
+    const t = new WebGLRenderTarget(1, 1, {
+      count: 2,
+      type: HalfFloatType,
+      minFilter: NearestFilter,
+      magFilter: NearestFilter,
+      depthBuffer: true,
+    });
+    t.depthTexture = new DepthTexture(1, 1);
+    return t;
+  }, []);
+
+  const { quadScene, quadCamera, material } = useMemo(() => {
+    const material = new ShaderMaterial({
+      glslVersion: GLSL3,
+      vertexShader: compositeVertex,
+      fragmentShader: compositeFragment,
+      depthTest: false,
+      depthWrite: false,
+      uniforms: {
+        tColor: { value: target.textures[0] },
+        tNormal: { value: target.textures[1] },
+        tDepth: { value: target.depthTexture },
+        uResolution: { value: new Vector2(1, 1) },
+        uDpr: { value: 1 },
+        uNear: { value: 0.1 },
+        uFar: { value: 200 },
+        uPaper: { value: new Vector3(...srgb(palette.paper)) },
+        uInk: { value: new Vector3(...srgb(palette.ink)) },
+        uAccent: { value: new Vector3(...srgb(palette.accent)) },
+        uInvert: { value: 0 },
+        uBgInvert: { value: 0 },
+        uFlash: { value: 0 },
+        uGlitch: { value: 0 },
+        uBoil: { value: 0.6 },
+        uTime: sharedUniforms.uTime,
+      },
+    });
+    const quadScene = new Scene();
+    quadScene.add(new Mesh(new PlaneGeometry(2, 2), material));
+    return { quadScene, quadCamera: new OrthographicCamera(-1, 1, 1, -1, 0, 1), material };
+  }, [target]);
+
+  useEffect(() => {
+    const w = Math.max(1, Math.floor(size.width * dpr));
+    const h = Math.max(1, Math.floor(size.height * dpr));
+    target.setSize(w, h);
+    material.uniforms.uResolution.value.set(w, h);
+    material.uniforms.uDpr.value = dpr;
+  }, [size, dpr, target, material]);
+
+  useEffect(
+    () => () => {
+      target.dispose();
+      material.dispose();
+    },
+    [target, material],
+  );
+
+  useFrame((state, delta) => {
+    const { scene, camera } = state;
+    const u = material.uniforms;
+    sharedUniforms.uTime.value += Math.min(delta, 0.1);
+
+    if (camera instanceof PerspectiveCamera) {
+      u.uNear.value = camera.near;
+      u.uFar.value = camera.far;
+    }
+    const k = 1 - Math.exp(-delta * 10);
+    u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
+    u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
+    u.uFlash.value = pipelineTarget.flash;
+    u.uGlitch.value = pipelineTarget.glitch;
+    // Keep the CSS world in step with the shader's notion of light and dark.
+    const site = useSite.getState();
+    if (Math.abs(site.tone - u.uInvert.value) > 0.01) site.setTone(u.uInvert.value);
+
+    camera.layers.set(0);
+    gl.setRenderTarget(target);
+    gl.setClearColor(0x000000, 0);
+    gl.clear();
+    gl.render(scene, camera);
+
+    gl.setRenderTarget(null);
+    gl.render(quadScene, quadCamera);
+
+    gl.autoClear = false;
+    gl.clearDepth();
+    camera.layers.set(OVERLAY_LAYER);
+    gl.render(scene, camera);
+    camera.layers.set(0);
+    gl.autoClear = true;
+  }, 1);
+
+  return null;
+}

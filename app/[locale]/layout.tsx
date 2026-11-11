@@ -3,10 +3,11 @@ import { Archivo, JetBrains_Mono } from "next/font/google";
 import { profile } from "@/content/profile";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
-import { THEME_STORAGE_KEY } from "@/lib/tokens";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
+import { SceneLoader } from "@/components/three/SceneLoader";
 import { CrosshairCursor } from "@/components/ui/CrosshairCursor";
 import { SheetFrame } from "@/components/ui/SheetFrame";
+import { ToneSync } from "@/components/ui/ToneSync";
 import "../globals.css";
 
 const archivo = Archivo({
@@ -19,10 +20,6 @@ const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   subsets: ["latin"],
 });
-
-const themeScript = `(function(){try{var t=localStorage.getItem(${JSON.stringify(
-  THEME_STORAGE_KEY,
-)});if(t==="paper"||t==="blueprint")document.documentElement.dataset.theme=t}catch(e){}})()`;
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -45,18 +42,17 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
   return (
     <html
       lang={locale === "zh" ? "zh-CN" : "en"}
-      data-theme="paper"
+      data-tone="paper"
       suppressHydrationWarning
       className={`${archivo.variable} ${jetbrains.variable}`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body>
         <a href="#main" className="skip-link">
           {dict.controls.skip}
         </a>
         <SmoothScroll />
+        <SceneLoader />
+        <ToneSync />
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
         {children}
         <CrosshairCursor />
