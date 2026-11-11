@@ -1,38 +1,38 @@
 "use client";
 
 import { useEffect } from "react";
-import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { clearSheets, measureSheets } from "@/lib/sceneClock";
+import { clearSheets, getSceneTime, measureSheets } from "@/lib/sceneClock";
 import { sheets } from "@/lib/sheets";
 import { useSite } from "@/lib/store";
 
-gsap.registerPlugin(ScrollTrigger);
-
-/** Marks the sheet whose section crosses the middle of the viewport as active. */
+/**
+ * Keeps the scene clock's section offsets fresh and publishes the active sheet.
+ * The active sheet comes from scene time, so it always agrees with the 3D world.
+ */
 export function SheetTriggers() {
   useEffect(() => {
-    const setSheet = useSite.getState().setSheet;
-    const triggers = sheets.flatMap((id, index) => {
-      const el = document.querySelector<HTMLElement>(`[data-sheet="${id}"]`);
-      if (!el) return [];
-      return ScrollTrigger.create({
-        trigger: el,
-        start: "top center",
-        end: "bottom center",
-        onToggle: (self) => self.isActive && setSheet(index),
-      });
-    });
-    // Scene time needs fresh section offsets whenever layout shifts.
+    const { setSheet } = useSite.getState();
+    const update = () => {
+      const s = getSceneTime();
+      const index = Math.min(Math.floor(s + 0.04), sheets.length - 1);
+      if (useSite.getState().sheet !== index) setSheet(index);
+    };
+
     measureSheets();
-    const observer = new ResizeObserver(() => measureSheets());
+    update();
+    const observer = new ResizeObserver(() => {
+      measureSheets();
+      update();
+    });
     const main = document.getElementById("main");
     if (main) observer.observe(main);
     ScrollTrigger.addEventListener("refresh", measureSheets);
+    window.addEventListener("scroll", update, { passive: true });
     return () => {
-      triggers.forEach((t) => t.kill());
       observer.disconnect();
       ScrollTrigger.removeEventListener("refresh", measureSheets);
+      window.removeEventListener("scroll", update);
       clearSheets();
     };
   }, []);

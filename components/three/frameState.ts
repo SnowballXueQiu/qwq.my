@@ -9,6 +9,7 @@ export const frameState = {
   park: 0,
   /** The finale, where everything returns to paper. */
   finale: 0,
+  cameraZ: 14,
 };
 
 export const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -17,3 +18,14 @@ export const smooth = (a: number, b: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 export const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/**
+ * Maps scene time onto a KineticText-style progress:
+ * -1 before `inStart`, 0→1 while arriving, 1 while holding, 1→2 while leaving.
+ */
+export function cue(s: number, inStart: number, inEnd: number, outStart: number, outEnd: number) {
+  if (s < inStart) return -1;
+  if (s < inEnd) return (s - inStart) / (inEnd - inStart);
+  if (s < outStart) return 1;
+  return 1 + Math.min((s - outStart) / (outEnd - outStart), 1.001);
+}

@@ -4,7 +4,9 @@ import { Canvas } from "@react-three/fiber";
 import { Director } from "./Director";
 import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
+import { AboutStage } from "./stages/AboutStage";
 import { HeroStage } from "./stages/HeroStage";
+import { SkillsStage } from "./stages/SkillsStage";
 
 export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
   return (
@@ -22,6 +24,8 @@ export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
       <InkPipeline />
       <HeroStage />
       <DebrisField />
+      <AboutStage />
+      <SkillsStage />
     </Canvas>
   );
 }

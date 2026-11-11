@@ -6,19 +6,13 @@ import { Vector3 } from "three";
 import { getSceneTime } from "@/lib/sceneClock";
 import { pipelineTarget } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
-
-type Key = { s: number; pos: [number, number, number]; look: [number, number, number] };
+import { buildCameraKeys } from "./world";
 
 /** Camera keyframes along scene time. Between keys the camera eases. */
-const KEYS: Key[] = [
-  { s: 0, pos: [0, 0, 14], look: [0, 0, 0] },
-  { s: 0.55, pos: [0, 0, 14], look: [0, 0, 0] },
-  { s: 1.0, pos: [0, 0, -12], look: [0, 0, -40] },
-  { s: 7, pos: [0, 0, -12], look: [0, 0, -40] },
-];
+const KEYS = buildCameraKeys();
 
 /** Moments where the edit hard-cuts: a one-frame inversion flash plus a glitch tail. */
-const CUTS = [0.47, 5.6];
+const CUTS = [0.47, 2.0, 3.0, 4.0, 5.0, 5.6];
 
 const a = new Vector3();
 const b = new Vector3();
@@ -67,6 +61,7 @@ export function Director() {
     sampleCamera(s, pos, target);
     camera.position.copy(pos);
     camera.lookAt(target);
+    frameState.cameraZ = pos.z;
 
     const dark = s > 0.62 && s < 5.6;
     pipelineTarget.invert = dark ? 1 : 0;

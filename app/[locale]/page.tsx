@@ -5,6 +5,8 @@ import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
+import { Panel } from "@/components/sections/Panel";
+import { Reveal } from "@/components/sections/Reveal";
 import { SheetSection } from "@/components/sections/SheetSection";
 
 export default async function Home() {
@@ -27,52 +29,76 @@ export default async function Home() {
         </HeroIntro>
       </SheetSection>
 
-      <SheetSection id="about" title={s.about}>
-        <div className="grid max-w-5xl gap-10 md:grid-cols-[1fr_280px]">
-          <div className="space-y-5 text-xl leading-relaxed">
-            {profile.bio.map((p, i) => (
-              <p key={i}>{p[locale]}</p>
-            ))}
-          </div>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 self-start border-t border-ink pt-3 font-mono text-sm">
-            <dt className="label text-ink-soft">{dict.about.school}</dt>
-            <dd>{profile.school[locale]}</dd>
-            <dt className="label text-ink-soft">{dict.about.major}</dt>
-            <dd>{profile.major[locale]}</dd>
-            <dt className="label text-ink-soft">{dict.about.grade}</dt>
-            <dd>{profile.grade[locale]}</dd>
-            <dt className="label text-ink-soft">{dict.about.based}</dt>
-            <dd>{profile.location[locale]}</dd>
-          </dl>
-        </div>
+      <SheetSection id="about" title={s.about} length={2} sticky>
+        <Reveal className="max-w-[440px] [perspective:1100px]">
+          <Panel className="origin-left [transform:rotateY(14deg)_rotateX(4deg)] transition-transform duration-500 hover:[transform:none]">
+            <pre className="overflow-x-auto font-mono text-[13px] leading-6">
+              <span data-line className="block text-ink-soft">{"// sheet 02 — init(me);"}</span>
+              <span data-line className="block">
+                <span className="text-accent">const</span> me = {"{"}
+              </span>
+              {(
+                [
+                  ["name", profile.name[locale]],
+                  ["school", profile.school[locale]],
+                  ["major", profile.major[locale]],
+                  ["grade", profile.grade[locale]],
+                  ["based", profile.location[locale]],
+                ] as const
+              ).map(([key, value]) => (
+                <span data-line key={key} className="block pl-4">
+                  <span className="text-ink-soft">{key}</span>: <span>&quot;{value}&quot;</span>
+                  <span className="text-accent">,</span>
+                </span>
+              ))}
+              <span data-line className="block">
+                {"}"}
+                <span className="text-accent">;</span>
+              </span>
+            </pre>
+            <div className="mt-4 space-y-2 border-t border-rule pt-3 text-sm leading-relaxed text-ink-soft">
+              {profile.bio.map((p, i) => (
+                <p data-line key={i}>
+                  {p[locale]}
+                </p>
+              ))}
+            </div>
+          </Panel>
+        </Reveal>
       </SheetSection>
 
-      <SheetSection id="skills" title={s.skills}>
-        <h2 className="font-display mb-8 text-5xl font-extrabold tracking-tight">{dict.skills.heading}</h2>
-        <table className="w-full max-w-2xl border-collapse font-mono text-sm">
-          <caption className="label mb-2 text-left text-ink-soft">{dict.skills.bom}</caption>
-          <thead>
-            <tr className="label border-y border-ink text-left text-ink-soft">
-              <th className="py-1.5 pr-3 font-normal">{dict.skills.part}</th>
-              <th className="py-1.5 pr-3 font-normal">{dict.skills.item}</th>
-              <th className="py-1.5 pr-3 font-normal">{dict.skills.level}</th>
-              <th className="py-1.5 font-normal">{dict.skills.since}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {skills.map((skill, i) => (
-              <tr key={skill.name} className="border-b border-rule">
-                <td className="py-1.5 pr-3 text-accent">{String(i + 1).padStart(2, "0")}</td>
-                <td className="py-1.5 pr-3">{skill.name}</td>
-                <td className="py-1.5 pr-3 tracking-[0.2em]">
-                  {"▮".repeat(skill.level)}
-                  <span className="text-rule">{"▯".repeat(5 - skill.level)}</span>
-                </td>
-                <td className="py-1.5 tabular-nums">{skill.since}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <SheetSection id="skills" title={s.skills} length={2.4} sticky>
+        <Reveal className="max-w-[380px]">
+          <Panel>
+            <h2 data-line className="font-display mb-3 text-2xl font-extrabold tracking-tight">
+              {dict.skills.heading}
+            </h2>
+            <table className="w-full border-collapse font-mono text-xs">
+              <caption className="label mb-2 text-left text-ink-soft">{dict.skills.bom}</caption>
+              <thead>
+                <tr className="label border-y border-ink text-left text-ink-soft">
+                  <th className="py-1 pr-2 font-normal">{dict.skills.part}</th>
+                  <th className="py-1 pr-2 font-normal">{dict.skills.item}</th>
+                  <th className="py-1 pr-2 font-normal">{dict.skills.level}</th>
+                  <th className="py-1 font-normal">{dict.skills.since}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {skills.map((skill, i) => (
+                  <tr data-line key={skill.name} className="border-b border-rule">
+                    <td className="py-1 pr-2 text-accent">{String(i + 1).padStart(2, "0")}</td>
+                    <td className="py-1 pr-2">{skill.name}</td>
+                    <td className="py-1 pr-2 tracking-[0.15em]">
+                      {"▮".repeat(skill.level)}
+                      <span className="text-rule">{"▯".repeat(5 - skill.level)}</span>
+                    </td>
+                    <td className="py-1 tabular-nums">{skill.since}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Panel>
+        </Reveal>
       </SheetSection>
 
       <SheetSection id="projects" title={s.projects}>
