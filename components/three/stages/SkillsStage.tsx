@@ -36,7 +36,8 @@ export function SkillsStage() {
 
   const rings = useRef<Group>(null);
   useFrame(() => {
-    if (rings.current) rings.current.visible = frameState.s > 1.85 && frameState.s < 3.3;
+    if (rings.current)
+      rings.current.visible = (frameState.s > 1.85 && frameState.s < 3.3) || frameState.overview > 0.4;
   });
 
   return (

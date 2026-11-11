@@ -1,18 +1,26 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import type { SheetId } from "@/lib/sheets";
 import { Director } from "./Director";
 import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
 import { AboutStage } from "./stages/AboutStage";
 import { FinaleStage } from "./stages/FinaleStage";
 import { HeroStage } from "./stages/HeroStage";
+import { OverviewMap } from "./stages/OverviewMap";
 import { ProjectsStage } from "./stages/ProjectsStage";
 import { SkillsStage } from "./stages/SkillsStage";
 import { TimelineStage } from "./stages/TimelineStage";
 import { WritingStage } from "./stages/WritingStage";
 
-export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
+export default function SceneCanvas({
+  onReady,
+  titles,
+}: {
+  onReady?: () => void;
+  titles: Record<SheetId, string>;
+}) {
   return (
     <Canvas
       dpr={[1, 1.75]}
@@ -34,6 +42,7 @@ export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
       <TimelineStage />
       <WritingStage />
       <FinaleStage />
+      <OverviewMap titles={titles} />
     </Canvas>
   );
 }

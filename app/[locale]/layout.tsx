@@ -54,7 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           {dict.controls.skip}
         </a>
         <SmoothScroll />
-        <SceneLoader />
+        <SceneLoader titles={dict.sheets} />
         <ToneSync />
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
         {children}

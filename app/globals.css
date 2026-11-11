@@ -136,3 +136,14 @@ html.is-crashing main,
 html.is-crashing header {
   animation: crash-jitter 1.6s steps(12) forwards;
 }
+
+/* While the overview map is open the page copy steps aside for the 3D world. */
+html.menu-open main {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+main {
+  transition: opacity 0.4s ease;
+}

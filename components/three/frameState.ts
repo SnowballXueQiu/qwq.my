@@ -10,7 +10,12 @@ export const frameState = {
   /** The finale, where everything returns to paper. */
   finale: 0,
   cameraZ: 14,
+  /** 0–1: how far the camera has pulled back into the overview map. */
+  overview: 0,
 };
+
+/** In the overview map every set piece shows fully assembled. */
+export const withOverview = (p: number) => (frameState.overview > 0.4 ? 1 : p);
 
 export const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 export const smooth = (a: number, b: number, x: number) => {

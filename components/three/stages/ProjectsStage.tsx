@@ -6,7 +6,7 @@ import { BoxGeometry, Group, PlaneGeometry } from "three";
 import { projects } from "@/content/projects";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
-import { clamp01, frameState } from "../frameState";
+import { clamp01, frameState, withOverview } from "../frameState";
 import { WORLD } from "../world";
 
 const SCREEN_W = 5.6;
@@ -74,7 +74,7 @@ function Monolith({ index }: { index: number }) {
     screenMat.uniforms.uHover.value = hover.current;
     const g = group.current;
     if (!g) return;
-    const p = near();
+    const p = withOverview(near());
     g.visible = p > 0 && p < 2;
     // Rise out of the floor on arrival, lean toward the camera on hover.
     const rise = Math.min(Math.max(p, 0), 1);

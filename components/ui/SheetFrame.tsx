@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { LangToggle } from "./LangToggle";
+import { MenuButton } from "./MenuButton";
 import { QwQLogo } from "./QwQLogo";
 import { SheetNav } from "./SheetNav";
 import { TerminalButton } from "./TerminalButton";
@@ -81,6 +82,7 @@ export function SheetFrame({
           </Link>
           <SheetNav locale={locale} titles={dict.sheets} />
           <div className="flex items-center gap-2">
+            <MenuButton labels={dict.menu} />
             <TerminalButton label={dict.controls.terminal} />
             <LangToggle locale={locale} label={dict.controls.language} />
           </div>

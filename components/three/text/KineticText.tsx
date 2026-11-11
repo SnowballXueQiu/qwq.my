@@ -5,7 +5,7 @@ import { useFrame, type ThreeElements } from "@react-three/fiber";
 import { Group, Vector3, Euler } from "three";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { createInkMaterial } from "../materials/inkMaterial";
-import { clamp01 } from "../frameState";
+import { clamp01, withOverview } from "../frameState";
 import { useFont, type FontName } from "./typeface";
 
 type Letter = {
@@ -121,7 +121,7 @@ export function KineticText({
   useFrame(() => {
     const g = root.current;
     if (!g) return;
-    const p = progress();
+    const p = withOverview(progress());
     g.visible = p > 0 && p < 2;
     if (!g.visible) return;
     const n = Math.max(letters.length, 1);

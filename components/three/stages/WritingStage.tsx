@@ -6,7 +6,7 @@ import { BoxGeometry, Group } from "three";
 import { posts } from "@/content/posts";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
-import { cue, frameState } from "../frameState";
+import { cue, frameState, withOverview } from "../frameState";
 import { WORLD } from "../world";
 
 const PAGE_W = 2.6;
@@ -68,7 +68,7 @@ export function WritingStage() {
   useFrame((state) => {
     const g = group.current;
     if (!g) return;
-    const p = cue(frameState.s, 4.85, 5.2, 5.55, 5.8);
+    const p = withOverview(cue(frameState.s, 4.85, 5.2, 5.55, 5.8));
     g.visible = p > 0 && p < 2;
     const t = state.clock.elapsedTime;
     g.children.forEach((child, i) => {

@@ -68,5 +68,10 @@
     "title": "Missing sheet",
     "body": "This sheet doesn't exist. Someone may have erased it.",
     "back": "Back home"
+  },
+  "menu": {
+    "open": "Map",
+    "close": "Close",
+    "hint": "Pick a scene to fly there · Esc to close"
   }
 }
