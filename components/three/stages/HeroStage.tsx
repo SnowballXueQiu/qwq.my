@@ -1,0 +1,100 @@
+"use client";
+
+import { useRef } from "react";
+import { createPortal, useFrame, useThree } from "@react-three/fiber";
+import { Group, PerspectiveCamera } from "three";
+import { Mascot, type MascotHandle } from "../mascot/Mascot";
+import { PaperSheet } from "../paper/PaperSheet";
+import { frameState, mix } from "../frameState";
+
+const HERO_DIST = 14;
+const PAPER_DIST = 14.6;
+
+/** Half-extents of the view frustum at a distance from the camera. */
+function frustumAt(camera: PerspectiveCamera, dist: number, aspect: number) {
+  const halfH = Math.tan((camera.fov * Math.PI) / 360) * dist;
+  return { halfW: halfH * aspect, halfH };
+}
+
+/** Where the mascot sits in camera space during the hero, plus its base scale. */
+function heroPlacement(camera: PerspectiveCamera, aspect: number) {
+  const { halfW, halfH } = frustumAt(camera, HERO_DIST, aspect);
+  const portrait = aspect < 1;
+  const scale = portrait ? (halfW * 2) / 8.2 : Math.min((halfH * 2) / 8.6, (halfW * 2) / 16.5);
+  const x = portrait ? 0 : halfW * 0.4;
+  const y = portrait ? halfH * 0.32 : halfH * 0.16;
+  return { x, y, scale };
+}
+
+/**
+ * The opening: a line drawing of QwQ on a sheet of paper. Scrolling gives it
+ * volume, tears the sheet open, the mascot leaps at the camera, then parks in
+ * the corner as a companion for the rest of the ride.
+ */
+export function HeroStage() {
+  const camera = useThree((s) => s.camera) as PerspectiveCamera;
+  const size = useThree((s) => s.size);
+  const aspect = size.width / size.height;
+  const rig = useRef<Group>(null);
+  const mascot = useRef<MascotHandle | null>(null);
+  const breakRef = useRef(0);
+  const paper = useRef<Group>(null);
+
+  const hero = heroPlacement(camera, aspect);
+  const sheet = frustumAt(camera, PAPER_DIST, aspect);
+  const k = PAPER_DIST / HERO_DIST;
+
+  useFrame(() => {
+    const f = frameState;
+    breakRef.current = f.breakAmount;
+    if (mascot.current) {
+      mascot.current.depth = Math.max(f.depth, 0.02);
+      // A flat drawing has no shading yet; light arrives with the volume.
+      for (const m of mascot.current.materials) m.uniforms.uToneBias.value = (1 - f.depth) * 0.5;
+    }
+    if (paper.current) paper.current.visible = f.s < 1.3;
+
+    const g = rig.current;
+    if (!g) return;
+    const portrait = aspect < 1;
+    const near = frustumAt(camera, 6.5, aspect);
+    const corner = frustumAt(camera, 9, aspect);
+    // hero → leap (toward the lens) → park (companion corner) → finale (centre stage)
+    let x = mix(hero.x, 0, f.leap);
+    let y = mix(hero.y, near.halfH * 0.04, f.leap);
+    let z = mix(-HERO_DIST, -6.5, f.leap);
+    let s = hero.scale;
+    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.8), f.park);
+    y = mix(y, -corner.halfH * (portrait ? 0.78 : 0.7), f.park);
+    z = mix(z, -9, f.park);
+    s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), f.park);
+    x = mix(x, 0, f.finale);
+    y = mix(y, hero.y * 0.6, f.finale);
+    z = mix(z, -HERO_DIST, f.finale);
+    s = mix(s, hero.scale * 1.05, f.finale);
+    g.position.set(x, y, z);
+    g.scale.setScalar(s);
+    // A little spin as it bursts through.
+    g.rotation.z = Math.sin(f.leap * Math.PI) * 0.18 * (1 - f.park);
+  });
+
+  return (
+    <>
+      <group ref={paper} position={[0, 0, HERO_DIST - PAPER_DIST]}>
+        <PaperSheet
+          width={sheet.halfW * 2 * 1.06}
+          height={sheet.halfH * 2 * 1.06}
+          focus={[hero.x * k, hero.y * k]}
+          pxToWorld={(sheet.halfH * 2) / size.height}
+          breakRef={breakRef}
+        />
+      </group>
+      {createPortal(
+        <group ref={rig}>
+          <Mascot handle={mascot} />
+        </group>,
+        camera,
+      )}
+    </>
+  );
+}

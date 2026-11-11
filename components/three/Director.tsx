@@ -1,0 +1,85 @@
+"use client";
+
+import { useEffect, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Vector3 } from "three";
+import { getSceneTime } from "@/lib/sceneClock";
+import { pipelineTarget } from "./pipeline/InkPipeline";
+import { frameState, smooth } from "./frameState";
+
+type Key = { s: number; pos: [number, number, number]; look: [number, number, number] };
+
+/** Camera keyframes along scene time. Between keys the camera eases. */
+const KEYS: Key[] = [
+  { s: 0, pos: [0, 0, 14], look: [0, 0, 0] },
+  { s: 0.55, pos: [0, 0, 14], look: [0, 0, 0] },
+  { s: 1.0, pos: [0, 0, -12], look: [0, 0, -40] },
+  { s: 7, pos: [0, 0, -12], look: [0, 0, -40] },
+];
+
+/** Moments where the edit hard-cuts: a one-frame inversion flash plus a glitch tail. */
+const CUTS = [0.47, 5.6];
+
+const a = new Vector3();
+const b = new Vector3();
+const look = new Vector3();
+const lookB = new Vector3();
+
+function sampleCamera(s: number, pos: Vector3, target: Vector3) {
+  let i = 0;
+  while (i < KEYS.length - 2 && s > KEYS[i + 1].s) i++;
+  const k0 = KEYS[i];
+  const k1 = KEYS[i + 1];
+  const t = smooth(k0.s, k1.s, s);
+  pos.lerpVectors(a.set(...k0.pos), b.set(...k1.pos), t);
+  target.lerpVectors(look.set(...k0.look), lookB.set(...k1.look), t);
+}
+
+/** Turns scroll into camera motion, hero choreography and the scene's light/dark. */
+export function Director() {
+  const camera = useThree((s) => s.camera);
+  const scene = useThree((s) => s.scene);
+
+  // The camera joins the scene so things can ride along with it (the mascot companion).
+  useEffect(() => {
+    scene.add(camera);
+    return () => {
+      scene.remove(camera);
+    };
+  }, [scene, camera]);
+
+  const { cut, pos, target } = useMemo(
+    () => ({ cut: { last: -1, at: -10 }, pos: new Vector3(), target: new Vector3() }),
+    [],
+  );
+
+  useFrame((state) => {
+    const s = getSceneTime();
+    const now = state.clock.elapsedTime;
+
+    frameState.s = s;
+    frameState.depth = smooth(0.1, 0.36, s);
+    frameState.breakAmount = smooth(0.3, 0.95, s) * 1.7;
+    frameState.leap = smooth(0.4, 0.66, s);
+    frameState.park = smooth(0.74, 1.0, s);
+    frameState.finale = smooth(5.45, 5.85, s);
+
+    sampleCamera(s, pos, target);
+    camera.position.copy(pos);
+    camera.lookAt(target);
+
+    const dark = s > 0.62 && s < 5.6;
+    pipelineTarget.invert = dark ? 1 : 0;
+    pipelineTarget.bgInvert = s < 5.6 ? 1 : 0;
+
+    for (const c of CUTS) {
+      if (cut.last >= 0 && (cut.last - c) * (s - c) < 0) cut.at = now;
+    }
+    cut.last = s;
+    const since = now - cut.at;
+    pipelineTarget.flash = since < 0.09 ? 1 : 0;
+    pipelineTarget.glitch = Math.max(0, 1 - since / 0.4) * 0.9;
+  }, -1);
+
+  return null;
+}

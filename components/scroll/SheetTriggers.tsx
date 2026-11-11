@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { clearSheets, measureSheets } from "@/lib/sceneClock";
 import { sheets } from "@/lib/sheets";
 import { useSite } from "@/lib/store";
 
@@ -22,7 +23,18 @@ export function SheetTriggers() {
         onToggle: (self) => self.isActive && setSheet(index),
       });
     });
-    return () => triggers.forEach((t) => t.kill());
+    // Scene time needs fresh section offsets whenever layout shifts.
+    measureSheets();
+    const observer = new ResizeObserver(() => measureSheets());
+    const main = document.getElementById("main");
+    if (main) observer.observe(main);
+    ScrollTrigger.addEventListener("refresh", measureSheets);
+    return () => {
+      triggers.forEach((t) => t.kill());
+      observer.disconnect();
+      ScrollTrigger.removeEventListener("refresh", measureSheets);
+      clearSheets();
+    };
   }, []);
 
   return null;

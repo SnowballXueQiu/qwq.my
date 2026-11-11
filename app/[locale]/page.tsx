@@ -4,6 +4,7 @@ import { skills } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
+import { HeroIntro } from "@/components/sections/HeroIntro";
 import { SheetSection } from "@/components/sections/SheetSection";
 
 export default async function Home() {
@@ -15,13 +16,15 @@ export default async function Home() {
     <main id="main">
       <SheetTriggers />
 
-      <SheetSection id="hero" title={s.hero} className="flex flex-col justify-end">
-        <p className="label mb-4 text-accent">{profile.roles[locale]}</p>
-        <h1 className="font-display text-[clamp(4rem,16vw,16rem)] font-black leading-[0.82] tracking-[-0.04em] font-condensed">
-          {profile.name[locale]}
-        </h1>
-        <p className="mt-6 max-w-xl text-lg text-ink-soft">{dict.hero.tagline}</p>
-        <p className="label mt-10 text-ink-soft">↓ {dict.hero.scroll}</p>
+      <SheetSection id="hero" title={s.hero} length={2.4} sticky>
+        <HeroIntro>
+          <p className="label mb-4 text-accent">{profile.roles[locale]}</p>
+          <h1 className="font-display text-[clamp(4rem,16vw,16rem)] font-black leading-[0.82] tracking-[-0.04em] font-condensed">
+            {profile.name[locale]}
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-ink-soft">{dict.hero.tagline}</p>
+          <p className="label mt-10 text-ink-soft">↓ {dict.hero.scroll}</p>
+        </HeroIntro>
       </SheetSection>
 
       <SheetSection id="about" title={s.about}>

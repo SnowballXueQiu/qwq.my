@@ -1,4 +1,4 @@
-import { GLSL3, ShaderMaterial, Vector3 } from "three";
+import { GLSL3, ShaderMaterial, Vector3, type IUniform } from "three";
 import { noise } from "../shaders/noise.glsl";
 
 /** Uniforms shared by every ink material; the pipeline advances them once per frame. */
@@ -21,15 +21,26 @@ export type InkMaterialOptions = {
   wobbleFrequency?: number;
   /** Lifts or sinks the light so a surface reads lighter or darker. */
   toneBias?: number;
+  /** Extra uniforms for the custom chunks below. */
+  uniforms?: Record<string, IUniform>;
+  /** GLSL declarations (attributes, uniforms, functions) for the vertex shader. */
+  vertexHead?: string;
+  /** GLSL run first in main(); may rewrite `pos` and `nrm` (object space). */
+  vertexTransform?: string;
+  fragmentHead?: string;
+  /** For paper fills: GLSL that sets `printed` (0–1 ink) from `vRest`, the undeformed position. */
+  fragmentPrint?: string;
 };
 
-const vertexShader = /* glsl */ `
+const vertexShader = (o: InkMaterialOptions) => /* glsl */ `
 ${noise}
 uniform float uTime;
 uniform float uWobble;
 uniform float uWobbleFreq;
 out vec3 vViewNormal;
 out vec3 vObjPos;
+out vec3 vRest;
+${o.vertexHead ?? ""}
 
 vec3 displace(vec3 p, vec3 n) {
   float w = snoise(p * uWobbleFreq + vec3(0.0, uTime * 0.55, uTime * 0.2));
@@ -39,6 +50,8 @@ vec3 displace(vec3 p, vec3 n) {
 void main() {
   vec3 pos = position;
   vec3 nrm = normal;
+  vRest = position;
+  ${o.vertexTransform ?? ""}
   if (uWobble > 0.0) {
     // Re-derive the normal from two displaced neighbours so shading follows the wobble.
     vec3 helper = abs(nrm.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
@@ -63,7 +76,7 @@ void main() {
 }
 `;
 
-const fragmentShader = /* glsl */ `
+const fragmentShader = (o: InkMaterialOptions) => /* glsl */ `
 ${noise}
 layout(location = 0) out vec4 gColor;
 layout(location = 1) out vec4 gNormal;
@@ -75,8 +88,11 @@ uniform float uObjectId;
 uniform float uToneBias;
 uniform float uDissolve;
 uniform float uDissolveScale;
+uniform float uTime;
 in vec3 vViewNormal;
 in vec3 vObjPos;
+in vec3 vRest;
+${o.fragmentHead ?? ""}
 
 void main() {
   float accent = uAccent;
@@ -91,6 +107,11 @@ void main() {
   if (!gl_FrontFacing) n = -n;
   float halfLambert = dot(n, uLightDir) * 0.5 + 0.5;
   float tone = clamp(pow(halfLambert, 1.35) + uToneBias, 0.0, 1.0);
+  if (uFill > 0.25 && uFill < 0.75) {
+    float printed = 0.0;
+    ${o.fragmentPrint ?? ""}
+    tone = printed;
+  }
   gColor = vec4(tone, accent, uFill, 1.0);
   gNormal = vec4(n * 0.5 + 0.5, uObjectId);
 }
@@ -101,8 +122,8 @@ export function createInkMaterial(options: InkMaterialOptions = {}) {
   const id = nextObjectId++;
   return new ShaderMaterial({
     glslVersion: GLSL3,
-    vertexShader,
-    fragmentShader,
+    vertexShader: vertexShader(options),
+    fragmentShader: fragmentShader(options),
     uniforms: {
       uTime: sharedUniforms.uTime,
       uLightDir: sharedUniforms.uLightDir,
@@ -115,6 +136,7 @@ export function createInkMaterial(options: InkMaterialOptions = {}) {
       uToneBias: { value: options.toneBias ?? 0 },
       uDissolve: { value: 0 },
       uDissolveScale: { value: 1.6 },
+      ...options.uniforms,
     },
   });
 }
