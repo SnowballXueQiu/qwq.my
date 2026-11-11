@@ -6,6 +6,7 @@ import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
 import { AboutStage } from "./stages/AboutStage";
 import { HeroStage } from "./stages/HeroStage";
+import { ProjectsStage } from "./stages/ProjectsStage";
 import { SkillsStage } from "./stages/SkillsStage";
 
 export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
@@ -26,6 +27,7 @@ export default function SceneCanvas({ onReady }: { onReady?: () => void }) {
       <DebrisField />
       <AboutStage />
       <SkillsStage />
+      <ProjectsStage />
     </Canvas>
   );
 }

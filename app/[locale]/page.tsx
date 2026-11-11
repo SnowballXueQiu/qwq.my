@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
+import { ProjectReadout } from "@/components/sections/ProjectReadout";
 import { Reveal } from "@/components/sections/Reveal";
 import { SheetSection } from "@/components/sections/SheetSection";
 
@@ -101,20 +102,8 @@ export default async function Home() {
         </Reveal>
       </SheetSection>
 
-      <SheetSection id="projects" title={s.projects}>
-        <ol className="grid max-w-5xl gap-px border border-ink bg-ink sm:grid-cols-2">
-          {projects.map((project, i) => (
-            <li key={project.slug} className="flex flex-col gap-3 bg-paper p-5">
-              <div className="label flex justify-between text-ink-soft">
-                <span className="text-accent">P-{String(i + 1).padStart(2, "0")}</span>
-                <span>{project.year}</span>
-              </div>
-              <h3 className="font-display text-3xl font-extrabold tracking-tight">{project.title}</h3>
-              <p className="text-ink-soft">{project.summary[locale]}</p>
-              <p className="label mt-auto text-ink-soft">{project.tags.join(" · ")}</p>
-            </li>
-          ))}
-        </ol>
+      <SheetSection id="projects" title={s.projects} length={Math.max(3, projects.length * 0.85)} sticky>
+        <ProjectReadout projects={projects} locale={locale} labels={dict.projects} />
       </SheetSection>
 
       <SheetSection id="timeline" title={s.timeline}>

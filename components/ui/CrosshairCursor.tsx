@@ -22,8 +22,14 @@ export function CrosshairCursor() {
     let x = -100;
     let y = -100;
     let frame = 0;
+    let domHover = false;
+    let domLabel = "";
     const render = () => {
       frame = 0;
+      // 3D objects announce themselves through a data attribute on <html>.
+      const sceneLabel = html.dataset.cursorLabel;
+      root.current!.dataset.hover = domHover || sceneLabel ? "true" : "false";
+      tag.current!.textContent = domLabel || sceneLabel || "";
       h.current!.style.transform = `translate3d(0, ${y}px, 0)`;
       v.current!.style.transform = `translate3d(${x}px, 0, 0)`;
       reticle.current!.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -37,8 +43,9 @@ export function CrosshairCursor() {
     };
     const onOver = (e: PointerEvent) => {
       const target = (e.target as Element | null)?.closest<HTMLElement>(INTERACTIVE);
-      root.current!.dataset.hover = target ? "true" : "false";
-      tag.current!.textContent = target?.dataset.cursor ?? (target ? "OPEN" : "");
+      domHover = Boolean(target);
+      domLabel = target?.dataset.cursor ?? (target ? "OPEN" : "");
+      if (!frame) frame = requestAnimationFrame(render);
     };
     const onLeave = () => {
       root.current!.dataset.visible = "false";
