@@ -12,6 +12,8 @@ export const frameState = {
   cameraZ: 14,
   /** 0–1: how far the camera has pulled back into the overview map. */
   overview: 0,
+  /** 0–1: debug-mode mini game in progress. */
+  game: 0,
 };
 
 /** In the overview map every set piece shows fully assembled. */

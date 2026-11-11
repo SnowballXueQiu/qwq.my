@@ -5,6 +5,7 @@ import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
+import { GameHUD } from "@/components/game/GameHUD";
 import { Terminal } from "@/components/terminal/Terminal";
 import { BootScreen } from "@/components/ui/BootScreen";
 import { CrashOverlay } from "@/components/ui/CrashOverlay";
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
         {children}
         <Terminal locale={locale} />
+        <GameHUD labels={dict.game} />
         <CrashOverlay />
         <BootScreen />
         <CrosshairCursor />

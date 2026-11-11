@@ -23,6 +23,9 @@ const lookB = new Vector3();
 /** Overview map: high and off to the side, taking in the whole flight path. */
 const OVERVIEW_POS = new Vector3(165, 195, 45);
 const OVERVIEW_LOOK = new Vector3(0, -10, -185);
+/** The debug-mode arena: empty sky far above the flight path. */
+export const ARENA = new Vector3(0, 800, 0);
+const ARENA_LOOK = new Vector3(0, 800, -100);
 const scratchPos = new Vector3();
 const scratchLook = new Vector3();
 
@@ -97,6 +100,11 @@ export function Director() {
       pos.lerp(scratchPos.copy(OVERVIEW_POS), o);
       target.lerp(scratchLook.copy(OVERVIEW_LOOK), o);
     }
+    const g = smooth(0, 1, frameState.game);
+    if (g > 0.0005) {
+      pos.lerp(scratchPos.copy(ARENA), g);
+      target.lerp(scratchLook.copy(ARENA_LOOK), g);
+    }
     camera.position.copy(pos);
     camera.lookAt(target);
     if (camera instanceof PerspectiveCamera) {
@@ -107,9 +115,11 @@ export function Director() {
       }
     }
 
-    const dark = s > 0.62 && s < 5.78;
+    // The game always plays in the dark arena, whatever sheet it was launched from.
+    const inGame = frameState.game > 0.5;
+    const dark = (s > 0.62 && s < 5.78) || inGame;
     pipelineTarget.invert = dark ? 1 : 0;
-    pipelineTarget.bgInvert = s < 5.78 ? 1 : 0;
+    pipelineTarget.bgInvert = s < 5.78 || inGame ? 1 : 0;
 
     for (const c of CUTS) {
       if (cut.last >= 0 && (cut.last - c) * (s - c) < 0) cut.at = now;

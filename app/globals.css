@@ -147,3 +147,13 @@ html.menu-open main {
 main {
   transition: opacity 0.4s ease;
 }
+
+@keyframes float-up {
+  from { transform: translate(-50%, 0); opacity: 1; }
+  to { transform: translate(-50%, -60px); opacity: 0; }
+}
+
+html.game-open main {
+  opacity: 0;
+  pointer-events: none;
+}

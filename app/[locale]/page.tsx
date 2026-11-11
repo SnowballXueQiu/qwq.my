@@ -9,6 +9,7 @@ import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
 import { ProjectReadout } from "@/components/sections/ProjectReadout";
+import { DebugButton } from "@/components/game/DebugButton";
 import { Reveal } from "@/components/sections/Reveal";
 import { TimelineReadout } from "@/components/sections/TimelineReadout";
 import { SheetSection } from "@/components/sections/SheetSection";
@@ -101,6 +102,7 @@ export default async function Home() {
                 ))}
               </tbody>
             </table>
+            <DebugButton label={dict.game.start} />
           </Panel>
         </Reveal>
       </SheetSection>

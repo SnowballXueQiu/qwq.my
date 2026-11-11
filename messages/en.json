@@ -73,5 +73,17 @@
     "open": "Map",
     "close": "Close",
     "hint": "Pick a scene to fly there · Esc to close"
+  },
+  "game": {
+    "title": "DEBUG MODE",
+    "hint": "Click the bugs · don't let them reach you · Esc to quit",
+    "score": "Score",
+    "best": "Best",
+    "squashed": "Bugs squashed",
+    "passed": "✓ All tests passed",
+    "failed": "✕ Build failed",
+    "retry": "Retry",
+    "exit": "Exit",
+    "start": "Enter debug mode"
   }
 }

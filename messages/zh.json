@@ -73,5 +73,17 @@
     "open": "全景",
     "close": "关闭",
     "hint": "点一幕飞过去 · Esc 关闭"
+  },
+  "game": {
+    "title": "DEBUG MODE",
+    "hint": "点击 bug 消灭它们 · 别让它们爬到你脸上 · Esc 退出",
+    "score": "分数",
+    "best": "最高分",
+    "squashed": "消灭的 bug",
+    "passed": "✓ 所有测试通过",
+    "failed": "✕ 构建失败",
+    "retry": "再来一局",
+    "exit": "退出",
+    "start": "进入 debug 模式"
   }
 }

@@ -10,6 +10,8 @@ export type FxEvents = {
   game: { open: boolean };
   menu: { open: boolean };
   sceneReady: Record<string, never>;
+  /** A bug was squashed at a screen position. */
+  hit: { x: number; y: number; points: number; combo: number };
 };
 
 const PREFIX = "qwq:";

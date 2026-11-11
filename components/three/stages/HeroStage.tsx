@@ -34,31 +34,35 @@ export function HeroStage() {
       // A flat drawing has no shading yet; light arrives with the volume.
       for (const m of mascot.current.materials) m.uniforms.uToneBias.value = (1 - f.depth) * 0.5;
     }
-    if (paper.current) paper.current.visible = f.s < 1.3;
+    if (paper.current) paper.current.visible = f.s < 1.3 && f.game < 0.5;
 
     const g = rig.current;
     if (!g) return;
     const portrait = aspect < 1;
+    // During the game QwQ watches from the corner, whatever the scroll says.
+    const park = Math.max(f.park, f.game);
+    const leap = Math.max(f.leap, f.game);
+    const finale = f.finale * (1 - f.game);
     const near = frustumAt(camera, 6.5, aspect);
     const corner = frustumAt(camera, 9, aspect);
     // hero → leap (toward the lens) → park (companion corner) → finale (centre stage)
-    let x = mix(hero.x, 0, f.leap);
-    let y = mix(hero.y, near.halfH * 0.04, f.leap);
-    let z = mix(-HERO_DIST, -6.5, f.leap);
+    let x = mix(hero.x, 0, leap);
+    let y = mix(hero.y, near.halfH * 0.04, leap);
+    let z = mix(-HERO_DIST, -6.5, leap);
     let s = hero.scale;
-    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.8), f.park);
-    y = mix(y, -corner.halfH * (portrait ? 0.78 : 0.7), f.park);
-    z = mix(z, -9, f.park);
-    s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), f.park);
+    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.8), park);
+    y = mix(y, -corner.halfH * (portrait ? 0.78 : 0.7), park);
+    z = mix(z, -9, park);
+    s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), park);
     // Land exactly where it started: the last sheet mirrors the first.
-    x = mix(x, hero.x, f.finale);
-    y = mix(y, hero.y, f.finale);
-    z = mix(z, -HERO_DIST, f.finale);
-    s = mix(s, hero.scale, f.finale);
+    x = mix(x, hero.x, finale);
+    y = mix(y, hero.y, finale);
+    z = mix(z, -HERO_DIST, finale);
+    s = mix(s, hero.scale, finale);
     g.position.set(x, y, z);
     g.scale.setScalar(s);
     // A little spin as it bursts through.
-    g.rotation.z = Math.sin(f.leap * Math.PI) * 0.18 * (1 - f.park);
+    g.rotation.z = Math.sin(leap * Math.PI) * 0.18 * (1 - park);
   });
 
   return (
