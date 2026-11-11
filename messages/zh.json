@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "雪球 · qwq.my",
+    "description": "雪球的个人站：学生、开发者。项目、经历、文章，以及一只会变形的 QwQ。"
+  },
+  "sheets": {
+    "hero": "你好",
+    "about": "关于我",
+    "skills": "技能",
+    "projects": "项目",
+    "timeline": "经历",
+    "writing": "文章",
+    "contact": "联系"
+  },
+  "titleBlock": {
+    "drawnBy": "绘制",
+    "dwgNo": "图号",
+    "sheet": "图幅",
+    "scale": "比例",
+    "rev": "版本",
+    "progress": "进度"
+  },
+  "controls": {
+    "theme": "切换纸面 / 蓝图",
+    "themePaper": "纸面",
+    "themeBlueprint": "蓝图",
+    "language": "Switch to English",
+    "skip": "跳到正文"
+  },
+  "hero": {
+    "kicker": "学生 / 开发者",
+    "tagline": "在代码和课本之间，画一张会动的图纸。",
+    "scroll": "向下滚动"
+  },
+  "about": {
+    "heading": "关于我",
+    "school": "学校",
+    "major": "专业",
+    "grade": "年级",
+    "based": "坐标"
+  },
+  "skills": {
+    "heading": "技能爆炸图",
+    "bom": "物料清单 BOM",
+    "part": "零件",
+    "item": "名称",
+    "level": "熟练度",
+    "since": "始于"
+  },
+  "projects": {
+    "heading": "项目",
+    "view": "查看项目",
+    "source": "源码"
+  },
+  "timeline": {
+    "heading": "经历",
+    "yearInReview": "年度回顾"
+  },
+  "writing": {
+    "heading": "文章",
+    "all": "全部文章"
+  },
+  "contact": {
+    "heading": "说声嗨",
+    "lead": "合作、交流，或者只是来打个招呼。",
+    "email": "写邮件"
+  },
+  "notFound": {
+    "title": "图纸缺页",
+    "body": "这张图纸不存在，可能被橡皮擦掉了。",
+    "back": "回到首页"
+  }
+}

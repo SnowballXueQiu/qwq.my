@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "title": "Snowball · qwq.my",
+    "description": "Snowball's personal site: student and developer. Projects, timeline, writing, and a shape-shifting QwQ."
+  },
+  "sheets": {
+    "hero": "Hello",
+    "about": "About",
+    "skills": "Skills",
+    "projects": "Projects",
+    "timeline": "Timeline",
+    "writing": "Writing",
+    "contact": "Contact"
+  },
+  "titleBlock": {
+    "drawnBy": "Drawn by",
+    "dwgNo": "Dwg no.",
+    "sheet": "Sheet",
+    "scale": "Scale",
+    "rev": "Rev",
+    "progress": "Progress"
+  },
+  "controls": {
+    "theme": "Toggle paper / blueprint",
+    "themePaper": "Paper",
+    "themeBlueprint": "Blueprint",
+    "language": "切换到中文",
+    "skip": "Skip to content"
+  },
+  "hero": {
+    "kicker": "Student / Developer",
+    "tagline": "Drawing a blueprint that moves, somewhere between code and coursework.",
+    "scroll": "Scroll"
+  },
+  "about": {
+    "heading": "About",
+    "school": "School",
+    "major": "Major",
+    "grade": "Year",
+    "based": "Based in"
+  },
+  "skills": {
+    "heading": "Exploded view",
+    "bom": "Bill of materials",
+    "part": "Part",
+    "item": "Item",
+    "level": "Level",
+    "since": "Since"
+  },
+  "projects": {
+    "heading": "Projects",
+    "view": "View project",
+    "source": "Source"
+  },
+  "timeline": {
+    "heading": "Timeline",
+    "yearInReview": "Year in review"
+  },
+  "writing": {
+    "heading": "Writing",
+    "all": "All posts"
+  },
+  "contact": {
+    "heading": "Say hi",
+    "lead": "Collaboration, a question, or just a hello.",
+    "email": "Send an email"
+  },
+  "notFound": {
+    "title": "Missing sheet",
+    "body": "This sheet doesn't exist. Someone may have erased it.",
+    "back": "Back home"
+  }
+}
