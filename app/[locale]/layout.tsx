@@ -41,7 +41,10 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL("https://qwq.my"),
     title: { default: dict.meta.title, template: `%s · qwq.my` },
     description: dict.meta.description,
-    alternates: { languages: { zh: "/zh", en: "/en" } },
+    alternates: {
+      languages: { zh: "/zh", en: "/en" },
+      types: { "application/rss+xml": `/${await getLocale()}/feed.xml` },
+    },
   };
 }
 
