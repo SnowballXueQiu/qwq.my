@@ -11,8 +11,12 @@ import {
   TetrahedronGeometry,
 } from "three";
 import { createInkMaterial } from "../materials/inkMaterial";
+import { WORLD } from "../world";
 
-const PER_KIND = 22;
+const PER_KIND = 48;
+// Debris spans the whole flight, from just past the paper to the finale.
+const NEAR = -16;
+const FAR = WORLD.contact.z + 20;
 
 /** Low-poly fragments drifting in the dark beyond the paper. */
 export function DebrisField() {
@@ -33,11 +37,11 @@ export function DebrisField() {
     return kinds.map(() =>
       Array.from({ length: PER_KIND }, () => {
         const angle = r() * Math.PI * 2;
-        const radius = 4 + r() * 12;
+        const radius = 5 + r() * 13;
         return {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius * 0.7,
-          z: -16 - r() * 140,
+          z: NEAR + (FAR - NEAR) * r(),
           s: 0.25 + r() * 1.1,
           rx: r() * 6,
           ry: r() * 6,

@@ -8,6 +8,7 @@ import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
 import { ProjectReadout } from "@/components/sections/ProjectReadout";
 import { Reveal } from "@/components/sections/Reveal";
+import { TimelineReadout } from "@/components/sections/TimelineReadout";
 import { SheetSection } from "@/components/sections/SheetSection";
 
 export default async function Home() {
@@ -106,17 +107,8 @@ export default async function Home() {
         <ProjectReadout projects={projects} locale={locale} labels={dict.projects} />
       </SheetSection>
 
-      <SheetSection id="timeline" title={s.timeline}>
-        <ol className="max-w-3xl border-l border-ink">
-          {timeline.map((event) => (
-            <li key={event.date + event.title.en} className="relative py-4 pl-6">
-              <span className="absolute -left-[5px] top-6 size-[9px] rounded-full border border-ink bg-paper" />
-              <p className="label text-accent">{event.date}</p>
-              <h3 className="mt-1 text-xl font-bold">{event.title[locale]}</h3>
-              <p className="text-ink-soft">{event.detail[locale]}</p>
-            </li>
-          ))}
-        </ol>
+      <SheetSection id="timeline" title={s.timeline} length={Math.max(3, timeline.length * 0.7)} sticky>
+        <TimelineReadout events={timeline} locale={locale} />
       </SheetSection>
 
       <SheetSection id="writing" title={s.writing}>

@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { Project } from "@/content/projects";
 import type { Locale } from "@/lib/i18n";
-import { getSceneTime } from "@/lib/sceneClock";
-import { sheets } from "@/lib/sheets";
 import { ScrambleText } from "@/components/ui/ScrambleText";
 import { Panel } from "./Panel";
-
-const SHEET = sheets.indexOf("projects");
+import { useSceneIndex } from "./SceneReadout";
 
 /** Shows whichever project's monolith the camera is passing, in sync with the 3D corridor. */
 export function ProjectReadout({
@@ -20,18 +16,7 @@ export function ProjectReadout({
   locale: Locale;
   labels: { view: string; source: string };
 }) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const update = () => {
-      const s = getSceneTime() - SHEET;
-      const i = Math.min(projects.length - 1, Math.max(0, Math.floor(s * projects.length)));
-      setIndex((prev) => (prev === i ? prev : i));
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, [projects.length]);
+  const index = useSceneIndex("projects", projects.length);
 
   const p = projects[index];
   return (
