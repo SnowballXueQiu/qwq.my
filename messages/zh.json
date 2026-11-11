@@ -60,7 +60,8 @@
   "contact": {
     "heading": "说声嗨",
     "lead": "合作、交流，或者只是来打个招呼。",
-    "email": "写邮件"
+    "email": "写邮件",
+    "again": "再画一遍"
   },
   "notFound": {
     "title": "图纸缺页",

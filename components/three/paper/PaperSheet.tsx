@@ -56,6 +56,7 @@ export function PaperSheet({
   focus,
   pxToWorld,
   breakRef,
+  seed = 7,
 }: {
   width: number;
   height: number;
@@ -63,18 +64,20 @@ export function PaperSheet({
   /** World units per CSS pixel at the sheet's depth, so the grid matches the DOM's 32px grid. */
   pxToWorld: number;
   breakRef: React.RefObject<number>;
+  /** Changes the tear pattern. */
+  seed?: number;
 }) {
   // Rebuild only when the sheet size meaningfully changes, not on sub-pixel jitter.
   const w = Math.round(width * 10) / 10;
   const h = Math.round(height * 10) / 10;
   const fx = Math.round(focus[0] * 10) / 10;
   const fy = Math.round(focus[1] * 10) / 10;
-  const geometry = useMemo(() => buildShardGeometry(w, h, [fx, fy]), [w, h, fx, fy]);
+  const geometry = useMemo(() => buildShardGeometry(w, h, [fx, fy], { seed }), [w, h, fx, fy, seed]);
 
   const material = useMemo(
     () =>
       createInkMaterial({
-        fill: Fill.paper,
+        fill: Fill.sheet,
         uniforms: {
           uBreak: { value: 0 },
           uGrid: { value: 32 },

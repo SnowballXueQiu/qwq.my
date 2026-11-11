@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { posts } from "@/content/posts";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { skills } from "@/content/skills";
@@ -111,27 +113,56 @@ export default async function Home() {
         <TimelineReadout events={timeline} locale={locale} />
       </SheetSection>
 
-      <SheetSection id="writing" title={s.writing}>
-        <h2 className="font-display text-5xl font-extrabold tracking-tight">{dict.writing.heading}</h2>
+      <SheetSection id="writing" title={s.writing} length={1.6} sticky>
+        <Reveal className="max-w-[460px]">
+          <Panel>
+            <h2 data-line className="font-display text-3xl font-extrabold tracking-tight">
+              {dict.writing.heading}
+            </h2>
+            <ol className="mt-3 divide-y divide-rule border-y border-rule">
+              {posts.map((post) => (
+                <li data-line key={post.slug}>
+                  <Link
+                    href={`/${locale}/blog/${post.slug}`}
+                    data-cursor="READ"
+                    className="group flex items-baseline gap-3 py-2"
+                  >
+                    <span className="label shrink-0 text-ink-soft">{post.date}</span>
+                    <span className="truncate font-medium group-hover:text-accent">{post.title[locale]}</span>
+                    <span className="ml-auto text-accent opacity-0 transition-opacity group-hover:opacity-100">→</span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+            <Link href={`/${locale}/blog`} className="label mt-3 inline-block hover:text-accent">
+              {dict.writing.all} →
+            </Link>
+          </Panel>
+        </Reveal>
       </SheetSection>
 
-      <SheetSection id="contact" title={s.contact} className="flex flex-col justify-center">
-        <h2 className="font-display text-[clamp(3rem,12vw,11rem)] font-black leading-[0.85] tracking-[-0.04em] font-condensed">
+      <SheetSection id="contact" title={s.contact} length={1.8} sticky>
+        <h2 className="font-display text-[clamp(3rem,10vw,9rem)] font-black leading-[0.85] tracking-[-0.04em] font-condensed">
           {dict.contact.heading}
         </h2>
-        <p className="mt-6 max-w-md text-lg text-ink-soft">{dict.contact.lead}</p>
-        <ul className="mt-8 flex flex-wrap gap-3">
+        <p className="mt-4 max-w-md text-lg text-ink-soft">{dict.contact.lead}</p>
+        <ul className="pointer-events-auto mt-6 flex flex-wrap gap-3">
           {profile.links.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className="label inline-block border border-ink px-3 py-2 transition-colors hover:bg-ink hover:text-paper"
+                className="label inline-block border border-ink bg-paper px-3 py-2 transition-colors hover:bg-ink hover:text-paper"
                 {...(link.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
               >
                 {link.label} ↗
               </a>
             </li>
           ))}
+          <li>
+            <a href="#hero" data-cursor="REDRAW" className="label inline-block border border-accent px-3 py-2 text-accent transition-colors hover:bg-accent hover:text-paper">
+              ↺ {dict.contact.again}
+            </a>
+          </li>
         </ul>
       </SheetSection>
     </main>

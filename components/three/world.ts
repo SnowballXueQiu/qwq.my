@@ -59,8 +59,8 @@ export function buildCameraKeys(): CameraKey[] {
     });
   }
   keys.push(
-    { s: 5.3, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z] },
-    { s: 5.82, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z] },
+    { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z] },
+    { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z] },
     { s: 7, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z] },
   );
   return keys;

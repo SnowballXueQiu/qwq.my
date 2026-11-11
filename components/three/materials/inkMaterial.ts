@@ -8,8 +8,12 @@ export const sharedUniforms = {
   uLightDir: { value: new Vector3(-0.55, 0.7, 0.55).normalize() },
 };
 
-/** How the composite pass fills a surface. */
-export const Fill = { shaded: 0, paper: 0.5, ink: 1 } as const;
+/**
+ * How the composite pass fills a surface.
+ * `paper` follows the scene's inversion; `sheet` is always real paper with ink
+ * printed on it, so torn pages stay pages even in the dark world.
+ */
+export const Fill = { shaded: 0, sheet: 0.35, paper: 0.5, ink: 1 } as const;
 
 let nextObjectId = 1;
 

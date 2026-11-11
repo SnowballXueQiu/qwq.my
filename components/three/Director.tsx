@@ -12,7 +12,7 @@ import { buildCameraKeys } from "./world";
 const KEYS = buildCameraKeys();
 
 /** Moments where the edit hard-cuts: a one-frame inversion flash plus a glitch tail. */
-const CUTS = [0.47, 2.0, 3.0, 4.0, 5.0, 5.6];
+const CUTS = [0.47, 2.0, 3.0, 4.0, 5.0, 5.78];
 
 const a = new Vector3();
 const b = new Vector3();
@@ -56,16 +56,16 @@ export function Director() {
     frameState.breakAmount = smooth(0.3, 0.95, s) * 1.7;
     frameState.leap = smooth(0.4, 0.66, s);
     frameState.park = smooth(0.74, 1.0, s);
-    frameState.finale = smooth(5.45, 5.85, s);
+    frameState.finale = smooth(5.58, 5.96, s);
 
     sampleCamera(s, pos, target);
     camera.position.copy(pos);
     camera.lookAt(target);
     frameState.cameraZ = pos.z;
 
-    const dark = s > 0.62 && s < 5.6;
+    const dark = s > 0.62 && s < 5.78;
     pipelineTarget.invert = dark ? 1 : 0;
-    pipelineTarget.bgInvert = s < 5.6 ? 1 : 0;
+    pipelineTarget.bgInvert = s < 5.78 ? 1 : 0;
 
     for (const c of CUTS) {
       if (cut.last >= 0 && (cut.last - c) * (s - c) < 0) cut.at = now;

@@ -11,14 +11,14 @@ import { useMascotBrain } from "./useMascotBrain";
 type EyeKind = "Q" | "O" | ">" | "<" | "^" | "-" | "@";
 type MouthKind = "w" | "ω" | "A";
 
-const FACES: Record<Expression, { l: EyeKind; r: EyeKind; mouth: MouthKind }> = {
+const FACES: Record<Expression, { l: EyeKind; r: EyeKind; mouth: MouthKind; wave?: boolean }> = {
   QwQ: { l: "Q", r: "Q", mouth: "w" },
   OwO: { l: "O", r: "O", mouth: "w" },
   ">w<": { l: ">", r: "<", mouth: "w" },
   QAQ: { l: "Q", r: "Q", mouth: "A" },
   "@w@": { l: "@", r: "@", mouth: "w" },
   "-w-": { l: "-", r: "-", mouth: "w" },
-  "^w^": { l: "^", r: "^", mouth: "ω" },
+  "^w^": { l: "^", r: "^", mouth: "ω", wave: true },
 };
 
 /** Which glyph parts each eye kind shows. */
@@ -77,6 +77,7 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
   const mouth = useRef<Group>(null);
   const tears = useRef<InstancedMesh>(null);
   const zees = useRef<Group>(null);
+  const hand = useRef<Group>(null);
 
   const brain = useMascotBrain();
   const springs = useRef(new Map<Object3D, Spring>());
@@ -198,6 +199,12 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
       tm.instanceMatrix.needsUpdate = true;
     }
 
+    // ^w^ﾉ waves.
+    if (hand.current) {
+      animate(hand.current, Boolean(spec.wave));
+      hand.current.rotation.z = -0.3 + Math.sin(t * 9) * 0.45;
+    }
+
     // Sleepy z's drift up from the right eye.
     zees.current?.children.forEach((z, i) => {
       const phase = (t * 0.45 + i / 3) % 1;
@@ -240,6 +247,9 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
             <mesh geometry={glyphs.mouthA} material={mats.stroke} />
             <mesh geometry={glyphs.mouthAFill} material={mats.mouthFill} />
           </group>
+        </group>
+        <group ref={hand} position={[EYE_X + 1.7, EYE_Y - 0.9, 0]}>
+          <mesh geometry={glyphs.hand} material={mats.stroke} />
         </group>
         <instancedMesh ref={tears} args={[glyphs.tear, mats.tear, TEARS]} frustumCulled={false} />
         <group ref={zees}>

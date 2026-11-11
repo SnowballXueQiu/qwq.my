@@ -116,8 +116,12 @@ void main() {
     if (fill > 0.75) {
       col = mark;
     } else if (fill > 0.25) {
-      // Flat paper: tone carries how much ink is printed on it.
-      col = mix(base, mark, c.r);
+      // Flat paper: tone carries how much ink is printed on it. Below 0.42 the
+      // paper ignores the inversion (a real sheet), above it follows the scene.
+      bool sheet = fill < 0.42;
+      vec3 paperCol = sheet ? mix(uPaper, uAccent, c.g * 0.1) : base;
+      vec3 inkCol = sheet ? mix(uInk, uAccent, step(0.5, c.g)) : mark;
+      col = mix(paperCol, inkCol, c.r);
     } else {
       float darkness = 1.0 - c.r;
       float ink = halftone(sp, darkness);

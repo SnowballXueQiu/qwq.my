@@ -60,7 +60,8 @@
   "contact": {
     "heading": "Say hi",
     "lead": "Collaboration, a question, or just a hello.",
-    "email": "Send an email"
+    "email": "Send an email",
+    "again": "Draw it again"
   },
   "notFound": {
     "title": "Missing sheet",

@@ -84,10 +84,13 @@ export function createGlyphs() {
   shape.bezierCurveTo(-0.5, -0.46, -0.32, -0.08, 0, 0.3);
   const mouthAFill = new ShapeGeometry(shape, 24).translate(0, 0, -0.05);
 
+  // A waving "ﾉ" hand, pivoting from its lower end.
+  const hand = stroke(polyline([v(0, 0), v(0.12, 0.5), v(0.42, 0.95), v(0.7, 1.15)]), STROKE * 0.9, 32);
+
   const tear = new SphereGeometry(0.16, 14, 12).scale(1, 1.4, 1);
   const zee = stroke(polyline([v(-0.3, 0.3), v(0.3, 0.3), v(-0.3, -0.3), v(0.3, -0.3)], 0.05), 0.08, 40);
 
-  return { ring, tail, pupil, highlight, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthA, mouthAFill, tear, zee };
+  return { ring, tail, pupil, highlight, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthA, mouthAFill, hand, tear, zee };
 }
 
 export type Glyphs = ReturnType<typeof createGlyphs>;

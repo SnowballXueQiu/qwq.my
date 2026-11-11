@@ -6,25 +6,7 @@ import { Group, PerspectiveCamera } from "three";
 import { Mascot, type MascotHandle } from "../mascot/Mascot";
 import { PaperSheet } from "../paper/PaperSheet";
 import { frameState, mix } from "../frameState";
-
-const HERO_DIST = 14;
-const PAPER_DIST = 14.6;
-
-/** Half-extents of the view frustum at a distance from the camera. */
-function frustumAt(camera: PerspectiveCamera, dist: number, aspect: number) {
-  const halfH = Math.tan((camera.fov * Math.PI) / 360) * dist;
-  return { halfW: halfH * aspect, halfH };
-}
-
-/** Where the mascot sits in camera space during the hero, plus its base scale. */
-function heroPlacement(camera: PerspectiveCamera, aspect: number) {
-  const { halfW, halfH } = frustumAt(camera, HERO_DIST, aspect);
-  const portrait = aspect < 1;
-  const scale = portrait ? (halfW * 2) / 8.2 : Math.min((halfH * 2) / 8.6, (halfW * 2) / 16.5);
-  const x = portrait ? 0 : halfW * 0.4;
-  const y = portrait ? halfH * 0.32 : halfH * 0.16;
-  return { x, y, scale };
-}
+import { HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
 
 /**
  * The opening: a line drawing of QwQ on a sheet of paper. Scrolling gives it
@@ -68,10 +50,11 @@ export function HeroStage() {
     y = mix(y, -corner.halfH * (portrait ? 0.78 : 0.7), f.park);
     z = mix(z, -9, f.park);
     s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), f.park);
-    x = mix(x, 0, f.finale);
-    y = mix(y, hero.y * 0.6, f.finale);
+    // Land exactly where it started: the last sheet mirrors the first.
+    x = mix(x, hero.x, f.finale);
+    y = mix(y, hero.y, f.finale);
     z = mix(z, -HERO_DIST, f.finale);
-    s = mix(s, hero.scale * 1.05, f.finale);
+    s = mix(s, hero.scale, f.finale);
     g.position.set(x, y, z);
     g.scale.setScalar(s);
     // A little spin as it bursts through.
