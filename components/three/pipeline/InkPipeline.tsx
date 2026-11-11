@@ -55,6 +55,11 @@ export function InkPipeline({
   const size = useThree((s) => s.size);
   const dpr = useThree((s) => s.viewport.dpr);
 
+  const reducedMotion = useMemo(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
   const target = useMemo(() => {
     const t = new WebGLRenderTarget(1, 1, {
       count: 2,
@@ -139,6 +144,7 @@ export function InkPipeline({
       u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
       u.uFlash.value = pipelineTarget.flash;
       u.uGlitch.value = pipelineTarget.glitch;
+      u.uBoil.value = reducedMotion ? 0 : 0.6;
       // Keep the CSS world in step with the shader's notion of light and dark.
       const site = useSite.getState();
       if (Math.abs(site.tone - u.uInvert.value) > 0.01) site.setTone(u.uInvert.value);

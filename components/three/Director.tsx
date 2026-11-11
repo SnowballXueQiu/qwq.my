@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
+import { prefersReducedMotion } from "@/lib/scroll";
 import { useSite } from "@/lib/store";
 import { pipelineTarget } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
@@ -130,6 +131,12 @@ export function Director() {
     cut.last = s;
     const since = now - cut.at;
     const wall = performance.now();
+    // No strobing for people who asked the OS for less motion.
+    if (prefersReducedMotion()) {
+      pipelineTarget.flash = 0;
+      pipelineTarget.glitch = 0;
+      return;
+    }
     pipelineTarget.flash = since < 0.09 || wall < fx.flashUntil ? 1 : 0;
     pipelineTarget.glitch = Math.max(
       Math.max(0, 1 - since / 0.4) * 0.9,

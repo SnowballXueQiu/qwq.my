@@ -18,3 +18,6 @@ export function heroPlacement(camera: PerspectiveCamera, aspect: number) {
   const y = portrait ? halfH * 0.32 : halfH * 0.16;
   return { x, y, scale };
 }
+
+/** Shrinks headline type on narrow screens so a word still fits across a phone. */
+export const fitScale = (aspect: number) => Math.min(1, Math.max(0.42, aspect / 1.55));

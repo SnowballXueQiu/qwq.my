@@ -1,5 +1,8 @@
 "use client";
 
+import { useThree } from "@react-three/fiber";
+import { fitScale } from "../framing";
+
 import { KineticText } from "../text/KineticText";
 import { cue, frameState } from "../frameState";
 import { WORLD } from "../world";
@@ -8,8 +11,9 @@ const isPunct = (_: number, c: string) => "();=.".includes(c);
 
 /** "init(me);" assembles out of the dark, holds while you read, then bursts past the lens. */
 export function AboutStage() {
+  const fit = useThree((s) => fitScale(s.size.width / s.size.height));
   return (
-    <group position={[0, 0, WORLD.about.z]}>
+    <group position={[0, 0, WORLD.about.z]} scale={fit}>
       <KineticText
         text="init(me);"
         size={4.4}

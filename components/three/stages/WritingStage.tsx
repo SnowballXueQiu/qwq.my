@@ -1,7 +1,9 @@
 "use client";
 
+import { useFrame, useThree } from "@react-three/fiber";
+import { fitScale } from "../framing";
+
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 import { BoxGeometry, Group } from "three";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
@@ -30,6 +32,7 @@ const pagePrint = /* glsl */ `
 
 /** A loose fan of pages, one per post, drifting like a stack someone just threw up in the air. */
 export function WritingStage({ postCount }: { postCount: number }) {
+  const fit = useThree((s) => fitScale(s.size.width / s.size.height));
   const count = Math.min(Math.max(postCount, 4), 9);
   const pages = useMemo(
     () =>
@@ -81,7 +84,7 @@ export function WritingStage({ postCount }: { postCount: number }) {
   });
 
   return (
-    <group position={[0, 0, WORLD.writing.z]}>
+    <group position={[0, 0, WORLD.writing.z]} scale={fit}>
       <KineticText
         text="print(thoughts);"
         size={1.9}

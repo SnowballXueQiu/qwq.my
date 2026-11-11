@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
+import { PerformanceMonitor } from "@react-three/drei";
 import type { SheetId } from "@/lib/sheets";
 import { Director } from "./Director";
 import { BugGame } from "./game/BugGame";
@@ -24,9 +26,11 @@ export default function SceneCanvas({
   titles: Record<SheetId, string>;
   postCount: number;
 }) {
+  // Start sharp and back off on slow devices; the ink lines carry the look even at 1x.
+  const [dpr, setDpr] = useState(1.5);
   return (
     <Canvas
-      dpr={[1, 1.75]}
+      dpr={dpr}
       flat
       gl={{ antialias: false, alpha: false, powerPreference: "high-performance" }}
       camera={{ fov: 35, position: [0, 0, 14], near: 0.1, far: 220 }}
@@ -35,6 +39,11 @@ export default function SceneCanvas({
       onCreated={() => onReady?.()}
       style={{ position: "fixed", inset: 0, zIndex: 0 }}
     >
+      <PerformanceMonitor
+        onChange={({ factor }) => setDpr(Math.round((1 + factor * 0.75) * 4) / 4)}
+        flipflops={3}
+        onFallback={() => setDpr(1)}
+      />
       <Director />
       <InkPipeline />
       <HeroStage />
