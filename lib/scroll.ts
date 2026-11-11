@@ -19,6 +19,15 @@ export function scrollToTarget(target: string | number) {
   }
 }
 
+/** Freezes page scrolling while an overlay (terminal, menu, game) owns the screen. */
+export function lockScroll(locked: boolean) {
+  if (instance) {
+    if (locked) instance.stop();
+    else instance.start();
+  }
+  document.documentElement.style.overflow = locked ? "hidden" : "";
+}
+
 export const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;

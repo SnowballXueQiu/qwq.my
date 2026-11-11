@@ -22,7 +22,8 @@
   },
   "controls": {
     "language": "Switch to English",
-    "skip": "跳到正文"
+    "skip": "跳到正文",
+    "terminal": "打开终端（` 或 ⌘K）"
   },
   "hero": {
     "kicker": "学生 / 开发者",

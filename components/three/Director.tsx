@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Vector3 } from "three";
+import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
 import { pipelineTarget } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
@@ -42,10 +43,29 @@ export function Director() {
     };
   }, [scene, camera]);
 
-  const { cut, pos, target } = useMemo(
-    () => ({ cut: { last: -1, at: -10 }, pos: new Vector3(), target: new Vector3() }),
+  const { cut, pos, target, fx } = useMemo(
+    () => ({
+      cut: { last: -1, at: -10 },
+      pos: new Vector3(),
+      target: new Vector3(),
+      // Effects requested from outside the canvas, as wall-clock deadlines.
+      fx: { flashUntil: 0, glitchUntil: 0, glitchAmount: 0 },
+    }),
     [],
   );
+
+  useEffect(() => {
+    const offs = [
+      on("flash", ({ duration = 0.12 }) => {
+        fx.flashUntil = performance.now() + duration * 1000;
+      }),
+      on("glitch", ({ duration = 0.6, amount = 1 }) => {
+        fx.glitchUntil = performance.now() + duration * 1000;
+        fx.glitchAmount = amount;
+      }),
+    ];
+    return () => offs.forEach((off) => off());
+  }, [fx]);
 
   useFrame((state) => {
     const s = getSceneTime();
@@ -72,8 +92,12 @@ export function Director() {
     }
     cut.last = s;
     const since = now - cut.at;
-    pipelineTarget.flash = since < 0.09 ? 1 : 0;
-    pipelineTarget.glitch = Math.max(0, 1 - since / 0.4) * 0.9;
+    const wall = performance.now();
+    pipelineTarget.flash = since < 0.09 || wall < fx.flashUntil ? 1 : 0;
+    pipelineTarget.glitch = Math.max(
+      Math.max(0, 1 - since / 0.4) * 0.9,
+      wall < fx.glitchUntil ? fx.glitchAmount : 0,
+    );
   }, -1);
 
   return null;

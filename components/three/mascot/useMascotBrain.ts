@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { on } from "@/lib/fx";
 import { sheets } from "@/lib/sheets";
 import { useSite, type Expression } from "@/lib/store";
 
@@ -22,6 +23,8 @@ export function useMascotBrain() {
     dizzyUntil: 0,
     clicks: [] as number[],
     speed: 0,
+    forced: null as Expression | null,
+    forcedUntil: 0,
   });
 
   useEffect(() => {
@@ -54,6 +57,10 @@ export function useMascotBrain() {
       s.away = false;
       active();
     };
+    const offFace = on("face", ({ expression, duration = 2.5 }) => {
+      s.forced = expression;
+      s.forcedUntil = performance.now() + duration * 1000;
+    });
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("keydown", active);
     window.addEventListener("wheel", active, { passive: true });
@@ -63,6 +70,7 @@ export function useMascotBrain() {
     window.addEventListener("blur", onLeave);
     window.addEventListener("focus", onEnter);
     return () => {
+      offFace();
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("keydown", active);
       window.removeEventListener("wheel", active);
@@ -102,6 +110,7 @@ export function useMascotBrain() {
     if (now < s.pokedUntil) face = ">w<";
     if (now < s.dizzyUntil) face = "@w@";
     if (now < s.cryUntil || s.away) face = "QAQ";
+    if (s.forced && now < s.forcedUntil) face = s.forced;
     if (face !== site.expression) site.setExpression(face);
     return face;
   };

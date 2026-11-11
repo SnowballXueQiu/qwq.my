@@ -4,6 +4,7 @@ import type { Dictionary } from "@/lib/dictionaries";
 import { LangToggle } from "./LangToggle";
 import { QwQLogo } from "./QwQLogo";
 import { SheetNav } from "./SheetNav";
+import { TerminalButton } from "./TerminalButton";
 import { TitleBlock } from "./TitleBlock";
 
 const COLUMNS = ["1", "2", "3", "4", "5", "6", "7", "8"];
@@ -80,6 +81,7 @@ export function SheetFrame({
           </Link>
           <SheetNav locale={locale} titles={dict.sheets} />
           <div className="flex items-center gap-2">
+            <TerminalButton label={dict.controls.terminal} />
             <LangToggle locale={locale} label={dict.controls.language} />
           </div>
         </header>

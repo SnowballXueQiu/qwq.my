@@ -22,7 +22,8 @@
   },
   "controls": {
     "language": "切换到中文",
-    "skip": "Skip to content"
+    "skip": "Skip to content",
+    "terminal": "Open terminal (` or ⌘K)"
   },
   "hero": {
     "kicker": "Student / Developer",

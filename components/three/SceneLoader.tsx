@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { emit } from "@/lib/fx";
 
 const SceneCanvas = dynamic(() => import("./SceneCanvas"), { ssr: false });
 
@@ -14,7 +15,14 @@ export function SceneLoader() {
       className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-700"
       style={{ opacity: ready ? 1 : 0 }}
     >
-      <SceneCanvas onReady={() => requestAnimationFrame(() => setReady(true))} />
+      <SceneCanvas
+        onReady={() =>
+          requestAnimationFrame(() => {
+            setReady(true);
+            emit("sceneReady", {});
+          })
+        }
+      />
     </div>
   );
 }

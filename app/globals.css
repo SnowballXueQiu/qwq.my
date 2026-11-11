@@ -121,3 +121,18 @@ html.lenis body {
 .lenis.lenis-smooth [data-lenis-prevent] {
   overscroll-behavior: contain;
 }
+
+/* sudo rm -rf / — everything on the page loses its grip. */
+@keyframes crash-jitter {
+  0% { transform: translate(0, 0) skewX(0); clip-path: inset(0); }
+  20% { transform: translate(-12px, 4px) skewX(6deg); clip-path: inset(10% 0 40% 0); }
+  40% { transform: translate(18px, -6px) skewX(-10deg); clip-path: inset(50% 0 5% 0); }
+  60% { transform: translate(-6px, 14px) skewX(3deg); clip-path: inset(0 0 70% 0); }
+  80% { transform: translate(10px, -10px) skewX(-4deg); clip-path: inset(30% 0 20% 0); }
+  100% { transform: translate(0, 60px) rotate(-3deg); clip-path: inset(0); opacity: 0.2; }
+}
+
+html.is-crashing main,
+html.is-crashing header {
+  animation: crash-jitter 1.6s steps(12) forwards;
+}

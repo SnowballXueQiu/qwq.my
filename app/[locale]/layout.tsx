@@ -5,6 +5,9 @@ import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
+import { Terminal } from "@/components/terminal/Terminal";
+import { BootScreen } from "@/components/ui/BootScreen";
+import { CrashOverlay } from "@/components/ui/CrashOverlay";
 import { CrosshairCursor } from "@/components/ui/CrosshairCursor";
 import { SheetFrame } from "@/components/ui/SheetFrame";
 import { ToneSync } from "@/components/ui/ToneSync";
@@ -55,6 +58,9 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <ToneSync />
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
         {children}
+        <Terminal locale={locale} />
+        <CrashOverlay />
+        <BootScreen />
         <CrosshairCursor />
       </body>
     </html>
