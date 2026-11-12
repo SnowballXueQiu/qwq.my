@@ -10,13 +10,13 @@ import { useMascotBrain } from "./useMascotBrain";
 import { pointerClaimed } from "../interact/interaction";
 
 type EyeKind = "Q" | "O" | ">" | "<" | "^" | "-" | "@";
-type MouthKind = "w" | "ω" | "A";
+type MouthKind = "w" | "ω" | "frown";
 
 const FACES: Record<Expression, { l: EyeKind; r: EyeKind; mouth: MouthKind; wave?: boolean }> = {
   QwQ: { l: "Q", r: "Q", mouth: "w" },
   OwO: { l: "O", r: "O", mouth: "w" },
   ">w<": { l: ">", r: "<", mouth: "w" },
-  QAQ: { l: "Q", r: "Q", mouth: "A" },
+  QAQ: { l: "Q", r: "Q", mouth: "frown" },
   "@w@": { l: "@", r: "@", mouth: "w" },
   "-w-": { l: "-", r: "-", mouth: "w" },
   "^w^": { l: "^", r: "^", mouth: "ω", wave: true },
@@ -36,7 +36,7 @@ const EYE_PARTS: Record<EyeKind, string[]> = {
 export const EYE_X = 2.12;
 export const EYE_Y = 0.3;
 const PUPIL_TRAVEL = 0.34;
-const TEARS = 14;
+const TEARS = 6;
 
 class Spring {
   value = 0;
@@ -67,8 +67,8 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
       blush: createInkMaterial({ fill: Fill.ink, accent: 1 }),
       pupil: createInkMaterial({ fill: Fill.ink }),
       highlight: createInkMaterial({ fill: Fill.paper }),
-      mouthFill: createInkMaterial({ fill: Fill.ink }),
-      tear: createInkMaterial({ fill: Fill.ink, accent: 1 }),
+      // Water, not blood: a drawn drop the colour of the page.
+      tear: createInkMaterial({ fill: Fill.paper }),
     }),
     [],
   );
@@ -78,6 +78,7 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
   const eyes = [useRef<Group>(null), useRef<Group>(null)];
   const pupils = [useRef<Group>(null), useRef<Group>(null)];
   const mouth = useRef<Group>(null);
+  const brows = [useRef<Group>(null), useRef<Group>(null)];
   const tears = useRef<InstancedMesh>(null);
   const zees = useRef<Group>(null);
   const hand = useRef<Group>(null);
@@ -108,9 +109,9 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
   const squash = useRef(new Spring());
   const tilt = useRef({ x: 0, y: 0 });
   const tearState = useRef(
-    Array.from({ length: TEARS }, () => ({ alive: false, x: 0, y: 0, vy: 0, life: 0 })),
+    Array.from({ length: TEARS }, () => ({ alive: false, x: 0, y: 0, life: 0 })),
   );
-  const tearClock = useRef(0);
+  const tearClock = useRef({ wait: 0, side: 1 });
   const helpers = useMemo(
     () => ({ ray: new Raycaster(), plane: new Plane(new Vector3(0, 0, 1), 0), hit: new Vector3(), tmp: new Vector3(), dummy: new Object3D() }),
     [],
@@ -132,6 +133,7 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
     const dt = Math.min(rawDelta, 1 / 30);
     const expression = brain.think();
     const spec = FACES[expression];
+    const crying = expression === "QAQ";
     const t = state.clock.elapsedTime;
 
     // Pop glyph parts in and out with a little overshoot.
@@ -156,7 +158,8 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
       for (const child of g.children) {
         const part = child.userData.part as string | undefined;
         if (!part) continue;
-        const pupilScale = part === "pupil" && kind === "O" ? 1.25 : 1;
+        // Big glossy pupils for O and for tears welling up.
+        const pupilScale = part === "pupil" ? (kind === "O" ? 1.25 : crying ? 1.15 : 1) : 1;
         animate(child, parts.includes(part), pupilScale);
         if (part === "chevron") child.rotation.z = kind === "<" ? Math.PI : 0;
         if (part === "spiral") child.rotation.z -= dt * 7 * (i === 0 ? 1 : -1);
@@ -165,6 +168,9 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
     mouth.current?.children.forEach((child) => {
       animate(child, child.userData.part === spec.mouth);
     });
+    // A crying mouth trembles a little.
+    if (mouth.current) mouth.current.position.x = crying ? Math.sin(t * 26) * 0.025 : 0;
+    brows.forEach((b) => animate(b.current, crying));
 
     // Pupils look at where the pointer meets a plane just in front of the face.
     const { ray, plane, hit, tmp } = helpers;
@@ -178,8 +184,10 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
         const local = eye.current.worldToLocal(tmp.copy(hit));
         const len = Math.hypot(local.x, local.y) || 1;
         const reach = Math.min(len * 0.22, PUPIL_TRAVEL);
-        pupil.position.x += ((local.x / len) * reach - pupil.position.x) * 0.2;
-        pupil.position.y += ((local.y / len) * reach - pupil.position.y) * 0.2;
+        // Crying eyes look up, pleading.
+        const up = crying ? 0.16 : 0;
+        pupil.position.x += ((local.x / len) * reach * (crying ? 0.5 : 1) - pupil.position.x) * 0.2;
+        pupil.position.y += ((local.y / len) * reach * (crying ? 0.5 : 1) + up - pupil.position.y) * 0.2;
       });
     }
 
@@ -196,28 +204,31 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
       face.current.scale.set(1 - sq * 0.14, 1 + sq * 0.22 + breath, Math.max(depth, 0.02));
     }
 
-    // Tears drip from the Q tails while crying.
+    // Tears well up under each eye in turn, roll a little way down the cheek and fade.
     const tm = tears.current;
     if (tm) {
-      tearClock.current -= dt;
-      if (expression === "QAQ" && tearClock.current <= 0) {
-        tearClock.current = 0.16;
+      const clock = tearClock.current;
+      clock.wait -= dt;
+      if (crying && clock.wait <= 0) {
+        clock.wait = 0.75;
+        clock.side = -clock.side;
         const slot = tearState.current.find((d) => !d.alive);
-        if (slot) {
-          const side = Math.random() < 0.5 ? -1 : 1;
-          Object.assign(slot, { alive: true, x: side * EYE_X + 1.4, y: EYE_Y - 1.35, vy: 0, life: 0 });
-        }
+        if (slot) Object.assign(slot, { alive: true, x: clock.side * EYE_X - 0.32, y: EYE_Y - 1.18, life: 0 });
       }
       tearState.current.forEach((d, i) => {
         const dummy = helpers.dummy;
+        let s = 0;
+        let fall = 0;
         if (d.alive) {
           d.life += dt;
-          d.vy -= 9 * dt;
-          d.y += d.vy * dt;
-          if (d.life > 1.4) d.alive = false;
+          if (d.life > 1.9) d.alive = false;
+          // Swell for a moment, then slide (easing in), then shrink away.
+          const swell = Math.min(d.life / 0.35, 1);
+          const slide = Math.max(0, Math.min((d.life - 0.35) / 1.3, 1));
+          fall = slide * slide * 1.15;
+          s = swell * (1 - Math.max(0, d.life - 1.5) / 0.4);
         }
-        const s = d.alive ? Math.min(d.life * 6, 1) * (1 - Math.max(0, d.life - 1.1) / 0.3) : 0;
-        dummy.position.set(d.x, d.y, 0.3);
+        dummy.position.set(d.x, d.y - fall, 0.3);
         dummy.scale.setScalar(Math.max(s, 0.0001));
         dummy.updateMatrix();
         tm.setMatrixAt(i, dummy.matrix);
@@ -273,11 +284,14 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
         <group ref={mouth} position={[0, -0.12, 0]}>
           <mesh userData={{ part: "w" }} geometry={glyphs.mouthW} material={mats.stroke} />
           <mesh userData={{ part: "ω" }} geometry={glyphs.mouthOmega} material={mats.stroke} />
-          <group userData={{ part: "A" }}>
-            <mesh geometry={glyphs.mouthA} material={mats.stroke} />
-            <mesh geometry={glyphs.mouthAFill} material={mats.mouthFill} />
-          </group>
+          <mesh userData={{ part: "frown" }} geometry={glyphs.mouthFrown} material={mats.stroke} />
         </group>
+        {/* Worried brows for QAQ, inner ends raised. */}
+        {[-1, 1].map((side, i) => (
+          <group key={`brow${side}`} ref={brows[i]} position={[side * (EYE_X - 0.2), EYE_Y + 1.62, 0]} rotation={[0, 0, -side * 0.36]}>
+            <mesh geometry={glyphs.brow} material={mats.stroke} />
+          </group>
+        ))}
         <group ref={hand} position={[EYE_X + 1.7, EYE_Y - 0.9, 0]}>
           <mesh geometry={glyphs.hand} material={mats.stroke} />
         </group>

@@ -50,7 +50,9 @@ export function useMascotBrain() {
       s.away = false;
       active();
     };
-    const onLeave = () => {
+    const onLeave = (e: Event) => {
+      // A lifted finger "leaves" the page after every touch; only a mouse leaving means the visitor left.
+      if (e instanceof PointerEvent && e.pointerType !== "mouse") return;
       s.away = true;
     };
     const onEnter = () => {

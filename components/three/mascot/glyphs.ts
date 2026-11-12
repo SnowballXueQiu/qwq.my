@@ -2,12 +2,12 @@ import {
   BufferGeometry,
   CapsuleGeometry,
   CatmullRomCurve3,
+  LatheGeometry,
   QuadraticBezierCurve3,
-  Shape,
-  ShapeGeometry,
   SphereGeometry,
   TorusGeometry,
   TubeGeometry,
+  Vector2,
   Vector3,
   type Curve,
 } from "three";
@@ -74,26 +74,29 @@ export function createGlyphs() {
     0.17,
     72,
   );
-  const mouthA = new TubeGeometry(
-    new CatmullRomCurve3([v(0, 0.3), v(0.3, -0.12), v(0.42, -0.42), v(0, -0.5), v(-0.42, -0.42), v(-0.3, -0.12)], true, "catmullrom", 0.4),
-    64,
-    0.15,
-    12,
-    true,
-  );
-  const shape = new Shape();
-  shape.moveTo(0, 0.3);
-  shape.bezierCurveTo(0.32, -0.08, 0.5, -0.46, 0, -0.5);
-  shape.bezierCurveTo(-0.5, -0.46, -0.32, -0.08, 0, 0.3);
-  const mouthAFill = new ShapeGeometry(shape, 24).translate(0, 0, -0.05);
+  // QAQ: a small pouting frown, drawn with the same pen as the w.
+  const frownPoints = Array.from({ length: 9 }, (_, i) => {
+    const x = -0.46 + (i / 8) * 0.92;
+    return v(x, -0.12 - 0.3 * (x / 0.46) ** 2 + 0.16);
+  });
+  const mouthFrown = stroke(polyline(frownPoints), 0.15, 40);
+  // Worried brows, inner ends raised (placed and tilted per side by the face).
+  const brow = stroke(new QuadraticBezierCurve3(v(-0.42, 0), v(0, 0.12), v(0.42, 0)), STROKE * 0.62, 24);
 
   // A waving "ﾉ" hand, pivoting from its lower end.
   const hand = stroke(polyline([v(0, 0), v(0.12, 0.5), v(0.42, 0.95), v(0.7, 1.15)]), STROKE * 0.9, 32);
 
-  const tear = new SphereGeometry(0.16, 14, 12).scale(1, 1.4, 1);
+  // A teardrop: round below, drawn to a point on top.
+  const tear = new LatheGeometry(
+    Array.from({ length: 17 }, (_, i) => {
+      const t = Math.PI - (i / 16) * Math.PI;
+      return new Vector2(Math.max(Math.sin(t) * Math.sin(t / 2) ** 1.3 * 0.2, 0.0001), Math.cos(t) * 0.26);
+    }),
+    18,
+  ).scale(1, 1, 0.6);
   const zee = stroke(polyline([v(-0.3, 0.3), v(0.3, 0.3), v(-0.3, -0.3), v(0.3, -0.3)], 0.05), 0.08, 40);
 
-  return { ring, tail, pupil, highlight, sparkle, blush, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthA, mouthAFill, hand, tear, zee };
+  return { ring, tail, pupil, highlight, sparkle, blush, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthFrown, brow, hand, tear, zee };
 }
 
 export type Glyphs = ReturnType<typeof createGlyphs>;
