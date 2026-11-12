@@ -176,7 +176,9 @@ export function Heatmap({ data, locale }: { data: YearData; locale: Locale }) {
 export function Projects({ year, locale }: { year: number; locale: Locale }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const list = (projects.filter((p) => p.year === year).length ? projects.filter((p) => p.year === year) : projects).slice(0, 4);
+  // Year kept in the signature for the title; show the four headline projects.
+  void year;
+  const list = projects.slice(0, 4);
   return (
     <AbsoluteFill style={{ ...fill(C.paper), ...gridPaper, padding: "110px 140px", fontFamily: FONT.mono }}>
       <div style={{ color: C.accent, fontSize: 26, letterSpacing: 4 }}>{"// render(projects)"}</div>

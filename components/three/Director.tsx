@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
-import { itemAt } from "@/lib/sheetLengths";
+import { TIMELINE_SLOTS, itemAt } from "@/lib/sheetLengths";
 import { getScrollVelocity, prefersReducedMotion } from "@/lib/scroll";
 import { play, setAmbientSpeed } from "@/lib/sound";
 import { useSite } from "@/lib/store";
@@ -13,10 +13,10 @@ import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
 import { BASE_FOV } from "./framing";
 import { hudState } from "./hudState";
-import { WORLD, roadX } from "./world";
+import { WORLD, milestoneZ, roadX } from "./world";
 import { buildCameraKeys } from "./world";
 import { projects } from "@/content/projects";
-import { timeline } from "@/content/timeline";
+import { timeline, whenLabel } from "@/content/timeline";
 import { skillGroups } from "@/content/skills";
 
 /** Camera keyframes along scene time. Between keys the camera eases. */
@@ -74,11 +74,14 @@ function anchorFor(s: number): { label: string } | null {
     return { label: `REF 04-${String(i + 1).padStart(2, "0")} · ${projects[i].title}` };
   }
   if (sheet === 4) {
-    const i = itemAt("timeline", f, timeline.length);
-    const { start, end } = WORLD.timeline;
-    const z = start - ((i + 0.5) / timeline.length) * (start - end);
-    anchorWorld.set(roadX(z) + (i % 2 === 0 ? -3 : 3), 2.5, z);
-    return { label: `REF 05-${String(i + 1).padStart(2, "0")} · ${timeline[i].date}` };
+    const i = itemAt("timeline", f, TIMELINE_SLOTS);
+    if (i >= timeline.length) {
+      anchorWorld.set(roadX(WORLD.timeline.plazaZ), 0, WORLD.timeline.plazaZ);
+      return { label: "REF 05-GH · github" };
+    }
+    const z = milestoneZ(i, timeline.length);
+    anchorWorld.set(roadX(z) + (i % 2 === 0 ? -3 : 3), 3.2, z);
+    return { label: `REF 05-${String(i + 1).padStart(2, "0")} · ${whenLabel(timeline[i], "en")}` };
   }
   return null;
 }

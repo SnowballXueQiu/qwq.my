@@ -4,19 +4,16 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
   BoxGeometry,
-  CatmullRomCurve3,
   Group,
   InstancedMesh,
   Mesh,
   Object3D,
   PlaneGeometry,
-  TubeGeometry,
-  Vector3,
 } from "three";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
 import { frameState } from "../frameState";
-import { WORLD, roadX } from "../world";
+import { WORLD } from "../world";
 
 const FLOOR_Y = -6;
 const GRID = 4;
@@ -114,23 +111,6 @@ function DataStream() {
   return <instancedMesh ref={mesh} args={[geometry, material, BITS]} frustumCulled={false} />;
 }
 
-/** An accent signal line running beside the road, wobbling like a scope trace. */
-function SignalTrace() {
-  const { start, end } = WORLD.timeline;
-  const geometry = useMemo(() => {
-    const pts: Vector3[] = [];
-    for (let i = 0; i <= 160; i++) {
-      const z = start + 10 - ((start - end + 30) * i) / 160;
-      pts.push(new Vector3(roadX(z) - 5.2, 3.2 + Math.sin(i * 0.9) * 0.5 * Math.sin(i * 0.13), z));
-    }
-    return new TubeGeometry(new CatmullRomCurve3(pts), 480, 0.06, 6, false);
-  }, [start, end]);
-  const material = useMemo(() => createInkMaterial({ fill: Fill.ink, accent: 1 }), []);
-  useEffect(() => () => geometry.dispose(), [geometry]);
-  useEffect(() => () => material.dispose(), [material]);
-  return <mesh geometry={geometry} material={material} />;
-}
-
 /** Giant scene numbers standing far behind each set piece, like stage flats. */
 function BackdropNumerals() {
   const group = useRef<Group>(null);
@@ -138,7 +118,6 @@ function BackdropNumerals() {
     () => [
       { n: "02", pos: [14, 4, WORLD.about.z - 34] as const, from: 0.8, to: 2.1 },
       { n: "04", pos: [18, 8, WORLD.projects.start - WORLD.projects.spacing * (WORLD.projects.count - 1) - 40] as const, from: 2.9, to: 4.1 },
-      { n: "05", pos: [-20, 6, WORLD.timeline.end - 40] as const, from: 3.9, to: 5.1 },
       { n: "06", pos: [16, 7, WORLD.writing.z - 36] as const, from: 4.8, to: 5.75 },
     ],
     [],
@@ -173,7 +152,6 @@ export function Atmosphere() {
     <>
       <FloorGrid />
       <DataStream />
-      <SignalTrace />
       <BackdropNumerals />
     </>
   );

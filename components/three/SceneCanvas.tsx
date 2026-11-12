@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { PerformanceMonitor } from "@react-three/drei";
+import type { Locale } from "@/lib/i18n";
 import type { SheetId } from "@/lib/sheets";
 import { Director } from "./Director";
 import { BugGame } from "./game/BugGame";
@@ -25,10 +26,14 @@ export default function SceneCanvas({
   onReady,
   titles,
   postCount,
+  github,
+  locale,
 }: {
   onReady?: () => void;
   titles: Record<SheetId, string>;
   postCount: number;
+  github: { total: number; weeks: { date: string; count: number }[][] };
+  locale: Locale;
 }) {
   // Start sharp and back off on slow devices; the ink lines carry the look even at 1x.
   const [dpr, setDpr] = useState(1.5);
@@ -59,7 +64,7 @@ export default function SceneCanvas({
       <AboutStage />
       <SkillsStage />
       <ProjectsStage />
-      <TimelineStage />
+      <TimelineStage github={github} locale={locale} />
       <WritingStage postCount={postCount} />
       <FinaleStage />
       <OverviewMap titles={titles} />

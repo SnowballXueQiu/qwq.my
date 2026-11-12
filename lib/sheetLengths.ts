@@ -3,13 +3,16 @@ import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import type { SheetId } from "./sheets";
 
+/** One stop per milestone, plus the GitHub contribution plaza at the end of the road. */
+export const TIMELINE_SLOTS = timeline.length + 1;
+
 /** Scroll length of each home sheet, in viewport heights. */
 export const SHEET_LENGTH: Record<SheetId, number> = {
   hero: 3,
   about: 2.4,
   skills: Math.max(3, skillGroups.length * 0.6),
   projects: Math.max(3, projects.length * 0.9),
-  timeline: Math.max(3, timeline.length * 0.7),
+  timeline: Math.max(3, TIMELINE_SLOTS * 0.62),
   writing: 1.6,
   contact: 1.8,
 };

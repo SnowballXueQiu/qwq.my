@@ -23,7 +23,8 @@
   "controls": {
     "language": "Switch to English",
     "skip": "跳到正文",
-    "terminal": "打开终端（` 或 ⌘K）"
+    "terminal": "打开终端（` 或 ⌘K）",
+    "close": "关闭"
   },
   "hero": {
     "kicker": "学生 / 开发者",
@@ -51,7 +52,9 @@
   },
   "timeline": {
     "heading": "经历",
-    "yearInReview": "年度回顾"
+    "yearInReview": "年度回顾",
+    "contributions": "次贡献 / 近一年",
+    "repos": "个仓库"
   },
   "writing": {
     "heading": "文章",
@@ -59,9 +62,10 @@
   },
   "contact": {
     "heading": "说声嗨",
-    "lead": "合作、交流，或者只是来打个招呼。",
+    "lead": "合作、实习、交流，或者只是来打个招呼。",
     "email": "写邮件",
-    "again": "再画一遍"
+    "again": "再画一遍",
+    "copied": "已复制"
   },
   "notFound": {
     "title": "图纸缺页",
@@ -107,7 +111,7 @@
   },
   "lab": {
     "title": "实验室",
-    "lead": "在 GPU 上实时跑的小东西。都是手写 GLSL，用和这个网站一样的纸和墨画出来。",
+    "lead": "在 GPU 上实时跑的小东西，用和这个网站一样的纸和墨画出来。",
     "nav": "实验室",
     "fluid": {
       "title": "墨水流体",

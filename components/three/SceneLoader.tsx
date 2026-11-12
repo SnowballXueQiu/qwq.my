@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState, useSyncExternalStore } from "react";
 import { QwQLogo } from "@/components/ui/QwQLogo";
 import { emit } from "@/lib/fx";
+import type { Locale } from "@/lib/i18n";
 import type { SheetId } from "@/lib/sheets";
 
 const SceneCanvas = dynamic(() => import("./SceneCanvas"), { ssr: false });
@@ -19,7 +20,17 @@ function hasWebGL2() {
 
 const noop = () => () => {};
 
-export function SceneLoader({ titles, postCount }: { titles: Record<SheetId, string>; postCount: number }) {
+export function SceneLoader({
+  titles,
+  postCount,
+  github,
+  locale,
+}: {
+  titles: Record<SheetId, string>;
+  postCount: number;
+  github: { total: number; weeks: { date: string; count: number }[][] };
+  locale: Locale;
+}) {
   const [ready, setReady] = useState(false);
   // null on the server, then whether this browser can run the scene at all.
   const webgl = useSyncExternalStore(noop, hasWebGL2, () => null);
@@ -41,6 +52,8 @@ export function SceneLoader({ titles, postCount }: { titles: Record<SheetId, str
       <SceneCanvas
         titles={titles}
         postCount={postCount}
+        github={github}
+        locale={locale}
         onReady={() =>
           requestAnimationFrame(() => {
             setReady(true);

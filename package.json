@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "video:studio": "remotion studio",
-    "video:render": "remotion render YearInReview public/video/year-in-review-2026.mp4 && remotion render YearInReviewEn public/video/year-in-review-2026-en.mp4"
+    "video:render": "pnpm github:snapshot && remotion render YearInReview public/video/year-in-review-2026.mp4 && remotion render YearInReviewEn public/video/year-in-review-2026-en.mp4",
+    "github:snapshot": "node scripts/fetch-github.ts"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

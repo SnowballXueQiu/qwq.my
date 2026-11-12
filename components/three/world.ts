@@ -1,6 +1,7 @@
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
-import { pinned } from "@/lib/sheetLengths";
+import { timeline } from "@/content/timeline";
+import { TIMELINE_SLOTS, pinned } from "@/lib/sheetLengths";
 
 type V3 = [number, number, number];
 /** `roll` is the dutch angle in degrees. */
@@ -20,17 +21,27 @@ const P_SPACING = 18;
 const P_END = P_START - P_SPACING * (projectCount - 1);
 const T_START = P_END - 28;
 const T_END = T_START - 96;
-const W_Z = T_END - 34;
+/** The GitHub contribution plaza where the road ends. */
+const PLAZA_Z = T_END - 34;
+const W_Z = PLAZA_Z - 60;
 const C_Z = W_Z - 46;
 
 export const WORLD = {
   about: { z: -46 },
   skills: { start: S_START, end: S_END, spacing: S_SPACING, count: skillGroups.length },
   projects: { start: P_START, spacing: P_SPACING, side: 4.4, count: projectCount },
-  timeline: { start: T_START, end: T_END },
+  timeline: { start: T_START, end: T_END, plazaZ: PLAZA_Z },
   writing: { z: W_Z },
   contact: { z: C_Z },
 };
+
+/**
+ * Where milestone `i` of `n` stands: a little ahead of where the camera is
+ * while that milestone is the current one, so it sits in frame as you read.
+ */
+export function milestoneZ(i: number, n: number) {
+  return T_START - 4 - (T_START - T_END - 4) * (i / Math.max(n - 1, 1));
+}
 
 /** Sideways sway of the timeline road at a given z. */
 export const roadX = (z: number) => Math.sin((z - T_START) * 0.045) * 3.2;
@@ -60,18 +71,27 @@ export function buildCameraKeys(): CameraKey[] {
     const slot = pinned("projects") / projectCount;
     keys.push({ s: 3 + slot * (i + 0.15), ...stop }, { s: 3 + slot * (i + 0.85), ...stop });
   }
-  const roadKeys = 5;
-  for (let i = 0; i <= roadKeys; i++) {
-    const t = i / roadKeys;
-    const z = T_START + 6 - (T_START - T_END + 6) * t;
-    keys.push({
-      s: 4.02 + t * (pinned("timeline") - 0.02),
-      pos: [roadX(z), 2.4, z],
-      look: [roadX(z - 22), 0.4, z - 22],
+  // Timeline: stop at each milestone (sign on the verge, exhibit in the middle
+  // of the road when there is one), then rise over the contribution plaza.
+  const tSlot = pinned("timeline") / TIMELINE_SLOTS;
+  timeline.forEach((event, i) => {
+    const z = milestoneZ(i, timeline.length);
+    const side = i % 2 === 0 ? -1 : 1;
+    // Stand on the road's centre line at this stop (not where the bend puts us),
+    // so both verges are framed evenly.
+    const cx = roadX(z);
+    const look: V3 = event.media ? [roadX(z - 3) - side * 1.6, 1.7, z - 3] : [cx, 0.6, z - 18];
+    const at = (camZ: number): Omit<CameraKey, "s"> => ({
+      pos: [cx, 2.2, camZ],
+      look,
       // Lean into the bends like a motorbike.
-      roll: (roadX(z - 8) - roadX(z)) * 4,
+      roll: (roadX(camZ - 8) - roadX(camZ)) * 4,
     });
-  }
+    keys.push({ s: 4 + tSlot * (i + 0.15), ...at(z + 15) }, { s: 4 + tSlot * (i + 0.85), ...at(z + 13) });
+  });
+  // High and back, looking past the plaza so it sits in the upper half, clear of the index panel.
+  const plaza = { pos: [roadX(PLAZA_Z) + 2, 19, PLAZA_Z + 25] as V3, look: [roadX(PLAZA_Z) + 2, -6.5, PLAZA_Z + 1] as V3, roll: 0 };
+  keys.push({ s: 4 + tSlot * (timeline.length + 0.2), ...plaza }, { s: 4 + tSlot * (timeline.length + 0.9), ...plaza });
   keys.push(
     { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 5 },
     { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 0 },

@@ -71,8 +71,12 @@ function Station({ index }: { index: number }) {
     material.uniforms.uActive.value = rise;
   });
 
-  const cols = group.items.length > 4 ? 2 : 1;
+  // Two columns only when every name is short; long names get the full width.
+  const longest = Math.max(...group.items.map((t) => t.length));
+  const cols = group.items.length > 4 && longest <= 11 ? 2 : 1;
   const perCol = Math.ceil(group.items.length / cols);
+  const rowH = Math.min(1.15, 5.2 / perCol);
+  const itemSize = rowH * 0.68;
   const left = -PLATE_W / 2 + 0.7;
   return (
     <group ref={root}>
@@ -106,10 +110,10 @@ function Station({ index }: { index: number }) {
           <KineticText
             key={item}
             text={item}
-            size={0.78}
+            size={itemSize}
             depth={0.22}
             align="left"
-            position={[left + col * (PLATE_W / 2 - 0.2), PLATE_H / 2 - 2.9 - row * 1.15, 0]}
+            position={[left + col * (PLATE_W / 2 - 0.2), PLATE_H / 2 - 2.9 - row * rowH, 0]}
             scatter={6}
             seed={index * 31 + i + 5}
             progress={() => cue() - i * 0.04}

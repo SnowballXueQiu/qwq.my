@@ -10,6 +10,7 @@ import { sheetNumber, sheets } from "@/lib/sheets";
 import { palette } from "@/lib/tokens";
 import { sampleCamera } from "../Director";
 import { OVERLAY_LAYER } from "../pipeline/InkPipeline";
+import { useDomLayer } from "../dom/useDomLayer";
 
 /**
  * The map shown when the camera pulls back: the whole flight path as a dashed
@@ -41,24 +42,14 @@ export function OverviewMap({ titles }: { titles: Record<(typeof sheets)[number]
 
   // Labels live in a fixed layer; drei would otherwise position them against the
   // scrolled document and they'd land off-screen.
-  const portal = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = document.createElement("div");
-    el.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:65";
-    document.body.appendChild(el);
-    portal.current = el;
-    return () => {
-      el.remove();
-      portal.current = null;
-    };
-  }, []);
+  const portal = useDomLayer(65);
 
   if (!open) return null;
   return (
     <group>
       <Line ref={line} points={path} color={palette.accent} lineWidth={2} dashed dashSize={3} gapSize={2} />
       {stops.map(({ id, pos }) => (
-        <Html key={id} position={pos} center portal={portal as React.RefObject<HTMLElement>} zIndexRange={[70, 60]} style={{ pointerEvents: "auto" }}>
+        <Html key={id} position={pos} center portal={portal} zIndexRange={[70, 60]} style={{ pointerEvents: "auto" }}>
           <button
             type="button"
             data-cursor="FLY"

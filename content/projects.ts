@@ -18,11 +18,11 @@ export const projects: Project[] = [
     title: "qwq.my",
     year: 2026,
     summary: {
-      zh: "这个网站：一张会被撕开的图纸，后面是用手写 GLSL 墨线渲染的 3D 世界。",
-      en: "This site: a drawing that tears open onto a 3D world rendered in hand-written GLSL ink.",
+      zh: "这个网站：一张会被撕开的图纸，后面是一个可以玩的 3D 世界。",
+      en: "This site: a drawing that tears open onto a 3D world you can play with.",
     },
     role: { zh: "作者", en: "Author" },
-    tags: ["Next.js", "Three.js", "GLSL", "Remotion"],
+    tags: ["Next.js", "Three.js", "Remotion"],
     href: "https://qwq.my",
   },
   {

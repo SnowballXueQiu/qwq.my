@@ -1,12 +1,18 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { BoxGeometry, BufferAttribute, BufferGeometry, DoubleSide, OctahedronGeometry } from "three";
-import { timeline } from "@/content/timeline";
+import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { BoxGeometry, BufferAttribute, BufferGeometry, DoubleSide, Group, InstancedMesh, Object3D } from "three";
+import { Html } from "@react-three/drei";
+import { KIND_LABEL, timeline, whenLabel, type TimelineMedia } from "@/content/timeline";
+import type { Locale } from "@/lib/i18n";
+import { showLightbox } from "@/components/ui/Lightbox";
+import { useDomLayer } from "../dom/useDomLayer";
+import { MilestoneMarker, useMarkerKit, type MarkerKit } from "./MilestoneMarkers";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
-import { clamp01, frameState } from "../frameState";
-import { WORLD, roadX } from "../world";
+import { clamp01, frameState, withOverview } from "../frameState";
+import { WORLD, milestoneZ, roadX } from "../world";
 
 const ROAD_Y = -1.1;
 const ROAD_W = 3.2;
@@ -63,66 +69,311 @@ const roadPrint = /* glsl */ `
   printed = max(max(edge, dash), max(tick * 0.8, major * 0.7));
 `;
 
-function Milestone({ index }: { index: number }) {
+const DF = 4; // drei Html distanceFactor: 1 CSS px = DF / 400 world units
+
+type GithubScene = { total: number; weeks: { date: string; count: number }[][] };
+
+/** Fades a DOM node by a 0–1(–2) cue without re-rendering React. */
+function useCueFade(cue: () => number) {
+  const el = useRef<HTMLDivElement>(null);
+  useFrame(() => {
+    const node = el.current;
+    if (!node) return;
+    const p = frameState.overview > 0.3 || frameState.game > 0.5 ? -1 : cue();
+    const o = p <= 0 || p >= 2 ? 0 : p < 1 ? p : 2 - p;
+    node.style.opacity = o.toFixed(3);
+    node.style.visibility = o > 0.01 ? "visible" : "hidden";
+    node.style.transform = `translateY(${((1 - Math.min(o * 1.4, 1)) * 24).toFixed(1)}px)`;
+  });
+  return el;
+}
+
+function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKit; locale: Locale; layer: React.RefObject<HTMLElement> }) {
   const event = timeline[index];
-  const { start, end } = WORLD.timeline;
-  const z = start - ((index + 0.5) / timeline.length) * (start - end);
+  const z = milestoneZ(index, timeline.length);
   const side = index % 2 === 0 ? -1 : 1;
   const x = roadX(z) + side * (ROAD_W / 2 + 1.4);
+  const root = useRef<Group>(null);
 
-  const { post, gem, postMat, gemMat } = useMemo(
-    () => ({
-      post: new BoxGeometry(0.09, 3.4, 0.09),
-      gem: new OctahedronGeometry(0.38, 0),
-      postMat: createInkMaterial({ fill: Fill.ink }),
-      gemMat: createInkMaterial({ accent: 1 }),
-    }),
-    [],
-  );
-  useEffect(
-    () => () => {
-      post.dispose();
-      gem.dispose();
-      postMat.dispose();
-      gemMat.dispose();
-    },
-    [post, gem, postMat, gemMat],
-  );
-
+  // Arrive as the camera approaches; gone once it has driven past.
   const near = () => {
     const s = frameState.s;
-    if (s < 3.8 || s > 5.3) return -1;
+    if (s < 3.85 || s > 5.3) return -1;
     const camZ = frameState.cameraZ;
-    const arrive = clamp01((z + 30 - camZ) / 14);
-    const leave = clamp01((z - 1 - camZ) / 6);
+    const arrive = clamp01((z + 36 - camZ) / 12);
+    const leave = clamp01((z + 8 - camZ) / 4);
     return leave > 0 ? 1 + leave : arrive;
   };
+  // The sign and exhibit only belong to the stop you're at.
+  const here = () => {
+    const s = frameState.s;
+    if (s < 3.85 || s > 5.3) return -1;
+    const d = frameState.cameraZ - z;
+    if (d > 26 || d < 7) return -1;
+    return d > 17 ? (26 - d) / 9 : d > 10 ? 1 : 1 + (10 - d) / 3;
+  };
+  const sign = useCueFade(near);
+  const exhibit = useCueFade(here);
 
+  useFrame(() => {
+    const g = root.current;
+    if (!g) return;
+    const p = withOverview(near());
+    g.visible = p > 0 && p < 2;
+    g.scale.setScalar(Math.max(0.001, Math.min(p, 1)));
+  });
+
+  const media = event.media;
   return (
     <group position={[x, ROAD_Y, z]}>
-      <mesh geometry={post} material={postMat} position={[0, 1.7, 0]} />
-      <mesh geometry={gem} material={gemMat} position={[0, 3.6, 0]} rotation={[0, index, 0]} />
-      <KineticText
-        font="mono"
-        text={event.date.replace("-", ".")}
-        size={0.62}
-        depth={0.14}
-        align={side < 0 ? "right" : "left"}
-        position={[side * -0.35, 2.6, 0]}
-        rotation={[0, -side * 0.5, 0]}
-        scatter={6}
-        seed={index + 80}
-        accent={(i) => i >= 5}
-        progress={near}
-      />
+      <group ref={root}>
+        <mesh geometry={kit.geo.base} material={kit.mat.ink} position={[0, 1.2, 0]} scale={[0.2, 17, 0.2]} />
+        <group position={[0, 2.75, 0]} scale={1.2}>
+          <MilestoneMarker kind={event.kind} kit={kit} seed={index} />
+        </group>
+      </group>
+
+      {/* Roadside sign above the post, turned a little toward the road; high in
+          the frame so the index panel never covers it. */}
+      <Html
+        transform
+        distanceFactor={DF}
+        portal={layer}
+        position={[side * 0.2, 4.6, 0]}
+        rotation={[0, -side * 0.28, 0]}
+        style={{ pointerEvents: "none" }}
+        zIndexRange={[20, 0]}
+      >
+        <div ref={sign} className="w-[300px] border-2 border-ink bg-paper/90 p-3.5 text-ink" style={{ opacity: 0 }}>
+          <div className="flex items-baseline justify-between gap-3 border-b border-ink pb-1.5">
+            <span className="font-mono text-[22px] font-bold text-accent">{whenLabel(event, locale)}</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-soft">
+              {String(index + 1).padStart(2, "0")} · {KIND_LABEL[event.kind][locale]}
+            </span>
+          </div>
+          <p className="mt-2 text-[20px] font-extrabold leading-tight">{event.title[locale]}</p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">{event.detail[locale]}</p>
+        </div>
+      </Html>
+
+      {/* The evidence, centred over the road while you're at this stop. */}
+      {media && (
+        <Html
+          transform
+          distanceFactor={DF}
+          portal={layer}
+          position={[roadX(z - 3) - x - side * 1.6, 2.7, -3]}
+          style={{ pointerEvents: "none" }}
+          zIndexRange={[20, 0]}
+        >
+          <div ref={exhibit} className="pointer-events-auto" style={{ opacity: 0 }}>
+            <Exhibit media={media} locale={locale} />
+          </div>
+        </Html>
+      )}
     </group>
   );
 }
 
-/** The timeline as a ruler-marked road the camera rides, milestones planted along its verge. */
-export function TimelineStage() {
-  const { start, end } = WORLD.timeline;
-  const road = useMemo(() => buildRoad(start + 16, end - 30), [start, end]);
+function Exhibit({ media, locale }: { media: TimelineMedia; locale: Locale }) {
+  if (media.type === "certificates") {
+    const shots = media.images.map((im) => ({ src: im.src[locale], alt: im.alt[locale] }));
+    return (
+      <div className="flex gap-5">
+        {shots.map((shot, i) => (
+          <button
+            key={shot.src}
+            type="button"
+            data-cursor="ZOOM"
+            onClick={() => showLightbox(shots, i)}
+            className="w-[220px] border-2 border-ink bg-paper p-1.5 shadow-[10px_10px_0_var(--accent)] transition-transform hover:-translate-y-2"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- drawn inside a CSS 3D transform */}
+            <img src={shot.src} alt={shot.alt} className="block h-auto w-full" draggable={false} />
+          </button>
+        ))}
+      </div>
+    );
+  }
+  const shot = { src: media.src, alt: media.alt[locale] };
+  return (
+    <div className="flex items-end gap-6">
+      <button type="button" data-cursor="ZOOM" onClick={() => showLightbox([shot])} className="w-[420px] transition-transform hover:-translate-y-2">
+        {/* eslint-disable-next-line @next/next/no-img-element -- drawn inside a CSS 3D transform */}
+        <img src={media.src} alt={shot.alt} className="block h-auto w-full drop-shadow-[0_12px_0_rgba(232,64,42,0.6)]" draggable={false} />
+      </button>
+      <dl className="mb-4 w-[150px] space-y-2 border-l-2 border-accent bg-paper/85 py-2 pl-3 text-ink">
+        {media.stats.map((st) => (
+          <div key={st.value + st.label.en}>
+            <dt className="font-display text-[38px] font-black leading-none text-accent">{st.value}</dt>
+            <dd className="font-mono text-[12px] uppercase tracking-[0.1em] text-ink-soft">{st.label[locale]}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+const CELL = 0.46;
+const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+/**
+ * Where the road ends: the last year of GitHub contributions as a plaza of
+ * bars, laid out exactly like the profile graph (weeks left→right, Sunday at
+ * the back). Seen from above it reads as the familiar grid. Hover a bar for
+ * its day.
+ */
+function ContributionPlaza({ github, locale, layer }: { github: GithubScene; locale: Locale; layer: React.RefObject<HTMLElement> }) {
+  const z0 = WORLD.timeline.plazaZ;
+  const x0 = roadX(z0);
+  const root = useRef<Group>(null);
+  const cols = github.weeks.length;
+
+  const { bars, months } = useMemo(() => {
+    const flat = github.weeks.flat().map((d) => d.count);
+    const hot = [...flat].sort((a, b) => b - a)[Math.min(9, flat.length - 1)] || 1;
+    const out: { x: number; z: number; h: number; hot: boolean; col: number; date: string; count: number }[] = [];
+    const labels: { x: number; text: string }[] = [];
+    let lastMonth = -1;
+    github.weeks.forEach((week, w) => {
+      const x = x0 + (w - (cols - 1) / 2) * CELL;
+      const month = Number(week[0]?.date.slice(5, 7)) - 1;
+      if (month !== lastMonth && week[0] && Number(week[0].date.slice(8, 10)) <= 7) {
+        labels.push({ x, text: MONTHS[month] });
+        lastMonth = month;
+      }
+      week.forEach((day) => {
+        const d = new Date(`${day.date}T00:00:00Z`).getUTCDay();
+        out.push({
+          x,
+          z: z0 + (d - 3) * CELL,
+          h: day.count ? 0.22 + Math.sqrt(day.count) * 0.5 : 0.04,
+          hot: day.count > 0 && day.count >= hot,
+          col: w,
+          date: day.date,
+          count: day.count,
+        });
+      });
+    });
+    return { bars: out, months: labels };
+  }, [github.weeks, x0, z0, cols]);
+
+  const groups = useMemo(() => ({ body: bars.filter((b) => !b.hot), hot: bars.filter((b) => b.hot) }), [bars]);
+  const geometry = useMemo(() => new BoxGeometry(CELL * 0.82, 1, CELL * 0.82), []);
+  const slab = useMemo(() => new BoxGeometry(cols * CELL + 1.2, 0.12, 7 * CELL + 1.2), [cols]);
+  const mats = useMemo(
+    () => ({ body: createInkMaterial({ toneBias: 0.06 }), hot: createInkMaterial({ accent: 1 }), slab: createInkMaterial({ fill: Fill.sheet }) }),
+    [],
+  );
+  useEffect(() => () => [geometry, slab].forEach((g) => g.dispose()), [geometry, slab]);
+  useEffect(() => () => Object.values(mats).forEach((m) => m.dispose()), [mats]);
+
+  const meshes = useRef<{ body: InstancedMesh | null; hot: InstancedMesh | null }>({ body: null, hot: null });
+  const dummy = useMemo(() => new Object3D(), []);
+  const reveal = useRef(0);
+
+  // Active over the last slot of the timeline sheet.
+  const cue = () => {
+    const s = frameState.s;
+    if (s < 4.6 || s > 5.4) return -1;
+    const d = frameState.cameraZ - z0;
+    return d > 44 ? -1 : d > 24 ? (44 - d) / 20 : s > 5.05 ? Math.min(1 + (s - 5.05) / 0.3, 1.99) : 1;
+  };
+  const caption = useCueFade(cue);
+
+  useFrame((_, dt) => {
+    const g = root.current;
+    if (!g) return;
+    const p = withOverview(cue());
+    g.visible = p > 0 && p < 2;
+    if (!g.visible) {
+      reveal.current = 0;
+      return;
+    }
+    // The bars rise in a wave, oldest week first.
+    reveal.current = Math.min(reveal.current + dt * 0.9, 1.6);
+    for (const kind of ["body", "hot"] as const) {
+      const mesh = meshes.current[kind];
+      if (!mesh) continue;
+      groups[kind].forEach((b, i) => {
+        const t = clamp01((reveal.current - (b.col / cols) * 0.6) / 0.5);
+        const h = Math.max(b.h * (1 - Math.pow(1 - t, 3)), 0.001);
+        dummy.position.set(b.x, ROAD_Y + 0.06 + h / 2, b.z);
+        dummy.scale.set(1, h, 1);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      // Raycasts test this sphere first; it must follow the bars, not the origin.
+      if (reveal.current < 1.6 || !mesh.boundingSphere) mesh.computeBoundingSphere();
+    }
+  });
+
+  const hover = (kind: "body" | "hot") => ({
+    onPointerMove: (e: { stopPropagation: () => void; instanceId?: number }) => {
+      e.stopPropagation();
+      const b = e.instanceId === undefined ? undefined : groups[kind][e.instanceId];
+      if (b) document.documentElement.dataset.cursorLabel = `${b.date} · ${b.count}`;
+    },
+    onPointerOut: () => {
+      delete document.documentElement.dataset.cursorLabel;
+    },
+  });
+
+  return (
+    <group ref={root}>
+      <mesh geometry={slab} material={mats.slab} position={[x0, ROAD_Y, z0]} />
+      {(["body", "hot"] as const).map((kind) => (
+        <instancedMesh
+          key={kind}
+          ref={(m) => {
+            meshes.current[kind] = m;
+          }}
+          args={[geometry, kind === "hot" ? mats.hot : mats.body, Math.max(groups[kind].length, 1)]}
+          frustumCulled={false}
+          {...hover(kind)}
+        />
+      ))}
+      {months.map((m, i) => (
+        <KineticText
+          key={`${m.text}${i}`}
+          font="mono"
+          text={m.text}
+          size={0.32}
+          depth={0.05}
+          align="left"
+          position={[m.x - CELL / 2, ROAD_Y + 0.1, z0 + 4 * CELL + 0.35]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          seed={200 + i}
+          progress={() => Math.min(withOverview(cue()), 1)}
+        />
+      ))}
+      <Html
+        transform
+        distanceFactor={DF * 2.2}
+        portal={layer}
+        position={[x0, ROAD_Y + 0.2, z0 + 3.6]}
+        rotation={[-1.05, 0, 0]}
+        style={{ pointerEvents: "none" }}
+        zIndexRange={[20, 0]}
+      >
+        <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0 }}>
+          <span className="font-display text-[64px] font-black leading-none text-accent">{github.total}</span>
+          <span className="font-mono text-[18px] uppercase tracking-[0.12em]">
+            {locale === "zh" ? "次贡献 · 近一年 · github.com/SnowballXueQiu" : "contributions in the last year · github.com/SnowballXueQiu"}
+          </span>
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+/** The timeline as a ruler-marked road the camera rides, with a sign at every stop. */
+export function TimelineStage({ github, locale }: { github: GithubScene; locale: Locale }) {
+  const kit = useMarkerKit();
+  const layer = useDomLayer(15);
+  const { start, end, plazaZ } = WORLD.timeline;
+  const road = useMemo(() => buildRoad(start + 16, plazaZ + 6), [start, plazaZ]);
   const roadMat = useMemo(() => {
     const m = createInkMaterial({
       fill: Fill.paper,
@@ -136,26 +387,15 @@ export function TimelineStage() {
   }, []);
   useEffect(() => () => road.dispose(), [road]);
   useEffect(() => () => roadMat.dispose(), [roadMat]);
+  void end;
 
   return (
     <group>
       <mesh geometry={road} material={roadMat} />
       {timeline.map((e, i) => (
-        <Milestone key={e.date + e.title.en} index={i} />
+        <Milestone key={e.date + e.title.en} index={i} kit={kit} locale={locale} layer={layer} />
       ))}
-      <KineticText
-        text="while (alive) {"
-        size={2.2}
-        depth={0.6}
-        position={[roadX(start), 2.2, start - 2]}
-        accent={(_, c) => "(){".includes(c)}
-        seed={91}
-        progress={() => {
-          const camZ = frameState.cameraZ;
-          if (frameState.s < 3.7 || frameState.s > 5.2) return -1;
-          return clamp01((start + 36 - camZ) / 16) + clamp01((start - 1 - camZ) / 6);
-        }}
-      />
+      <ContributionPlaza github={github} locale={locale} layer={layer} />
     </group>
   );
 }

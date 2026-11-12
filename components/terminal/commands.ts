@@ -99,6 +99,7 @@ export const commands: Record<string, Command> = {
         ctx.print(
           accent(`# ${profile.name[l]}`),
           `${profile.roles[l]} · ${profile.school[l]} · ${profile.major[l]} · ${profile.grade[l]}`,
+          ...profile.now.map((n) => `  · ${n.org[l]} — ${n.role[l]}`),
           ...profile.bio.map((p) => p[l]),
         );
       } else if (file === "skills") {
@@ -108,6 +109,18 @@ export const commands: Record<string, Command> = {
       } else {
         ctx.print(err(`cat: ${file ?? ""}: ${t(ctx, "没有这个文件", "no such file")}`));
       }
+    },
+  },
+  now: {
+    summary: { zh: "我现在在做什么", en: "what I'm doing now" },
+    run: (_, ctx) => {
+      profile.now.forEach((n) => ctx.print(`${n.org[ctx.locale]}  —  ${n.role[ctx.locale]}`));
+    },
+  },
+  contact: {
+    summary: { zh: "联系方式", en: "how to reach me" },
+    run: (_, ctx) => {
+      profile.contacts.forEach((c) => ctx.print(`${c.label.padEnd(10)} ${c.value}${c.href && !c.href.startsWith("mailto") ? `  ${c.href}` : ""}`));
     },
   },
   projects: {

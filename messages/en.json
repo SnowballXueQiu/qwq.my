@@ -23,7 +23,8 @@
   "controls": {
     "language": "切换到中文",
     "skip": "Skip to content",
-    "terminal": "Open terminal (` or ⌘K)"
+    "terminal": "Open terminal (` or ⌘K)",
+    "close": "Close"
   },
   "hero": {
     "kicker": "Student / Developer",
@@ -51,7 +52,9 @@
   },
   "timeline": {
     "heading": "Timeline",
-    "yearInReview": "Year in review"
+    "yearInReview": "Year in review",
+    "contributions": "contribs / yr",
+    "repos": "repos"
   },
   "writing": {
     "heading": "Writing",
@@ -59,9 +62,10 @@
   },
   "contact": {
     "heading": "Say hi",
-    "lead": "Collaboration, a question, or just a hello.",
+    "lead": "Collaboration, internships, a question, or just a hello.",
     "email": "Send an email",
-    "again": "Draw it again"
+    "again": "Draw it again",
+    "copied": "copied"
   },
   "notFound": {
     "title": "Missing sheet",
@@ -107,7 +111,7 @@
   },
   "lab": {
     "title": "Lab",
-    "lead": "Small things running live on the GPU — hand-written GLSL, drawn in the same paper and ink as the rest of the site.",
+    "lead": "Small things running live on the GPU, drawn in the same paper and ink as the rest of the site.",
     "nav": "Lab",
     "fluid": {
       "title": "Ink fluid",

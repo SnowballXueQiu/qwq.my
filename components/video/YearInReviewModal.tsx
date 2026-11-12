@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { emit, on } from "@/lib/fx";
+import type { YearData } from "@/content/year/2026";
 import type { Locale } from "@/lib/i18n";
 import { lockScroll } from "@/lib/scroll";
 import { sitePipeline } from "@/components/three/pipeline/InkPipeline";
@@ -17,8 +18,11 @@ export function YearInReviewModal({
   locale,
   videoUrl,
   labels,
+  data,
 }: {
   locale: Locale;
+  /** Live numbers from the server, so the film matches the page. */
+  data: YearData;
   /** Pre-rendered MP4 under /public, when one exists. */
   videoUrl: string | null;
   labels: { title: string; download: string; close: string };
@@ -62,7 +66,7 @@ export function YearInReviewModal({
             </button>
           </span>
         </div>
-        <YearPlayer locale={locale} />
+        <YearPlayer locale={locale} data={data} />
       </div>
     </div>
   );

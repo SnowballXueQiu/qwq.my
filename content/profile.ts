@@ -13,18 +13,35 @@ export const profile = {
   geo: { lat: 39.1, lon: 117.2 },
   bio: [
     {
-      zh: "我是雪球（Snowball_233），天津师范大学人工智能专业 2025 级的学生，也是一个喜欢把想法做成能跑起来的东西的开发者。",
-      en: "I'm Snowball (Snowball_233), an Artificial Intelligence student at Tianjin Normal University, class of 2025, and a developer who likes turning ideas into things that run.",
+      zh: "喜欢把想法做成能跑起来、能用起来的东西。网页、原生 App、后端、我的世界服务器和插件都在做，也在用 AI 工具把原型做得更快。",
+      en: "I like turning ideas into things that run and get used: web, native apps, backends, Minecraft servers and plugins, with AI tools to prototype faster.",
     },
     {
-      zh: "从网页、原生 App 到后端和 Minecraft 插件都写过一点，最近在折腾 shader 和 LLM 工具链。这个网站本身就是一张还在修订的图纸。",
-      en: "I've written a bit of everything from web and native apps to backends and Minecraft plugins, and lately I'm into shaders and LLM tooling. This site is itself a drawing still under revision.",
+      zh: "联合创立了瀚海工艺，在苦力怕论坛管技术，给《Rust 语言圣经》写内容。这个网站本身就是一张还在修订的图纸。",
+      en: "I co-founded Vastsea, run tech at KLPBBS, and write for the Rust Course. This site is itself a drawing still under revision.",
     },
   ] satisfies L10n[],
-  email: "hi@qwq.my",
-  links: [
-    { label: "GitHub", href: "https://github.com/SnowballXueQiu" },
-    { label: "Blog", href: "https://blog.qwq.my" },
-    { label: "Email", href: "mailto:hi@qwq.my" },
-  ],
+  avatar: "/media/avatar.jpg",
+  /** What I'm doing now. */
+  now: [
+    { org: { zh: "瀚海工艺 Vastsea", en: "Vastsea" }, role: { zh: "联合创始人", en: "Co-founder" }, href: "https://github.com/TeamVastsea" },
+    { org: { zh: "苦力怕论坛 KLPBBS", en: "KLPBBS (Creeper Forum)" }, role: { zh: "技术总管 & 版主", en: "Head of tech & moderator" }, href: "https://klpbbs.com" },
+    { org: { zh: "course.rs《Rust 语言圣经》", en: "course.rs (The Rust Course)" }, role: { zh: "Collaborator", en: "Collaborator" }, href: "https://course.rs" },
+    {
+      org: { zh: "Inf Network", en: "Inf Network" },
+      role: { zh: "我的世界服务器服主（重建中…）", en: "Minecraft server owner (rebuilding…)" },
+      href: "https://github.com/Inf-Network",
+    },
+    { org: { zh: "MCSL2", en: "MCSL2" }, role: { zh: "我的世界开服器 · 后端开发", en: "Minecraft server launcher · backend" }, href: "https://github.com/MCSLTeam/MCSL2" },
+  ] satisfies { org: L10n; role: L10n; href: string }[],
+  email: "snowballstudio233@gmail.com",
+  /** `href` opens it; `copy` puts the handle on the clipboard instead (no public URL). */
+  contacts: [
+    { label: "Email", value: "snowballstudio233@gmail.com", href: "mailto:snowballstudio233@gmail.com" },
+    { label: "GitHub", value: "SnowballXueQiu", href: "https://github.com/SnowballXueQiu" },
+    { label: "Telegram", value: "@Snowball_233", href: "https://t.me/Snowball_233" },
+    { label: "Discord", value: "SnowballXueQiu", copy: true },
+    { label: "QQ", value: "2957202260", copy: true },
+    { label: "Blog", value: "blog.qwq.my", href: "https://blog.qwq.my" },
+  ] as { label: string; value: string; href?: string; copy?: boolean }[],
 };

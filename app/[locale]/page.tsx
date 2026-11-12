@@ -1,12 +1,15 @@
+import Image from "next/image";
 import Link from "next/link";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
+import { getGithub } from "@/lib/github";
 import { listPosts } from "@/lib/posts";
 import { SHEET_LENGTH } from "@/lib/sheetLengths";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
+import { ContactList } from "@/components/sections/ContactList";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
 import { ProjectReadout } from "@/components/sections/ProjectReadout";
@@ -19,6 +22,7 @@ export default async function Home() {
   const locale = await getLocale();
   const dict = await getDictionary();
   const posts = await listPosts(locale);
+  const github = await getGithub();
   const s = dict.sheets;
 
   return (
@@ -40,16 +44,30 @@ export default async function Home() {
       </SheetSection>
 
       <SheetSection id="about" title={s.about} length={SHEET_LENGTH.about} sticky>
-        <Reveal className="max-w-[440px] [perspective:1100px]">
-          <Panel className="origin-left [transform:rotateY(14deg)_rotateX(4deg)] transition-transform duration-500 hover:[transform:none]">
-            <pre className="overflow-x-auto font-mono text-[13px] leading-6">
+        <Reveal className="max-w-[500px] [perspective:1100px]">
+          <Panel className="origin-left [transform:rotateY(12deg)_rotateX(3deg)] transition-transform duration-500 hover:[transform:none]">
+            <div data-line className="mb-3 flex items-center gap-3">
+              <Image
+                src={profile.avatar}
+                alt={profile.name.en}
+                width={56}
+                height={56}
+                className="size-14 border border-ink object-cover grayscale-[0.2]"
+              />
+              <div>
+                <p className="font-display text-xl font-extrabold leading-tight">
+                  {profile.name.zh} <span className="text-ink-soft">/ {profile.name.en}</span>
+                </p>
+                <p className="label text-ink-soft">@{profile.handle}</p>
+              </div>
+            </div>
+            <pre className="overflow-x-auto font-mono text-[12px] leading-[1.6rem]">
               <span data-line className="block text-ink-soft">{"// sheet 02 — init(me);"}</span>
               <span data-line className="block">
                 <span className="text-accent">const</span> me = {"{"}
               </span>
               {(
                 [
-                  ["name", profile.name[locale]],
                   ["school", profile.school[locale]],
                   ["major", profile.major[locale]],
                   ["grade", profile.grade[locale]],
@@ -61,18 +79,28 @@ export default async function Home() {
                   <span className="text-accent">,</span>
                 </span>
               ))}
+              <span data-line className="block pl-4">
+                <span className="text-ink-soft">now</span>: [
+              </span>
+              {profile.now.map((n) => (
+                <span data-line key={n.href} className="block pl-8">
+                  <a href={n.href} target="_blank" rel="noreferrer" className="hover:text-accent" data-cursor="OPEN">
+                    &quot;{n.org[locale]}<span className="text-ink-soft"> · {n.role[locale]}</span>&quot;
+                  </a>
+                  <span className="text-accent">,</span>
+                </span>
+              ))}
+              <span data-line className="block pl-4">
+                ]<span className="text-accent">,</span>
+              </span>
               <span data-line className="block">
                 {"}"}
                 <span className="text-accent">;</span>
               </span>
             </pre>
-            <div className="mt-4 space-y-2 border-t border-rule pt-3 text-sm leading-relaxed text-ink-soft">
-              {profile.bio.map((p, i) => (
-                <p data-line key={i}>
-                  {p[locale]}
-                </p>
-              ))}
-            </div>
+            <p data-line className="mt-3 border-t border-rule pt-3 text-sm leading-relaxed text-ink-soft">
+              {profile.bio[0][locale]}
+            </p>
           </Panel>
         </Reveal>
       </SheetSection>
@@ -90,7 +118,12 @@ export default async function Home() {
       </SheetSection>
 
       <SheetSection id="timeline" title={s.timeline} length={SHEET_LENGTH.timeline} sticky>
-        <TimelineReadout events={timeline} locale={locale} playLabel={dict.video.play} />
+        <TimelineReadout
+          events={timeline}
+          locale={locale}
+          github={github}
+          labels={{ play: dict.video.play, contributions: dict.timeline.contributions, repos: dict.timeline.repos }}
+        />
       </SheetSection>
 
       <SheetSection id="writing" title={s.writing} length={SHEET_LENGTH.writing} sticky>
@@ -126,24 +159,14 @@ export default async function Home() {
           {dict.contact.heading}
         </h2>
         <p className="mt-4 max-w-md text-lg text-ink-soft">{dict.contact.lead}</p>
-        <ul className="pointer-events-auto mt-6 flex flex-wrap gap-3">
-          {profile.links.map((link) => (
-            <li key={link.href}>
-              <a
-                href={link.href}
-                className="label inline-block border border-ink bg-paper px-3 py-2 transition-colors hover:bg-ink hover:text-paper"
-                {...(link.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
-              >
-                {link.label} ↗
-              </a>
-            </li>
-          ))}
-          <li>
-            <a href="#hero" data-cursor="REDRAW" className="label inline-block border border-accent px-3 py-2 text-accent transition-colors hover:bg-accent hover:text-paper">
-              ↺ {dict.contact.again}
-            </a>
-          </li>
-        </ul>
+        <ContactList contacts={profile.contacts} copiedLabel={dict.contact.copied} />
+        <a
+          href="#hero"
+          data-cursor="REDRAW"
+          className="label pointer-events-auto mt-6 inline-block self-start border border-accent bg-paper px-3 py-2 text-accent transition-colors hover:bg-accent hover:text-paper"
+        >
+          ↺ {dict.contact.again}
+        </a>
       </SheetSection>
     </main>
   );

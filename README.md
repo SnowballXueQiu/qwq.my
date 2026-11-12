@@ -20,9 +20,11 @@ pnpm lint
 | `content/profile.ts` | 名字、学校、专业、年级、简介、链接 |
 | `content/skills.ts` | 技能隧道和 BOM 表 |
 | `content/projects.ts` | 项目碑（标题、简介、年份、标签、链接） |
-| `content/timeline.ts` | 经历公路上的路标 |
+| `content/timeline.ts` | 经历公路上的路标；`media` 可以挂证书或图片，会在路中央展出 |
 | `content/posts/<slug>/{zh,en}.mdx` | 文章；缺一种语言时会自动回退并提示 |
-| `content/year/2026.ts` | 年度回顾视频的数据 |
+| `content/year/2026.ts` | 年度回顾视频的高光事件（数字来自 GitHub） |
+| `content/github.json` | GitHub 数据快照：网站会每隔几小时实时抓取，抓不到时用它；`pnpm github:snapshot` 更新 |
+| `public/media/` | 头像、证书、授课图片 |
 | `messages/{zh,en}.json` | 界面文案 |
 
 颜色在 `app/globals.css` 和 `lib/tokens.ts` 里，两处保持一致。
