@@ -154,7 +154,7 @@ export function PelicanRider() {
     const dx = roadX(z - 1) - x;
     const n = Math.hypot(dx, 1);
     // Forward heading along the road is (dx, -1); flip it when riding back.
-    const turn = (1 - st.facing) / 2; // 0 = riding on, 1 = riding back
+    const turn = (1 + st.facing) / 2; // facing -1 (down the road) = 0, +1 (back) = a half turn
     const heading = Math.atan2(1, dx) + turn * Math.PI;
     g.position.set(x + (1 / n) * LANE, ROAD_Y, z + (dx / n) * LANE);
     g.rotation.set(0, heading, Math.sin(clock.elapsedTime * 1.6) * 0.02 * (1 - Math.min(st.speed, 1)));
