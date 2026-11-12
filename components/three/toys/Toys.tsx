@@ -28,7 +28,7 @@ import { play } from "@/lib/sound";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
 import { clamp01, frameState } from "../frameState";
-import { HERO_DIST, PAPER_DIST, heroPlacement } from "../framing";
+import { HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
 import { claimPointer } from "../interact/interaction";
 
 /** Seconds since this toy was last poked (large when never). */
@@ -280,18 +280,21 @@ function PuzzleCube({ mats, age }: { mats: Mats; age: Age }) {
 type ToySpec = {
   id: string;
   anchor: [number, number, number];
+  /** Where it hangs on a phone, as a fraction of the visible half-width and half-height, and how much smaller it is there. */
+  phone: [number, number, number?];
   rest: [number, number, number];
   scale: number;
   sound: string;
 };
 
 const SPECS: ToySpec[] = [
-  { id: "duck", anchor: [-3.7, 1.5, 4], rest: [0.1, 0.6, 0], scale: 0.9, sound: "quack" },
-  { id: "keys", anchor: [3.4, 1.7, 4], rest: [0.7, -0.4, 0], scale: 0.85, sound: "key" },
-  { id: "mug", anchor: [-4.1, -1.6, 4.4], rest: [0.2, 0.5, 0], scale: 0.85, sound: "pop" },
-  { id: "plane", anchor: [3.9, -1.3, 4.4], rest: [0.4, -0.5, 0.15], scale: 0.9, sound: "whoosh" },
-  { id: "floppy", anchor: [-1.5, -2.3, 5], rest: [0.3, 0.4, 0], scale: 0.85, sound: "tick" },
-  { id: "cube", anchor: [1.6, -2.4, 5], rest: [0.5, 0.6, 0], scale: 0.9, sound: "key" },
+  // On a phone: one pair between the hint and QwQ, two pairs below it.
+  { id: "duck", anchor: [-3.7, 1.5, 4], phone: [-0.55, 0.44], rest: [0.1, 0.6, 0], scale: 0.9, sound: "quack" },
+  { id: "keys", anchor: [3.4, 1.7, 4], phone: [0.45, 0.44, 0.7], rest: [0.7, -0.4, 0], scale: 0.85, sound: "key" },
+  { id: "mug", anchor: [-4.1, -1.6, 4.4], phone: [-0.55, -0.3], rest: [0.2, 0.5, 0], scale: 0.85, sound: "pop" },
+  { id: "plane", anchor: [3.9, -1.3, 4.4], phone: [0.5, -0.3, 0.85], rest: [0.4, -0.5, 0.15], scale: 0.9, sound: "whoosh" },
+  { id: "floppy", anchor: [-1.5, -2.3, 5], phone: [-0.55, -0.66], rest: [0.3, 0.4, 0], scale: 0.85, sound: "tick" },
+  { id: "cube", anchor: [1.6, -2.4, 5], phone: [0.55, -0.66], rest: [0.5, 0.6, 0], scale: 0.9, sound: "key" },
 ];
 
 /**
@@ -309,6 +312,7 @@ export function Toys() {
   const grab = useRef<{ index: number; x: number; moved: boolean; key?: number } | null>(null);
   const typed = useRef<string[]>([]);
   const clock = useRef(0);
+  const scratch = useMemo(() => new Vector3(), []);
 
   // Origin of the burst: the tear's focus, just behind the sheet.
   const hero = heroPlacement(camera, size.width / size.height);
@@ -387,6 +391,10 @@ export function Toys() {
     clock.current += dt;
     const s = frameState.s;
     const t = state.clock.elapsedTime;
+    const aspect = state.size.width / state.size.height;
+    // A phone shows a narrow slice of the desk: lay the toys out inside it, smaller.
+    const phone = aspect < 1;
+    const small = phone ? Math.min(1, Math.max(0.5, aspect / 0.75)) : 1;
     SPECS.forEach((spec, i) => {
       const g = groups.current[i];
       if (!g) return;
@@ -394,14 +402,20 @@ export function Toys() {
       g.visible = b > 0 && s < 1.05 && frameState.game < 0.5 && frameState.overview < 0.3;
       if (!g.visible) return;
       const e = easeOutBack(b);
-      g.position.lerpVectors(origin, new Vector3(...spec.anchor), e);
+      const anchor = scratch.set(...spec.anchor);
+      if (phone) {
+        const { halfW, halfH } = frustumAt(camera, camera.position.z - anchor.z, aspect);
+        anchor.set(spec.phone[0] * halfW, spec.phone[1] * halfH, anchor.z);
+      }
+      g.position.lerpVectors(origin, anchor, e);
       g.position.y += Math.sin(t * 1.3 + i * 1.7) * 0.08 * b;
       const sp = spin.current[i];
       sp.vel *= Math.pow(0.08, dt);
       sp.angle += sp.vel * dt;
       sp.hover += ((sp.hovered ? 1 : 0) - sp.hover) * Math.min(dt * 10, 1);
       g.rotation.set(spec.rest[0] + (1 - b) * 4, spec.rest[1] + sp.angle + (1 - b) * 6 + Math.sin(t * 0.6 + i) * 0.15, spec.rest[2]);
-      g.scale.setScalar(spec.scale * (0.25 + 0.75 * b) * (1 + sp.hover * 0.08));
+      const size = spec.scale * (phone ? small * (spec.phone[2] ?? 1) : 1);
+      g.scale.setScalar(size * (0.25 + 0.75 * b) * (1 + sp.hover * 0.08));
     });
   });
 

@@ -230,7 +230,7 @@ export function Hud({ toyHint }: { toyHint: string }) {
 
       <div
         ref={hint}
-        className="label absolute left-1/2 top-[18%] -translate-x-1/2 bg-ink px-2 py-1 text-paper opacity-0 transition-opacity duration-500"
+        className="label absolute left-1/2 top-[12%] -translate-x-1/2 md:top-[18%] bg-ink px-2 py-1 text-paper opacity-0 transition-opacity duration-500"
       >
         {toyHint}
       </div>

@@ -10,7 +10,7 @@ import { UI_SELECTOR, pointer, pointerClaimed, pushImpulse } from "./interaction
 
 /**
  * Turns pointer input into world input: tracks the pointer in NDC, and makes
- * clicks on empty space in the dark world fire an ink shockwave.
+ * clicks (not touches) on empty space in the dark world fire an ink shockwave.
  */
 export function InteractionBridge() {
   useEffect(() => {
@@ -26,6 +26,8 @@ export function InteractionBridge() {
       pointer.inside = false;
     };
     const onDown = (e: PointerEvent) => {
+      // A phone's screen is small and every swipe starts with a touch: no shockwaves there.
+      if (e.pointerType === "touch") return;
       if (e.button !== 0 || pointerClaimed()) return;
       const html = document.documentElement;
       if (html.classList.contains("menu-open") || html.classList.contains("game-open")) return;
