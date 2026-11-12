@@ -9,8 +9,8 @@ export type TimelineMedia =
 export type TimelineEvent = {
   date: string; // YYYY-MM, for ordering
   /** Shown instead of the date when the month isn't the point (e.g. "2026 秋"). */
-  /** An organisation logo for the roadside sign (white artwork, drawn on a dark plate). */
-  logo?: { src: string; alt: L10n };
+  /** An organisation logo for the roadside sign. `dark` puts light artwork on a dark plate. */
+  logo?: { src: string; alt: L10n; dark?: boolean };
   when?: L10n;
   kind: TimelineKind;
   title: L10n;
@@ -27,6 +27,7 @@ export const timeline: TimelineEvent[] = [
     kind: "found",
     title: { zh: "联合创立瀚海工艺技术团队", en: "Co-founded the Vastsea tech team" },
     detail: { zh: "瀚海工艺 Vastsea，做下一代轨道交通主题的我的世界服务器。", en: "Vastsea: a next-gen rail-transit Minecraft server." },
+    logo: { src: "/media/logos/vastsea.svg", alt: { zh: "瀚海工艺", en: "Vastsea" } },
   },
   {
     date: "2024-08",
@@ -44,10 +45,8 @@ export const timeline: TimelineEvent[] = [
     date: "2024-11",
     kind: "work",
     title: { zh: "苦力怕论坛技术总管", en: "Head of tech at KLPBBS" },
-    detail: {
-      zh: "同时在徐州驰飞互联网科技有限公司实习。",
-      en: "Alongside an internship at Xuzhou Chifei Internet Technology Co., Ltd.",
-    },
+    detail: { zh: "徐州驰飞互联网科技有限公司。", en: "Xuzhou Chifei Internet Technology Co., Ltd." },
+    logo: { src: "/media/logos/klpbbs.png", alt: { zh: "苦力怕论坛", en: "KLPBBS" } },
   },
   {
     date: "2025-07",
@@ -73,7 +72,7 @@ export const timeline: TimelineEvent[] = [
     kind: "school",
     title: { zh: "进入天津师范大学", en: "Started at Tianjin Normal University" },
     detail: { zh: "人工智能专业，2025 级。", en: "Artificial Intelligence, class of 2025." },
-    logo: { src: "/media/logos/tjnu.png", alt: { zh: "天津师范大学", en: "Tianjin Normal University" } },
+    logo: { src: "/media/logos/tjnu.png", alt: { zh: "天津师范大学", en: "Tianjin Normal University" }, dark: true },
   },
   {
     date: "2025-10",

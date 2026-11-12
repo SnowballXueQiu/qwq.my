@@ -3,8 +3,11 @@ import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import type { SheetId } from "./sheets";
 
-/** One stop per milestone, plus the GitHub contribution plaza at the end of the road. */
-export const TIMELINE_SLOTS = timeline.length + 1;
+/**
+ * One stop per milestone, then two for the GitHub city at the end of the road:
+ * drive in among the towers, then crane up over the grid.
+ */
+export const TIMELINE_SLOTS = timeline.length + 2;
 
 /** Scroll length of each home sheet, in viewport heights. */
 export const SHEET_LENGTH: Record<SheetId, number> = {

@@ -12,7 +12,7 @@ import {
   TetrahedronGeometry,
 } from "three";
 import { createInkMaterial } from "../materials/inkMaterial";
-import { WORLD } from "../world";
+import { PLAZA_S, WORLD } from "../world";
 import { frameState } from "../frameState";
 import { impulsesSince, pointer } from "../interact/interaction";
 
@@ -116,9 +116,11 @@ export function DebrisField() {
         it.extraSpin *= Math.pow(0.2, dt);
         it.rx += it.extraSpin * dt;
         dummy.position.copy(p);
+        // Clear the sky over the GitHub city while we look down on it.
+        const overCity = frameState.s > PLAZA_S.street && frameState.s < PLAZA_S.end + 0.1 && Math.abs(it.z - WORLD.timeline.plazaZ) < 50;
         dummy.rotation.set(it.rx + t * it.spin * (1 + dance * 8), it.ry + t * it.spin * 0.7, 0);
         if (dance > 0.01) dummy.position.y += Math.abs(Math.sin(t * 7 + i)) * dance * 1.2;
-        dummy.scale.setScalar(it.s);
+        dummy.scale.setScalar(overCity ? 0.0001 : it.s);
         dummy.updateMatrix();
         mesh.setMatrixAt(i, dummy.matrix);
       });

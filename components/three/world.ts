@@ -21,9 +21,9 @@ const P_SPACING = 18;
 const P_END = P_START - P_SPACING * (projectCount - 1);
 const T_START = P_END - 28;
 const T_END = T_START - 96;
-/** The GitHub contribution plaza where the road ends. */
-const PLAZA_Z = T_END - 34;
-const W_Z = PLAZA_Z - 60;
+/** The GitHub contribution city where the road ends. */
+const PLAZA_Z = T_END - 40;
+const W_Z = PLAZA_Z - 70;
 const C_Z = W_Z - 46;
 
 export const WORLD = {
@@ -33,6 +33,16 @@ export const WORLD = {
   timeline: { start: T_START, end: T_END, plazaZ: PLAZA_Z },
   writing: { z: W_Z },
   contact: { z: C_Z },
+};
+
+/** Scene-time beats of the GitHub city: arriving at street level, then fully overhead. */
+const T_SLOT = pinned("timeline") / TIMELINE_SLOTS;
+export const PLAZA_S = {
+  /** Camera reaches the foot of the towers. */
+  street: 4 + T_SLOT * (timeline.length + 0.1),
+  /** Camera has finished craning up; the grid reads from above. */
+  overhead: 4 + T_SLOT * (timeline.length + 1.45),
+  end: 4 + T_SLOT * TIMELINE_SLOTS,
 };
 
 /**
@@ -73,7 +83,7 @@ export function buildCameraKeys(): CameraKey[] {
   }
   // Timeline: stop at each milestone (sign on the verge, exhibit in the middle
   // of the road when there is one), then rise over the contribution plaza.
-  const tSlot = pinned("timeline") / TIMELINE_SLOTS;
+  const tSlot = T_SLOT;
   timeline.forEach((event, i) => {
     const z = milestoneZ(i, timeline.length);
     const side = i % 2 === 0 ? -1 : 1;
@@ -89,9 +99,17 @@ export function buildCameraKeys(): CameraKey[] {
     });
     keys.push({ s: 4 + tSlot * (i + 0.15), ...at(z + 15) }, { s: 4 + tSlot * (i + 0.85), ...at(z + 13) });
   });
-  // High and back, looking past the plaza so it sits in the upper half, clear of the index panel.
-  const plaza = { pos: [roadX(PLAZA_Z) + 2, 19, PLAZA_Z + 25] as V3, look: [roadX(PLAZA_Z) + 2, -6.5, PLAZA_Z + 1] as V3, roll: 0 };
-  keys.push({ s: 4 + tSlot * (timeline.length + 0.2), ...plaza }, { s: 4 + tSlot * (timeline.length + 0.9), ...plaza });
+  // The GitHub city: roll up to the foot of the towers looking up at them,
+  // then crane up and back until the whole year reads as the familiar grid.
+  const px = roadX(PLAZA_Z);
+  const n = timeline.length;
+  keys.push(
+    { s: 4 + tSlot * (n + 0.1), pos: [px, 1.3, PLAZA_Z + 24], look: [px, 7, PLAZA_Z], roll: 0 },
+    { s: 4 + tSlot * (n + 0.75), pos: [px + 1.5, 1.5, PLAZA_Z + 13], look: [px + 1, 9, PLAZA_Z - 2], roll: -4 },
+    { s: 4 + tSlot * (n + 1.1), pos: [px + 6, 18, PLAZA_Z + 30], look: [px + 2, 0, PLAZA_Z], roll: 0 },
+    { s: 4 + tSlot * (n + 1.45), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
+    { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
+  );
   keys.push(
     { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 5 },
     { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 0 },

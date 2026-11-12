@@ -24,16 +24,27 @@ export const profile = {
   avatar: "/media/avatar.jpg",
   /** What I'm doing now. */
   now: [
-    { org: { zh: "瀚海工艺 Vastsea", en: "Vastsea" }, role: { zh: "联合创始人", en: "Co-founder" }, href: "https://github.com/TeamVastsea" },
-    { org: { zh: "苦力怕论坛 KLPBBS", en: "KLPBBS (Creeper Forum)" }, role: { zh: "技术总管 & 版主", en: "Head of tech & moderator" }, href: "https://klpbbs.com" },
+    {
+      org: { zh: "瀚海工艺 Vastsea", en: "Vastsea" },
+      role: { zh: "联合创始人", en: "Co-founder" },
+      href: "https://github.com/TeamVastsea",
+      logo: "/media/logos/vastsea.svg",
+    },
+    {
+      org: { zh: "苦力怕论坛 KLPBBS", en: "KLPBBS (Creeper Forum)" },
+      role: { zh: "技术总管 & 版主", en: "Head of tech & moderator" },
+      href: "https://klpbbs.com",
+      logo: "/media/logos/klpbbs.png",
+    },
     { org: { zh: "course.rs《Rust 语言圣经》", en: "course.rs (The Rust Course)" }, role: { zh: "Collaborator", en: "Collaborator" }, href: "https://course.rs" },
     {
       org: { zh: "Inf Network", en: "Inf Network" },
       role: { zh: "我的世界服务器服主（重建中…）", en: "Minecraft server owner (rebuilding…)" },
       href: "https://github.com/Inf-Network",
+      logo: "/media/logos/inf-network.png",
     },
     { org: { zh: "MCSL2", en: "MCSL2" }, role: { zh: "我的世界开服器 · 后端开发", en: "Minecraft server launcher · backend" }, href: "https://github.com/MCSLTeam/MCSL2" },
-  ] satisfies { org: L10n; role: L10n; href: string }[],
+  ] satisfies { org: L10n; role: L10n; href: string; logo?: string }[],
   email: "snowballstudio233@gmail.com",
   /** `href` opens it; `copy` puts the handle on the clipboard instead (no public URL). */
   contacts: [

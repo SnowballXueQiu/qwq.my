@@ -85,6 +85,10 @@ export default async function Home() {
               {profile.now.map((n) => (
                 <span data-line key={n.href} className="block pl-8">
                   <a href={n.href} target="_blank" rel="noreferrer" className="hover:text-accent" data-cursor="OPEN">
+                    {"logo" in n && n.logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- 16px org mark
+                      <img src={n.logo} alt="" className="mr-1.5 inline-block size-4 -translate-y-px object-contain align-middle" />
+                    ) : null}
                     &quot;{n.org[locale]}<span className="text-ink-soft"> · {n.role[locale]}</span>&quot;
                   </a>
                   <span className="text-accent">,</span>

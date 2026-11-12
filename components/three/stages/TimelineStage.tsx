@@ -9,10 +9,11 @@ import type { Locale } from "@/lib/i18n";
 import { showLightbox } from "@/components/ui/Lightbox";
 import { useDomLayer } from "../dom/useDomLayer";
 import { MilestoneMarker, useMarkerKit, type MarkerKit } from "./MilestoneMarkers";
+import { PelicanRider } from "./PelicanRider";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { KineticText } from "../text/KineticText";
 import { clamp01, frameState, withOverview } from "../frameState";
-import { WORLD, milestoneZ, roadX } from "../world";
+import { PLAZA_S, WORLD, milestoneZ, roadX } from "../world";
 
 const ROAD_Y = -1.1;
 const ROAD_W = 3.2;
@@ -158,9 +159,14 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
             </span>
           </div>
           {event.logo && (
-            <div className="mt-2.5 inline-block bg-[#141414] px-2.5 py-1.5">
+            <div className={`mt-2.5 inline-block ${event.logo.dark ? "bg-[#141414] px-2.5 py-1.5" : ""}`}>
               {/* eslint-disable-next-line @next/next/no-img-element -- drawn inside a CSS 3D transform */}
-              <img src={event.logo.src} alt={event.logo.alt[locale]} className="block h-[38px] w-auto" draggable={false} />
+              <img
+                src={event.logo.src}
+                alt={event.logo.alt[locale]}
+                className={`block w-auto ${event.logo.dark ? "h-[38px]" : "h-[52px]"}`}
+                draggable={false}
+              />
             </div>
           )}
           <p className="mt-2 text-[20px] font-extrabold leading-tight">{event.title[locale]}</p>
@@ -226,14 +232,43 @@ function Exhibit({ media, locale }: { media: TimelineMedia; locale: Locale }) {
   );
 }
 
-const CELL = 0.46;
+const CELL = 1;
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
+// Towers print their own windows: floors every 0.6 units, three bays per face,
+// on every side face; roofs stay plain. In the dark world the facade is ink
+// and the windows are lit.
+const towerVertexHead = /* glsl */ `
+out vec3 vWin;
+`;
+const towerTransform = /* glsl */ `
+  #ifdef USE_INSTANCING
+    vWin = (instanceMatrix * vec4(position, 1.0)).xyz;
+  #else
+    vWin = position;
+  #endif
+`;
+const towerFragmentHead = /* glsl */ `
+in vec3 vWin;
+`;
+const towerPrint = /* glsl */ `
+  bool roof = vRest.y > 0.499;
+  bool sideX = abs(vRest.x) > 0.499;
+  float along = sideX ? vWin.z : vWin.x;
+  float floorBand = step(0.3, fract(vWin.y / 0.6)) * step(fract(vWin.y / 0.6), 0.75);
+  float bay = step(0.22, fract(along * 3.0 / ${CELL.toFixed(1)})) * step(fract(along * 3.0 / ${CELL.toFixed(1)}), 0.72);
+  float lit = step(0.35, hash12(floor(vec2(along * 3.0, vWin.y / 0.6)) + 7.0));
+  float windows = roof || vRest.y < -0.499 || vWin.y < -0.7 ? 0.0 : floorBand * bay * mix(0.35, 1.0, lit);
+  float shade = 1.0 - clamp(dot(n, uLightDir) * 0.5 + 0.5, 0.0, 1.0);
+  printed = max(windows * 0.9, shade * 0.35 + (roof ? 0.12 : 0.0));
+`;
+
 /**
- * Where the road ends: the last year of GitHub contributions as a plaza of
- * bars, laid out exactly like the profile graph (weeks left→right, Sunday at
- * the back). Seen from above it reads as the familiar grid. Hover a bar for
- * its day.
+ * Where the road ends: the last year of GitHub contributions as a city. One
+ * tower per day, laid out like the profile graph (weeks left→right, Sunday at
+ * the back), height by contributions, the busiest days in red. You see the
+ * skyline from the last milestone, drive in among the towers, then crane up
+ * until it reads as the familiar grid. Hover a tower for its day.
  */
 function ContributionPlaza({ github, locale, layer }: { github: GithubScene; locale: Locale; layer: React.RefObject<HTMLElement> }) {
   const z0 = WORLD.timeline.plazaZ;
@@ -259,7 +294,8 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
         out.push({
           x,
           z: z0 + (d - 3) * CELL,
-          h: day.count ? 0.22 + Math.sqrt(day.count) * 0.5 : 0.04,
+          // Skyscrapers: a busy day is a tower; an empty day is a paved lot.
+          h: day.count ? 1.4 + Math.sqrt(day.count) * 2.2 : 0.12,
           hot: day.count > 0 && day.count >= hot,
           col: w,
           date: day.date,
@@ -271,10 +307,20 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
   }, [github.weeks, x0, z0, cols]);
 
   const groups = useMemo(() => ({ body: bars.filter((b) => !b.hot), hot: bars.filter((b) => b.hot) }), [bars]);
-  const geometry = useMemo(() => new BoxGeometry(CELL * 0.82, 1, CELL * 0.82), []);
-  const slab = useMemo(() => new BoxGeometry(cols * CELL + 1.2, 0.12, 7 * CELL + 1.2), [cols]);
+  const geometry = useMemo(() => new BoxGeometry(CELL * 0.8, 1, CELL * 0.8), []);
+  const slab = useMemo(() => new BoxGeometry(cols * CELL + 2, 0.12, 7 * CELL + 2), [cols]);
   const mats = useMemo(
-    () => ({ body: createInkMaterial({ toneBias: 0.06 }), hot: createInkMaterial({ accent: 1 }), slab: createInkMaterial({ fill: Fill.sheet }) }),
+    () => ({
+      body: createInkMaterial({
+        fill: Fill.paper,
+        vertexHead: towerVertexHead,
+        vertexTransform: towerTransform,
+        fragmentHead: towerFragmentHead,
+        fragmentPrint: towerPrint,
+      }),
+      hot: createInkMaterial({ accent: 1 }),
+      slab: createInkMaterial({ fill: Fill.sheet }),
+    }),
     [],
   );
   useEffect(() => () => [geometry, slab].forEach((g) => g.dispose()), [geometry, slab]);
@@ -284,26 +330,31 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
   const dummy = useMemo(() => new Object3D(), []);
   const reveal = useRef(0);
 
-  // Active over the last slot of the timeline sheet.
-  const cue = () => {
+  // The skyline is up from as soon as the last stretch of road is in view.
+  const visible = () => {
     const s = frameState.s;
-    if (s < 4.6 || s > 5.4) return -1;
-    const d = frameState.cameraZ - z0;
-    return d > 44 ? -1 : d > 24 ? (44 - d) / 20 : s > 5.05 ? Math.min(1 + (s - 5.05) / 0.3, 1.99) : 1;
+    // Stays up while the camera pulls away toward the writing scene.
+    return (s > 3.85 && s < PLAZA_S.end + 0.45 && frameState.cameraZ - z0 < 120) || frameState.overview > 0.4;
   };
-  const caption = useCueFade(cue);
+  // The caption belongs to the overhead view.
+  const captionCue = () => {
+    const s = frameState.s;
+    const t = (s - (PLAZA_S.overhead - 0.03)) / 0.04;
+    if (t < 0) return -1;
+    return s > PLAZA_S.end - 0.02 ? 1 + Math.min((s - (PLAZA_S.end - 0.02)) / 0.03, 0.99) : Math.min(t, 1);
+  };
+  const caption = useCueFade(captionCue);
 
   useFrame((_, dt) => {
     const g = root.current;
     if (!g) return;
-    const p = withOverview(cue());
-    g.visible = p > 0 && p < 2;
+    g.visible = visible();
     if (!g.visible) {
       reveal.current = 0;
       return;
     }
-    // The bars rise in a wave, oldest week first.
-    reveal.current = Math.min(reveal.current + dt * 0.9, 1.6);
+    // Towers rise in a wave, oldest week first, the first time the city comes into view.
+    reveal.current = Math.min(reveal.current + dt * 0.7, 1.6);
     for (const kind of ["body", "hot"] as const) {
       const mesh = meshes.current[kind];
       if (!mesh) continue;
@@ -316,7 +367,7 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
         mesh.setMatrixAt(i, dummy.matrix);
       });
       mesh.instanceMatrix.needsUpdate = true;
-      // Raycasts test this sphere first; it must follow the bars, not the origin.
+      // Raycasts test this sphere first; it must follow the towers, not the origin.
       if (reveal.current < 1.6 || !mesh.boundingSphere) mesh.computeBoundingSphere();
     }
   });
@@ -351,28 +402,28 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
           key={`${m.text}${i}`}
           font="mono"
           text={m.text}
-          size={0.32}
-          depth={0.05}
+          size={0.8}
+          depth={0.08}
           align="left"
-          position={[m.x - CELL / 2, ROAD_Y + 0.1, z0 + 4 * CELL + 0.35]}
+          position={[m.x - CELL / 2, ROAD_Y + 0.1, z0 + 4 * CELL + 0.8]}
           rotation={[-Math.PI / 2, 0, 0]}
           seed={200 + i}
-          progress={() => Math.min(withOverview(cue()), 1)}
+          progress={() => (frameState.s > PLAZA_S.overhead - 0.06 && visible() ? 1 : withOverview(-1))}
         />
       ))}
       <Html
         transform
-        distanceFactor={DF * 2.2}
+        distanceFactor={DF * 6}
         portal={layer}
-        position={[x0, ROAD_Y + 0.2, z0 + 3.6]}
-        rotation={[-1.05, 0, 0]}
+        position={[x0, ROAD_Y + 0.2, z0 + 4 * CELL + 4.2]}
+        rotation={[-1.0, 0, 0]}
         style={{ pointerEvents: "none" }}
         zIndexRange={Z_RANGE}
       >
         <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0 }}>
           <span className="font-display text-[64px] font-black leading-none text-accent">{github.total}</span>
           <span className="font-mono text-[18px] uppercase tracking-[0.12em]">
-            {locale === "zh" ? "次贡献 · 近一年 · github.com/SnowballXueQiu" : "contributions in the last year · github.com/SnowballXueQiu"}
+            {locale === "zh" ? "次贡献 · 近一年 · 一天一栋楼" : "contributions in the last year · one tower a day"}
           </span>
         </div>
       </Html>
@@ -385,7 +436,7 @@ export function TimelineStage({ github, locale }: { github: GithubScene; locale:
   const kit = useMarkerKit();
   const layer = useDomLayer(15);
   const { start, end, plazaZ } = WORLD.timeline;
-  const road = useMemo(() => buildRoad(start + 16, plazaZ + 6), [start, plazaZ]);
+  const road = useMemo(() => buildRoad(start + 16, plazaZ + 5), [start, plazaZ]);
   const roadMat = useMemo(() => {
     const m = createInkMaterial({
       fill: Fill.paper,
@@ -408,6 +459,7 @@ export function TimelineStage({ github, locale }: { github: GithubScene; locale:
         <Milestone key={e.date + e.title.en} index={i} kit={kit} locale={locale} layer={layer} />
       ))}
       <ContributionPlaza github={github} locale={locale} layer={layer} />
+      <PelicanRider />
     </group>
   );
 }
