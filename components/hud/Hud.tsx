@@ -208,8 +208,10 @@ export function Hud({ toyHint }: { toyHint: string }) {
         ref={scope}
         width={220}
         height={46}
-        className="absolute hidden md:block"
-        style={{ left: inset, bottom: "calc(var(--frame-inset) + var(--frame-gutter) + 52px)" }}
+        // Top-left under the camera readouts: the bottom-left corner belongs to each
+        // sheet's copy and buttons. Only where the screen is tall enough to keep clear of panels.
+        className="absolute hidden lg:[@media(min-height:820px)]:block"
+        style={{ left: inset, top: "calc(var(--frame-inset) + var(--frame-gutter) + 94px)" }}
       />
 
       <div className="absolute hidden flex-col items-center gap-1 md:flex" style={{ right: "calc(var(--frame-inset) + var(--frame-gutter) + 356px)", bottom: "calc(var(--frame-inset) + var(--frame-gutter) + 52px)" }}>

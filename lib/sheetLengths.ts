@@ -27,7 +27,7 @@ const lengthFor = (stops: number) => Math.max(3, 1 + stops * perStop);
 /** Scroll length of each home sheet, in viewport heights. */
 export const SHEET_LENGTH: Record<SheetId, number> = {
   hero: 3,
-  about: 2.4,
+  about: 3.4,
   skills: lengthFor(skillGroups.length),
   projects: lengthFor(projects.length),
   timeline: lengthFor(TIMELINE_SLOTS),

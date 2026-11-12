@@ -6,25 +6,29 @@ import { fitScale } from "../framing";
 import { KineticText } from "../text/KineticText";
 import { cue, frameState } from "../frameState";
 import { WORLD } from "../world";
-import { Globe } from "./Globe";
-import { profile } from "@/content/profile";
+import { ChinaMap } from "./ChinaMap";
+import type { Locale } from "@/lib/i18n";
 
 const isPunct = (_: number, c: string) => "();=.".includes(c);
 
-/** "init(me);" assembles out of the dark, holds while you read, then bursts past the lens. */
-export function AboutStage() {
+/**
+ * "init(me);" assembles out of the dark, holds while you read, then bursts past
+ * the lens; then the camera turns to the footprints map.
+ */
+export function AboutStage({ locale }: { locale: Locale }) {
   const fit = useThree((s) => fitScale(s.size.width / s.size.height));
+  const { map } = WORLD.about;
   return (
+    <>
+    <ChinaMap locale={locale} position={[map.x, map.y, map.z]} />
     <group position={[0, 0, WORLD.about.z]} scale={fit}>
-      {/* "based: 中国" — the pin sits on the location in content/profile.ts. */}
-      <Globe position={[-11, 1.5, -6]} lat={profile.geo.lat} lon={profile.geo.lon} />
       <KineticText
         text="init(me);"
         size={4.4}
         depth={1.3}
         position={[0, 1.1, 0]}
         accent={isPunct}
-        progress={() => cue(frameState.s, 0.92, 1.3, 1.8, 2.02)}
+        progress={() => cue(frameState.s, 0.92, 1.25, 1.55, 1.68)}
       />
       <KineticText
         font="mono"
@@ -35,8 +39,9 @@ export function AboutStage() {
         scatter={9}
         seed={4}
         accent={isPunct}
-        progress={() => cue(frameState.s, 1.05, 1.42, 1.74, 1.96)}
+        progress={() => cue(frameState.s, 1.02, 1.3, 1.5, 1.64)}
       />
     </group>
+    </>
   );
 }

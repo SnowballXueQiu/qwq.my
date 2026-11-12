@@ -9,8 +9,6 @@ export const profile = {
   major: { zh: "人工智能", en: "Artificial Intelligence" } satisfies L10n,
   grade: { zh: "2025 级", en: "Class of 2025" } satisfies L10n,
   location: { zh: "中国", en: "China" } satisfies L10n,
-  /** Where the pin goes on the About globe (Tianjin). */
-  geo: { lat: 39.1, lon: 117.2 },
   bio: [
     {
       zh: "喜欢把想法做成能跑起来、能用起来的东西。网页、原生 App、后端、我的世界服务器和插件都在做，也在用 AI 工具把原型做得更快。",

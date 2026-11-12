@@ -26,14 +26,20 @@ const PLAZA_Z = T_END - 40;
 const W_Z = PLAZA_Z - 70;
 const C_Z = W_Z - 46;
 
+/** The footprints map, off to the side of init(me). */
+const MAP = { x: -27, y: -3, z: -54 };
+
 export const WORLD = {
-  about: { z: -46 },
+  about: { z: -46, map: MAP },
   skills: { start: S_START, end: S_END, spacing: S_SPACING, count: skillGroups.length },
   projects: { start: P_START, spacing: P_SPACING, side: 4.4, count: projectCount },
   timeline: { start: T_START, end: T_END, plazaZ: PLAZA_Z },
   writing: { z: W_Z },
   contact: { z: C_Z },
 };
+
+/** Scene-time beats of the footprints map in the about sheet. */
+export const MAP_S = { arrive: 1.5, hold: 1.72, leave: 1.94 };
 
 /** Scene-time beats of the GitHub city: arriving at street level, then fully overhead. */
 const T_SLOT = pinned("timeline") / TIMELINE_SLOTS;
@@ -63,8 +69,20 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     // Hold after the tear so there's time to play with the toys that burst out.
     { s: 0.78, pos: [0, 0, 14], look: [0, 0, 0] },
     { s: 1.0, pos: [0, 0, -14], look: [0, 0, WORLD.about.z] },
-    { s: 1.45, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z], roll: -7 },
-    { s: 1.78, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z], roll: 9 },
+    { s: 1.29, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z], roll: -7 },
+    { s: 1.56, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z], roll: 9 },
+    // Footprints: turn and look down on the map while the about panel scrolls away.
+    ...(portrait
+      ? [
+          // High enough that the whole country fits a phone's width.
+          { s: MAP_S.hold, pos: [MAP.x, MAP.y + 64, MAP.z + 12] as V3, look: [MAP.x, MAP.y, MAP.z + 1.5] as V3, roll: 0 },
+          { s: MAP_S.leave, pos: [MAP.x, MAP.y + 64, MAP.z + 12] as V3, look: [MAP.x, MAP.y, MAP.z + 1.5] as V3, roll: 0 },
+        ]
+      : [
+          // Looking a little west of centre puts the map on the right, clear of the panels on the left.
+          { s: MAP_S.hold, pos: [MAP.x - 3.5, MAP.y + 18.5, MAP.z + 18.5] as V3, look: [MAP.x - 3.5, MAP.y, MAP.z + 1] as V3, roll: 0 },
+          { s: MAP_S.leave, pos: [MAP.x - 2.9, MAP.y + 18, MAP.z + 18] as V3, look: [MAP.x - 3.5, MAP.y, MAP.z + 1] as V3, roll: 0 },
+        ]),
   ];
   // Skills: glide level and calm past one station per group, so the type stays legible.
   for (let i = 0; i < skillGroups.length; i++) {

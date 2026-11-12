@@ -13,7 +13,7 @@ import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
 import { BASE_FOV } from "./framing";
 import { hudState } from "./hudState";
-import { WORLD, buildCameraKeys, type CameraKey } from "./world";
+import { MAP_S, WORLD, buildCameraKeys, type CameraKey } from "./world";
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
 
@@ -103,6 +103,7 @@ function anchorFor(s: number): { label: string } | null {
   const sheet = Math.floor(s);
   const f = s - sheet;
   if (sheet === 1) {
+    if (s >= MAP_S.arrive) return null; // the map labels itself
     anchorWorld.set(0, 1.1, WORLD.about.z);
     return { label: "REF 02-A · init(me)" };
   }

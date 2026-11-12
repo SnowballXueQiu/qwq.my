@@ -58,7 +58,7 @@ export default function SceneCanvas({
       <Toys />
       <DebrisField />
       <Atmosphere />
-      <AboutStage />
+      <AboutStage locale={locale} />
       <SkillsStage />
       <ProjectsStage />
       <TimelineStage github={github} locale={locale} />
