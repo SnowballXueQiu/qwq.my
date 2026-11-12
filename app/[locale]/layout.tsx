@@ -8,6 +8,7 @@ import { listPosts } from "@/lib/posts";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
 import { Hud } from "@/components/hud/Hud";
+import { SoundBridge } from "@/components/sound/SoundBridge";
 import { MvTimeline } from "@/components/hud/MvTimeline";
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -69,6 +70,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           {dict.controls.skip}
         </a>
         <SmoothScroll />
+        <SoundBridge />
         <SceneLoader titles={dict.sheets} postCount={posts.length} />
         <ToneSync />
         <Suspense fallback={null}>

@@ -6,6 +6,7 @@ import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
 import { getScrollVelocity, prefersReducedMotion } from "@/lib/scroll";
+import { play, setAmbientSpeed } from "@/lib/sound";
 import { useSite } from "@/lib/store";
 import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
@@ -113,6 +114,7 @@ export function Director() {
       }),
       on("menu", ({ open }) => {
         fx.menu = open;
+        play("whoosh", 1.4);
         fx.flashUntil = performance.now() + 90;
       }),
       on("glitch", ({ duration = 0.6, amount = 1 }) => {
@@ -225,8 +227,14 @@ export function Director() {
     pipelineTarget.bgInvert = s < 5.78 || inGame ? 1 : 0;
 
     for (const c of CUTS) {
-      if (cut.last >= 0 && (cut.last - c) * (s - c) < 0) cut.at = now;
+      if (cut.last >= 0 && (cut.last - c) * (s - c) < 0) {
+        cut.at = now;
+        play("whoosh");
+      }
     }
+    // The sheet starts to give way.
+    if (cut.last >= 0 && cut.last < 0.32 && s >= 0.32) play("tear");
+    setAmbientSpeed(frameState.speed);
     cut.last = s;
     const since = now - cut.at;
     const wall = performance.now();

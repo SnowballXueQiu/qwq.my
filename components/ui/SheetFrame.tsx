@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n";
 import type { Dictionary } from "@/lib/dictionaries";
 import { LangToggle } from "./LangToggle";
 import { MenuButton } from "./MenuButton";
+import { SoundToggle } from "@/components/sound/SoundToggle";
 import { QwQLogo } from "./QwQLogo";
 import { SheetNav } from "./SheetNav";
 import { TerminalButton } from "./TerminalButton";
@@ -86,6 +87,7 @@ export function SheetFrame({
             <SheetNav locale={locale} titles={dict.sheets} />
           </Suspense>
           <div className="flex items-center gap-2">
+            <SoundToggle labels={dict.sound} />
             <MenuButton labels={dict.menu} />
             <TerminalButton label={dict.controls.terminal} />
             <Suspense fallback={<span className="label border border-ink px-2 py-1">中 / en</span>}>

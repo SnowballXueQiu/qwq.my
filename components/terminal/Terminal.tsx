@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
 import { lockScroll } from "@/lib/scroll";
+import { play } from "@/lib/sound";
 import type { PostMeta } from "@/lib/postTypes";
 import { complete, run, setPostSlugs, type Line } from "./commands";
 
@@ -82,6 +83,7 @@ export function Terminal({ locale, posts }: { locale: Locale; posts: PostMeta[] 
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    play("key");
     if (e.key === "Enter") {
       e.preventDefault();
       if (!busy) void submit();

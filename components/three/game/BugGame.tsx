@@ -17,6 +17,7 @@ import {
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { emit } from "@/lib/fx";
+import { play } from "@/lib/sound";
 import { GAME_LENGTH, useGame } from "@/lib/game";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { frameState } from "../frameState";
@@ -164,6 +165,7 @@ export function BugGame() {
       points,
       combo,
     });
+    play("pop");
     if (combo >= 3) emit("face", { expression: "^w^", duration: 0.8 });
     else emit("face", { expression: ">w<", duration: 0.5 });
   };
@@ -238,6 +240,7 @@ export function BugGame() {
       if (u >= 1 && game.status === "playing") {
         bug.alive = false;
         game.miss();
+        play("buzz");
         emit("glitch", { duration: 0.35, amount: 0.9 });
         emit("flash", { duration: 0.08 });
         emit("face", { expression: "QAQ", duration: 1.2 });

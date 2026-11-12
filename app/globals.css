@@ -274,3 +274,8 @@ html.game-open .hud {
 .hud {
   transition: opacity 0.4s ease;
 }
+
+@keyframes eq {
+  from { height: 3px; }
+  to { height: 12px; }
+}

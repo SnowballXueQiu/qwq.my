@@ -102,5 +102,9 @@
     "download": "Download MP4",
     "close": "Close",
     "play": "Play 2026 in review"
+  },
+  "sound": {
+    "on": "Sound on",
+    "off": "Sound off"
   }
 }
