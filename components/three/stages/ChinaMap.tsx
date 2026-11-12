@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { CylinderGeometry, ExtrudeGeometry, Group, Path, Shape, SphereGeometry, TorusGeometry, type ShaderMaterial } from "three";
-import { places, regions, visitedProvinces } from "@/content/places";
+import { CylinderGeometry, ExtrudeGeometry, Group, Path, Shape, SphereGeometry, type ShaderMaterial } from "three";
+import { PROVINCE_COUNT, places, visitedProvinces } from "@/content/places";
 import type { Locale } from "@/lib/i18n";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
 import { clamp01, frameState, withOverview } from "../frameState";
@@ -59,8 +59,8 @@ function shapesFor(polys: Ring[][]) {
 
 /**
  * "Places I've been": China as an extruded ink map. Visited provinces stand
- * taller in red, visited cities get pins with leader lines and crisp DOM
- * labels, regions visited as a whole are labelled on the region.
+ * taller in red; every place gets a pin with a leader line and a crisp DOM
+ * label.
  */
 export function ChinaMap({ locale, ...group }: { locale: Locale } & React.ComponentProps<"group">) {
   const provinces = useProvinces();
@@ -97,9 +97,7 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
     () => ({
       stem: new CylinderGeometry(0.03, 0.03, 1, 8),
       head: new SphereGeometry(0.16, 16, 12),
-      ring: new TorusGeometry(0.34, 0.04, 8, 32),
       ink: createInkMaterial({ fill: Fill.ink }),
-      red: createInkMaterial({ accent: 1 }),
       paper: createInkMaterial({ fill: Fill.paper }),
     }),
     [],
@@ -142,7 +140,6 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
     }
   });
 
-  const heightAt = (adcode?: string) => (adcode && visitedProvinces.has(adcode) ? VISITED_H : BASE_H);
   const labelSize = portrait ? "text-[10px] px-1 py-0" : "text-[14px]";
 
   return (
@@ -163,25 +160,21 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
 
       {places.map((pl) => {
         const [x, y] = project(pl.lon, pl.lat);
-        // Visited cities all sit in visited provinces.
+        // Every place sits in a visited (raised) province.
         const top = VISITED_H;
-        const stem = pl.home ? 1.5 : 1.1;
+        const stem = 1.1;
         const [lx, ly] = project(pl.lon + pl.label[0], pl.lat + pl.label[1]);
         return (
           <group key={pl.name.en} position={[x, top, -y]}>
             <mesh geometry={pin.stem} material={pin.ink} position={[0, stem / 2, 0]} scale={[1, stem, 1]} />
-            <mesh geometry={pin.head} material={pl.home ? pin.red : pin.paper} position={[0, stem, 0]} scale={pl.home ? 1.35 : 1} />
-            {pl.home && <mesh geometry={pin.ring} material={pin.red} position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]} />}
+            <mesh geometry={pin.head} material={pin.paper} position={[0, stem, 0]} />
             <Html position={[lx - x, stem, -(ly - y)]} center portal={layer} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
               <div
                 data-map-label
-                className={`whitespace-nowrap border px-1.5 py-0.5 font-mono font-bold ${labelSize} ${
-                  pl.home ? "border-accent bg-accent text-paper" : "border-ink bg-paper/90 text-ink"
-                }`}
+                className={`whitespace-nowrap border border-ink bg-paper/90 px-1.5 py-0.5 font-mono font-bold text-ink ${labelSize}`}
                 style={{ opacity: 0 }}
               >
                 {pl.name[locale]}
-                {pl.home && <span className="ml-1 font-normal opacity-80">{locale === "zh" ? "· 在读" : "· studying"}</span>}
               </div>
             </Html>
             {/* Leader from the pin head to its label. */}
@@ -190,20 +183,6 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
         );
       })}
 
-      {regions.map((r) => {
-        const [x, y] = project(r.lon, r.lat);
-        return (
-          <Html key={r.adcode} position={[x, heightAt(r.adcode) + 0.3, -y]} center portal={layer} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
-            <div
-              data-map-label
-              className={`whitespace-nowrap border-2 border-dashed border-accent bg-paper/90 px-2 py-0.5 font-mono font-bold text-accent ${labelSize}`}
-              style={{ opacity: 0 }}
-            >
-              {r.name[locale]}
-            </div>
-          </Html>
-        );
-      })}
 
       {/* Title south-west of Tibet; it waits until the about panel has scrolled away. */}
       <Html
@@ -219,9 +198,18 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
           </p>
           <p className="mt-1 font-mono text-[12px] text-ink-soft">
             {locale === "zh"
-              ? `${places.length} 座城市 · ${regions.map((r) => r.name.zh).join("、")}`
-              : `${places.length} cities · ${regions.map((r) => r.name.en).join(", ")}`}
+              ? `${places.length} 个地方 · ${visitedProvinces.size} / ${PROVINCE_COUNT} 个省级行政区`
+              : `${places.length} places · ${visitedProvinces.size} / ${PROVINCE_COUNT} provinces`}
           </p>
+          <p className={`mt-2 border-l-2 border-accent pl-2 ${portrait ? "text-[12px]" : "text-[15px]"}`}>
+            {locale === "zh" ? "我的梦想是走遍中国的每一个省份。" : "My dream is to set foot in every province of China."}
+          </p>
+          {/* Progress toward that dream: one tick per province. */}
+          <div className="mt-2 flex gap-[3px]" aria-hidden>
+            {Array.from({ length: PROVINCE_COUNT }, (_, i) => (
+              <span key={i} className={`h-2 w-[5px] ${i < visitedProvinces.size ? "bg-accent" : "border border-ink/40"}`} />
+            ))}
+          </div>
         </div>
       </Html>
     </group>
