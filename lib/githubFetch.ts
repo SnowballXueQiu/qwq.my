@@ -29,6 +29,9 @@ const unescape = (s: string) =>
   s.replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 
 const UA = { "User-Agent": "qwq.my (+https://qwq.my)" };
+/** GitHub is unreachable from some networks; give up quickly and use the snapshot. */
+const TIMEOUT = 8000;
+const get = (url: string, headers: Record<string, string>) => fetch(url, { headers, signal: AbortSignal.timeout(TIMEOUT) });
 
 function attr(tag: string, name: string) {
   return tag.match(new RegExp(`${name}="([^"]*)"`))?.[1];
@@ -96,16 +99,16 @@ export async function fetchGithub(login: string, token?: string): Promise<Github
   const api = { ...UA, Accept: "application/vnd.github+json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
   const counts = async () => {
     // The REST API when it has quota; the public profile page otherwise.
-    const r = await fetch(`https://api.github.com/users/${login}`, { headers: api });
+    const r = await get(`https://api.github.com/users/${login}`, api);
     if (r.ok) {
       const u = await r.json();
       return { repos: u.public_repos ?? 0, followers: u.followers ?? 0 };
     }
-    const page = await fetch(`https://github.com/${login}`, { headers: UA });
+    const page = await get(`https://github.com/${login}`, UA);
     return page.ok ? parseProfile(await page.text()) : { repos: 0, followers: 0 };
   };
   const [calendar, user] = await Promise.all([
-    fetch(`https://github.com/users/${login}/contributions`, { headers: UA }).then((r) => {
+    get(`https://github.com/users/${login}/contributions`, UA).then((r) => {
       if (!r.ok) throw new Error(`contributions ${r.status}`);
       return r.text();
     }),
