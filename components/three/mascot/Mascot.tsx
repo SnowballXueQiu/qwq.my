@@ -32,8 +32,8 @@ const EYE_PARTS: Record<EyeKind, string[]> = {
   "@": ["spiral"],
 };
 
-const EYE_X = 2.12;
-const EYE_Y = 0.3;
+export const EYE_X = 2.12;
+export const EYE_Y = 0.3;
 const PUPIL_TRAVEL = 0.3;
 const TEARS = 14;
 

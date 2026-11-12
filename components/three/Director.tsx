@@ -10,7 +10,11 @@ import { useSite } from "@/lib/store";
 import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
 import { BASE_FOV } from "./framing";
+import { hudState } from "./hudState";
+import { WORLD, roadX } from "./world";
 import { buildCameraKeys } from "./world";
+import { projects } from "@/content/projects";
+import { timeline } from "@/content/timeline";
 
 /** Camera keyframes along scene time. Between keys the camera eases. */
 const KEYS = buildCameraKeys();
@@ -45,6 +49,35 @@ export function sampleCamera(s: number, pos: Vector3, target: Vector3) {
 }
 
 const parallax = { x: 0, y: 0 };
+const anchorWorld = new Vector3();
+
+/** What the active sheet's panel points at in the world, if anything. */
+function anchorFor(s: number): { label: string } | null {
+  const sheet = Math.floor(s);
+  const f = s - sheet;
+  if (sheet === 1) {
+    anchorWorld.set(0, 1.1, WORLD.about.z);
+    return { label: "REF 02-A · init(me)" };
+  }
+  if (sheet === 2) {
+    anchorWorld.set(0, 0, WORLD.skills.start - (WORLD.skills.start - WORLD.skills.end) * f);
+    return { label: "REF 03-T · tunnel axis" };
+  }
+  if (sheet === 3) {
+    const i = Math.min(projects.length - 1, Math.floor(f * projects.length));
+    const side = i % 2 === 0 ? 1 : -1;
+    anchorWorld.set(side * WORLD.projects.side, 0, WORLD.projects.start - WORLD.projects.spacing * i);
+    return { label: `REF 04-${String(i + 1).padStart(2, "0")} · ${projects[i].title}` };
+  }
+  if (sheet === 4) {
+    const i = Math.min(timeline.length - 1, Math.floor(f * timeline.length));
+    const { start, end } = WORLD.timeline;
+    const z = start - ((i + 0.5) / timeline.length) * (start - end);
+    anchorWorld.set(roadX(z) + (i % 2 === 0 ? -3 : 3), 2.5, z);
+    return { label: `REF 05-${String(i + 1).padStart(2, "0")} · ${timeline[i].date}` };
+  }
+  return null;
+}
 
 /** Turns scroll into camera motion, hero choreography and the scene's light/dark. */
 export function Director() {
@@ -144,6 +177,30 @@ export function Director() {
         camera.fov = fov;
         camera.updateProjectionMatrix();
       }
+    }
+
+    // Publish readouts for the DOM HUD.
+    const h = hudState;
+    h.cam.x = camera.position.x;
+    h.cam.y = camera.position.y;
+    h.cam.z = camera.position.z;
+    h.cam.fov = camera instanceof PerspectiveCamera ? camera.fov : BASE_FOV;
+    h.cam.roll = roll % 360;
+    h.cam.yaw = (Math.atan2(target.x - pos.x, -(target.z - pos.z)) * 180) / Math.PI;
+    h.fps += (1 / Math.max(delta, 1e-3) - h.fps) * 0.05;
+    h.frame++;
+    h.velocity = frameState.velocity;
+    h.speed = frameState.speed;
+    h.sinceCut = sinceCut;
+    const anchor = free > 0.5 ? anchorFor(s) : null;
+    if (anchor) {
+      anchorWorld.project(camera);
+      h.anchor.visible = anchorWorld.z < 1 && Math.abs(anchorWorld.x) < 1.2 && Math.abs(anchorWorld.y) < 1.2;
+      h.anchor.x = ((anchorWorld.x + 1) / 2) * state.size.width;
+      h.anchor.y = ((1 - anchorWorld.y) / 2) * state.size.height;
+      h.anchor.label = anchor.label;
+    } else {
+      h.anchor.visible = false;
     }
 
     // Lens and film.

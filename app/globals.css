@@ -259,3 +259,18 @@ html.game-open main {
   color: var(--ink-soft);
   border-bottom-color: var(--ink);
 }
+
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+html.menu-open .hud,
+html.game-open .hud {
+  opacity: 0;
+}
+
+.hud {
+  transition: opacity 0.4s ease;
+}

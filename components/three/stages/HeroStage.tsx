@@ -2,8 +2,9 @@
 
 import { useRef } from "react";
 import { createPortal, useFrame, useThree } from "@react-three/fiber";
-import { Group, PerspectiveCamera } from "three";
-import { Mascot, type MascotHandle } from "../mascot/Mascot";
+import { Group, PerspectiveCamera, Vector3 } from "three";
+import { EYE_X, EYE_Y, Mascot, type MascotHandle } from "../mascot/Mascot";
+import { hudState } from "../hudState";
 import { PaperSheet } from "../paper/PaperSheet";
 import { frameState, mix } from "../frameState";
 import { COVER_FOV, HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
@@ -27,7 +28,9 @@ export function HeroStage() {
   const cover = frustumAt(camera, PAPER_DIST, aspect, COVER_FOV);
   const k = PAPER_DIST / HERO_DIST;
 
-  useFrame(() => {
+  const probe = useRef({ c: new Vector3(), e: new Vector3() });
+
+  useFrame((state) => {
     const f = frameState;
     breakRef.current = f.breakAmount;
     if (mascot.current) {
@@ -64,6 +67,27 @@ export function HeroStage() {
     g.scale.setScalar(s);
     // A little spin as it bursts through.
     g.rotation.z = Math.sin(leap * Math.PI) * 0.18 * (1 - park);
+
+    // Where the eyes are on screen, so the HUD can dimension the drawing.
+    hudState.eyesVisible = f.s < 0.42 && f.game < 0.5 && !portrait;
+    if (hudState.eyesVisible) {
+      g.updateWorldMatrix(true, false);
+      const { c, e } = probe.current;
+      [-1, 1].forEach((side, i) => {
+        c.set(side * EYE_X, EYE_Y, 0);
+        g.localToWorld(c);
+        e.set(side * EYE_X + 1.27, EYE_Y, 0);
+        g.localToWorld(e);
+        c.project(state.camera);
+        e.project(state.camera);
+        const w = state.size.width;
+        const h = state.size.height;
+        const eye = hudState.eyes[i];
+        eye.x = ((c.x + 1) / 2) * w;
+        eye.y = ((1 - c.y) / 2) * h;
+        eye.r = Math.abs(((e.x - c.x) / 2) * w);
+      });
+    }
   });
 
   return (

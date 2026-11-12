@@ -12,6 +12,8 @@ export const setLenis = (lenis: Lenis | null) => {
   instance = lenis;
 };
 
+export const getLenis = () => instance;
+
 /** Smoothly scrolls to a selector or offset, falling back to native scroll. */
 export function scrollToTarget(target: string | number) {
   if (instance) {

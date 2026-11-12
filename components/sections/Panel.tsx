@@ -2,6 +2,7 @@
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div
+      data-panel
       className={`pointer-events-auto relative border border-ink bg-paper/90 p-4 backdrop-blur-[2px] md:p-5 ${className}`}
     >
       {/* Corner ticks, like registration marks. */}

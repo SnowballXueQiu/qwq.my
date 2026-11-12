@@ -7,6 +7,8 @@ import { locales } from "@/lib/i18n";
 import { listPosts } from "@/lib/posts";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
+import { Hud } from "@/components/hud/Hud";
+import { MvTimeline } from "@/components/hud/MvTimeline";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { GameHUD } from "@/components/game/GameHUD";
@@ -72,7 +74,9 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <Suspense fallback={null}>
           <RouteSync />
         </Suspense>
+        <Hud />
         <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
+        <MvTimeline titles={dict.sheets} />
         {children}
         <Terminal locale={locale} posts={posts} />
         <GameHUD labels={dict.game} />
