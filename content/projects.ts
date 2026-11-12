@@ -46,7 +46,7 @@ export const projects: Project[] = [
       en: "Frontend of the KLPBBS (Creeper forum) survey system, live at wj.klpbbs.com.",
     },
     role: { zh: "前端开发", en: "Frontend" },
-    tags: ["TypeScript", "React"],
+    tags: ["Next.js", "React", "Mantine"],
     href: "https://wj.klpbbs.com",
     repo: "https://github.com/TeamVastsea/klpbbs_survey_frontend",
   },
