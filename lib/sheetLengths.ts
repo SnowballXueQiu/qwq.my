@@ -9,13 +9,28 @@ import type { SheetId } from "./sheets";
  */
 export const TIMELINE_SLOTS = timeline.length + 2;
 
+/**
+ * One pace for every "stop" on the ride (skill cards, project screens,
+ * milestones), in viewport heights of scrolling: how long the camera holds at
+ * a stop, and how long the move to the next one takes. Sections with more
+ * stops are simply longer, so the speed feels the same everywhere.
+ */
+export const PACE = { hold: 0.32, move: 0.4 };
+const perStop = PACE.hold + PACE.move;
+/** Where in a stop's slot the hold begins and ends (the move takes the rest). */
+export const HOLD_IN = PACE.move / 2 / perStop;
+export const HOLD_OUT = 1 - HOLD_IN;
+
+/** A sticky section pins for (length − 1) viewports; fill exactly that with stops. */
+const lengthFor = (stops: number) => Math.max(3, 1 + stops * perStop);
+
 /** Scroll length of each home sheet, in viewport heights. */
 export const SHEET_LENGTH: Record<SheetId, number> = {
   hero: 3,
   about: 2.4,
-  skills: Math.max(3, skillGroups.length * 0.6),
-  projects: Math.max(3, projects.length * 0.9),
-  timeline: Math.max(3, TIMELINE_SLOTS * 0.62),
+  skills: lengthFor(skillGroups.length),
+  projects: lengthFor(projects.length),
+  timeline: lengthFor(TIMELINE_SLOTS),
   writing: 1.6,
   contact: 1.8,
 };

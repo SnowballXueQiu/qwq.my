@@ -1,7 +1,7 @@
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
-import { TIMELINE_SLOTS, pinned } from "@/lib/sheetLengths";
+import { HOLD_IN, HOLD_OUT, TIMELINE_SLOTS, pinned } from "@/lib/sheetLengths";
 
 type V3 = [number, number, number];
 /** `roll` is the dutch angle in degrees. */
@@ -73,14 +73,14 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     // arrive, hold while you read, then move on.
     const slot = pinned("skills") / skillGroups.length;
     const station = { pos: [1.2, 0.3, z + 17.5] as V3, look: [3.6, 0.2, z - 4] as V3, roll: 0 };
-    keys.push({ s: 2 + slot * (i + 0.12), ...station }, { s: 2 + slot * (i + 0.88), ...station });
+    keys.push({ s: 2 + slot * (i + HOLD_IN), ...station }, { s: 2 + slot * (i + HOLD_OUT), ...station });
   }
   for (let i = 0; i < projectCount; i++) {
     const z = P_START - P_SPACING * i;
     const side = i % 2 === 0 ? 1 : -1;
     const stop = { pos: [-side * 1.4, 0.6, z + 10] as V3, look: [side * WORLD.projects.side * 0.85, 0, z] as V3, roll: -side * 6 };
     const slot = pinned("projects") / projectCount;
-    keys.push({ s: 3 + slot * (i + 0.15), ...stop }, { s: 3 + slot * (i + 0.85), ...stop });
+    keys.push({ s: 3 + slot * (i + HOLD_IN), ...stop }, { s: 3 + slot * (i + HOLD_OUT), ...stop });
   }
   // Timeline: stop at each milestone (sign on the verge, exhibit in the middle
   // of the road when there is one), then rise over the contribution plaza.
@@ -98,7 +98,7 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
       // Lean into the bends like a motorbike.
       roll: (roadX(camZ - 8) - roadX(camZ)) * 4,
     });
-    keys.push({ s: 4 + tSlot * (i + 0.15), ...at(z + 15) }, { s: 4 + tSlot * (i + 0.85), ...at(z + 13) });
+    keys.push({ s: 4 + tSlot * (i + HOLD_IN), ...at(z + 15) }, { s: 4 + tSlot * (i + HOLD_OUT), ...at(z + 13) });
   });
   // The GitHub city: roll up to the foot of the towers looking up at them,
   // then crane up and back until the whole year reads as the familiar grid.
