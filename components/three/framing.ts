@@ -2,10 +2,14 @@ import type { PerspectiveCamera } from "three";
 
 export const HERO_DIST = 14;
 export const PAPER_DIST = 14.6;
+/** The resting field of view; the director widens it with speed and narrows it on cuts. */
+export const BASE_FOV = 35;
+/** Widest the director ever goes, plus parallax slack: sheets are cut to cover this. */
+export const COVER_FOV = 50;
 
 /** Half-extents of the view frustum at a distance from the camera. */
-export function frustumAt(camera: PerspectiveCamera, dist: number, aspect: number) {
-  const halfH = Math.tan((camera.fov * Math.PI) / 360) * dist;
+export function frustumAt(_camera: PerspectiveCamera, dist: number, aspect: number, fov = BASE_FOV) {
+  const halfH = Math.tan((fov * Math.PI) / 360) * dist;
   return { halfW: halfH * aspect, halfH };
 }
 

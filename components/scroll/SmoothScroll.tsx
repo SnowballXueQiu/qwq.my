@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { prefersReducedMotion, setLenis } from "@/lib/scroll";
+import { prefersReducedMotion, scrollMotion, setLenis } from "@/lib/scroll";
 import { useSite } from "@/lib/store";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -26,7 +26,8 @@ export function SmoothScroll() {
 
     const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9 });
     setLenis(lenis);
-    lenis.on("scroll", () => {
+    lenis.on("scroll", (l: Lenis) => {
+      scrollMotion.velocity = l.velocity;
       ScrollTrigger.update();
       updateProgress();
     });

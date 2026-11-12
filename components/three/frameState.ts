@@ -14,6 +14,11 @@ export const frameState = {
   overview: 0,
   /** 0–1: debug-mode mini game in progress. */
   game: 0,
+  /** Smoothed signed scroll velocity and its 0–1 magnitude. */
+  velocity: 0,
+  speed: 0,
+  /** Seconds since the last hard cut (drives punch-ins and shake). */
+  sinceCut: 99,
 };
 
 /** In the overview map every set piece shows fully assembled. */

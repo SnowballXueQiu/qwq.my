@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import type { Group, PerspectiveCamera } from "three";
 import { PaperSheet } from "../paper/PaperSheet";
 import { frameState, smooth } from "../frameState";
-import { HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
+import { COVER_FOV, HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
 import { WORLD } from "../world";
 
 /**
@@ -19,6 +19,7 @@ export function FinaleStage() {
   const breakRef = useRef(1.7);
   const group = useRef<Group>(null);
   const sheet = frustumAt(camera, PAPER_DIST, aspect);
+  const cover = frustumAt(camera, PAPER_DIST, aspect, COVER_FOV);
   const hero = heroPlacement(camera, aspect);
   const k = PAPER_DIST / HERO_DIST;
 
@@ -31,8 +32,8 @@ export function FinaleStage() {
   return (
     <group ref={group} position={[0, 0, WORLD.contact.z + HERO_DIST - PAPER_DIST]}>
       <PaperSheet
-        width={sheet.halfW * 2 * 1.06}
-        height={sheet.halfH * 2 * 1.06}
+        width={cover.halfW * 2 * 1.08}
+        height={cover.halfH * 2 * 1.08}
         focus={[hero.x * k, hero.y * k]}
         pxToWorld={(sheet.halfH * 2) / size.height}
         breakRef={breakRef}

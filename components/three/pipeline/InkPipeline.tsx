@@ -6,6 +6,7 @@ import {
   DepthTexture,
   GLSL3,
   HalfFloatType,
+  LinearFilter,
   Mesh,
   NearestFilter,
   OrthographicCamera,
@@ -21,6 +22,7 @@ import { useSite } from "@/lib/store";
 import { palette, srgb } from "@/lib/tokens";
 import { sharedUniforms } from "../materials/inkMaterial";
 import { compositeFragment, compositeVertex } from "../shaders/composite.glsl";
+import { postFragment } from "../shaders/post.glsl";
 
 /** Layer for annotations drawn straight to screen after the ink composite. */
 export const OVERLAY_LAYER = 1;
@@ -37,6 +39,18 @@ export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, flash:
 
 /** Set while another canvas (the year-in-review player) owns the shared shader clock. */
 export const sitePipeline = { paused: false };
+
+/** Lens/film effects after the ink pass; the director and click handlers write here. */
+export const postFx = {
+  aberration: 0,
+  crt: 0,
+  speed: 0,
+  vignette: 0.35,
+  shockX: 0.5,
+  shockY: 0.5,
+  /** Wall-clock ms of the last shockwave, or 0. */
+  shockAt: 0,
+};
 
 /**
  * Takes over rendering: scene → G-buffer (tone/accent/fill + normal/id + depth),
@@ -104,12 +118,41 @@ export function InkPipeline({
   }, [target]);
 
 
+  const post = useMemo(() => {
+    const rt = new WebGLRenderTarget(1, 1, { minFilter: LinearFilter, magFilter: LinearFilter, depthBuffer: true });
+    const mat = new ShaderMaterial({
+      glslVersion: GLSL3,
+      vertexShader: compositeVertex,
+      fragmentShader: postFragment,
+      depthTest: false,
+      depthWrite: false,
+      uniforms: {
+        tScene: { value: rt.texture },
+        uResolution: { value: new Vector2(1, 1) },
+        uDpr: { value: 1 },
+        uTime: sharedUniforms.uTime,
+        uAberration: { value: 0 },
+        uCRT: { value: 0 },
+        uSpeed: { value: 0 },
+        uVignette: { value: 0.35 },
+        uLine: { value: new Vector3(...srgb(palette.paper)) },
+        uShockCenter: { value: new Vector2(0.5, 0.5) },
+        uShockAge: { value: -1 },
+      },
+    });
+    const scene = new Scene();
+    scene.add(new Mesh(new PlaneGeometry(2, 2), mat));
+    return { rt, mat, scene };
+  }, []);
+
   useEffect(
     () => () => {
       target.dispose();
       material.dispose();
+      post.rt.dispose();
+      post.mat.dispose();
     },
-    [target, material],
+    [target, material, post],
   );
 
   useFrame((state, delta) => {
@@ -121,8 +164,11 @@ export function InkPipeline({
     const h = Math.max(1, Math.floor(size.height * dpr));
     if (target.width !== w || target.height !== h) {
       target.setSize(w, h);
+      post.rt.setSize(w, h);
       u.uResolution.value.set(w, h);
       u.uDpr.value = dpr;
+      post.mat.uniforms.uResolution.value.set(w, h);
+      post.mat.uniforms.uDpr.value = dpr;
     }
     const external = controls !== undefined;
     if (!external && sitePipeline.paused) return;
@@ -156,15 +202,34 @@ export function InkPipeline({
     gl.clear();
     gl.render(scene, camera);
 
-    gl.setRenderTarget(null);
+    // Ink composite and overlays go into a film buffer so the lens pass bends both.
+    gl.setRenderTarget(post.rt);
     gl.render(quadScene, quadCamera);
-
     gl.autoClear = false;
     gl.clearDepth();
     camera.layers.set(OVERLAY_LAYER);
     gl.render(scene, camera);
     camera.layers.set(0);
     gl.autoClear = true;
+
+    const p = post.mat.uniforms;
+    const fx = external ? { ...postFx, aberration: 0, crt: 0, speed: 0, shockAt: 0 } : postFx;
+    p.uAberration.value = fx.aberration;
+    p.uCRT.value = fx.crt;
+    p.uSpeed.value = fx.speed;
+    p.uVignette.value = fx.vignette;
+    const inv = u.uInvert.value;
+    const paperRGB = srgb(palette.paper);
+    const inkRGB = srgb(palette.ink);
+    p.uLine.value.set(
+      inkRGB[0] + (paperRGB[0] - inkRGB[0]) * inv,
+      inkRGB[1] + (paperRGB[1] - inkRGB[1]) * inv,
+      inkRGB[2] + (paperRGB[2] - inkRGB[2]) * inv,
+    );
+    p.uShockCenter.value.set(fx.shockX, fx.shockY);
+    p.uShockAge.value = fx.shockAt ? (performance.now() - fx.shockAt) / 1000 : -1;
+    gl.setRenderTarget(null);
+    gl.render(post.scene, quadCamera);
   }, 1);
 
   return null;

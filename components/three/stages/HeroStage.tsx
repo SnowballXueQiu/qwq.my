@@ -6,7 +6,7 @@ import { Group, PerspectiveCamera } from "three";
 import { Mascot, type MascotHandle } from "../mascot/Mascot";
 import { PaperSheet } from "../paper/PaperSheet";
 import { frameState, mix } from "../frameState";
-import { HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
+import { COVER_FOV, HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
 
 /**
  * The opening: a line drawing of QwQ on a sheet of paper. Scrolling gives it
@@ -24,6 +24,7 @@ export function HeroStage() {
 
   const hero = heroPlacement(camera, aspect);
   const sheet = frustumAt(camera, PAPER_DIST, aspect);
+  const cover = frustumAt(camera, PAPER_DIST, aspect, COVER_FOV);
   const k = PAPER_DIST / HERO_DIST;
 
   useFrame(() => {
@@ -69,8 +70,8 @@ export function HeroStage() {
     <>
       <group ref={paper} position={[0, 0, HERO_DIST - PAPER_DIST]}>
         <PaperSheet
-          width={sheet.halfW * 2 * 1.06}
-          height={sheet.halfH * 2 * 1.06}
+          width={cover.halfW * 2 * 1.08}
+          height={cover.halfH * 2 * 1.08}
           focus={[hero.x * k, hero.y * k]}
           pxToWorld={(sheet.halfH * 2) / size.height}
           breakRef={breakRef}

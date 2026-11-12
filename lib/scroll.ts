@@ -2,6 +2,12 @@ import type Lenis from "lenis";
 
 let instance: Lenis | null = null;
 
+/** Latest scroll velocity in px per frame (signed), for effects that react to speed. */
+export const scrollMotion = { velocity: 0 };
+
+/** Lenis' live velocity (0 when idle), falling back to the last scroll event. */
+export const getScrollVelocity = () => instance?.velocity ?? scrollMotion.velocity;
+
 export const setLenis = (lenis: Lenis | null) => {
   instance = lenis;
 };

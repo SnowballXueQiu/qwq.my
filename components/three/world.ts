@@ -2,7 +2,8 @@ import { projects } from "@/content/projects";
 import { skills } from "@/content/skills";
 
 type V3 = [number, number, number];
-export type CameraKey = { s: number; pos: V3; look: V3 };
+/** `roll` is the dutch angle in degrees. */
+export type CameraKey = { s: number; pos: V3; look: V3; roll?: number };
 
 /**
  * World layout. Scenes are strung out along -z; the camera flies from the
@@ -34,10 +35,11 @@ export function buildCameraKeys(): CameraKey[] {
     { s: 0, pos: [0, 0, 14], look: [0, 0, 0] },
     { s: 0.55, pos: [0, 0, 14], look: [0, 0, 0] },
     { s: 1.0, pos: [0, 0, -14], look: [0, 0, WORLD.about.z] },
-    { s: 1.45, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z] },
-    { s: 1.78, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z] },
-    { s: 2.0, pos: [0, 0, WORLD.skills.start + 8], look: [0, 0, WORLD.skills.start - 30] },
-    { s: 2.92, pos: [0, 0, WORLD.skills.end - 6], look: [0, 0, WORLD.skills.end - 40] },
+    { s: 1.45, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z], roll: -7 },
+    { s: 1.78, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z], roll: 9 },
+    { s: 2.0, pos: [0, 0, WORLD.skills.start + 8], look: [0, 0, WORLD.skills.start - 30], roll: 0 },
+    // Corkscrew through the skills tunnel.
+    { s: 2.92, pos: [0, 0, WORLD.skills.end - 6], look: [0, 0, WORLD.skills.end - 40], roll: 200 },
   ];
   for (let i = 0; i < projectCount; i++) {
     const z = P_START - P_SPACING * i;
@@ -46,6 +48,7 @@ export function buildCameraKeys(): CameraKey[] {
       s: 3 + (i + 0.5) / projectCount,
       pos: [-side * 1.4, 0.6, z + 10],
       look: [side * WORLD.projects.side * 0.85, 0, z],
+      roll: 360 - side * 6,
     });
   }
   const roadKeys = 5;
@@ -56,12 +59,14 @@ export function buildCameraKeys(): CameraKey[] {
       s: 4.05 + t * 0.9,
       pos: [roadX(z), 2.4, z],
       look: [roadX(z - 22), 0.4, z - 22],
+      // Lean into the bends like a motorbike.
+      roll: 360 + (roadX(z - 8) - roadX(z)) * 4,
     });
   }
   keys.push(
-    { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z] },
-    { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z] },
-    { s: 7, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z] },
+    { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 365 },
+    { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 360 },
+    { s: 7, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 360 },
   );
   return keys;
 }

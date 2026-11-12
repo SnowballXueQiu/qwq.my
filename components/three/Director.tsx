@@ -5,10 +5,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
-import { prefersReducedMotion } from "@/lib/scroll";
+import { getScrollVelocity, prefersReducedMotion } from "@/lib/scroll";
 import { useSite } from "@/lib/store";
-import { pipelineTarget } from "./pipeline/InkPipeline";
+import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
+import { BASE_FOV } from "./framing";
 import { buildCameraKeys } from "./world";
 
 /** Camera keyframes along scene time. Between keys the camera eases. */
@@ -31,6 +32,7 @@ const ARENA_LOOK = new Vector3(0, 800, -100);
 const scratchPos = new Vector3();
 const scratchLook = new Vector3();
 
+/** Camera position and target at scene time `s`; returns the dutch angle in degrees. */
 export function sampleCamera(s: number, pos: Vector3, target: Vector3) {
   let i = 0;
   while (i < KEYS.length - 2 && s > KEYS[i + 1].s) i++;
@@ -39,7 +41,10 @@ export function sampleCamera(s: number, pos: Vector3, target: Vector3) {
   const t = smooth(k0.s, k1.s, s);
   pos.lerpVectors(a.set(...k0.pos), b.set(...k1.pos), t);
   target.lerpVectors(look.set(...k0.look), lookB.set(...k1.look), t);
+  return (k0.roll ?? 0) + ((k1.roll ?? 0) - (k0.roll ?? 0)) * t;
 }
+
+const parallax = { x: 0, y: 0 };
 
 /** Turns scroll into camera motion, hero choreography and the scene's light/dark. */
 export function Director() {
@@ -95,8 +100,26 @@ export function Director() {
     frameState.park = reading ? 1 : smooth(0.74, 1.0, s);
     frameState.finale = reading ? 0 : smooth(5.58, 5.96, s);
 
-    sampleCamera(s, pos, target);
+    const calm = prefersReducedMotion();
+    let roll = sampleCamera(s, pos, target);
     frameState.cameraZ = pos.z;
+
+    // Speed: Lenis velocity, smoothed, as a 0–1 magnitude.
+    const v = calm ? 0 : getScrollVelocity();
+    frameState.velocity += (v - frameState.velocity) * Math.min(delta * 8, 1);
+    frameState.speed = Math.min(Math.abs(frameState.velocity) / 40, 1);
+    const sinceCut = state.clock.elapsedTime - cut.at;
+    frameState.sinceCut = sinceCut;
+    const punch = calm ? 0 : sinceCut < 0.8 ? Math.exp(-sinceCut * 5.5) : 0;
+
+    // Hand-held: the pointer nudges the camera, cuts shake it, speed leans it.
+    parallax.x += (state.pointer.x - parallax.x) * Math.min(delta * 3, 1);
+    parallax.y += (state.pointer.y - parallax.y) * Math.min(delta * 3, 1);
+    const free = calm ? 0 : 1 - Math.max(frameState.overview, frameState.game);
+    const t = state.clock.elapsedTime;
+    pos.x += (parallax.x * 0.55 + Math.sin(t * 47) * punch * 0.3) * free;
+    pos.y += (parallax.y * 0.35 + Math.cos(t * 53) * punch * 0.3) * free;
+    roll += (frameState.velocity * 0.12 + Math.sin(t * 31) * punch * 2) * free;
     // Ease toward (or back from) the overview map.
     frameState.overview += ((fx.menu ? 1 : 0) - frameState.overview) * (1 - Math.exp(-Math.min(delta, 0.1) * 2.6));
     const o = smooth(0, 1, frameState.overview);
@@ -111,13 +134,24 @@ export function Director() {
     }
     camera.position.copy(pos);
     camera.lookAt(target);
+    camera.rotateZ(((roll * (1 - Math.max(o, g))) * Math.PI) / 180);
     if (camera instanceof PerspectiveCamera) {
+      // Warp wider with speed; punch in on every cut.
+      const fov = BASE_FOV + frameState.speed * 10 * free - punch * 9;
       const far = 220 + o * 1200;
-      if (Math.abs(camera.far - far) > 1) {
+      if (Math.abs(camera.far - far) > 1 || Math.abs(camera.fov - fov) > 0.01) {
         camera.far = far;
+        camera.fov = fov;
         camera.updateProjectionMatrix();
       }
     }
+
+    // Lens and film.
+    const transit = o > 0.03 && o < 0.97 ? 0.6 : 0;
+    postFx.speed = calm ? 0 : smooth(0.2, 1, frameState.speed) * free;
+    postFx.aberration = calm ? 0 : frameState.speed * 0.6 + punch * 0.8 + pipelineTarget.glitch * 0.7;
+    postFx.crt = calm ? 0 : Math.max(punch * 0.9, transit, pipelineTarget.glitch * 0.6);
+    postFx.vignette = 0.35 + frameState.speed * 0.3;
 
     // The game always plays in the dark arena, whatever sheet it was launched from.
     const inGame = frameState.game > 0.5;
