@@ -70,9 +70,9 @@ export function beatTimes(portrait = false): number[] {
     ...skillGroups.map((_, i) => 2 + slot("skills", skillGroups.length) * (i + 0.5)),
     ...projects.map((_, i) => 3 + slot("projects", projectCount) * (i + 0.5)),
     ...timeline.map((_, i) => 4 + T_SLOT * (i + 0.5)),
-    // The GitHub city: among the towers, then the year from above (a phone pans it in two halves).
-    4 + T_SLOT * (n + 0.6),
-    ...(portrait ? [4 + T_SLOT * (n + 1.45), 4 + T_SLOT * (n + 1.95)] : [4 + T_SLOT * (n + 1.7)]),
+    // The GitHub city: among the towers, then the year from above. A phone is too narrow for
+    // the street view; it pans the year in two halves instead.
+    ...(portrait ? [4 + T_SLOT * (n + 1.45), 4 + T_SLOT * (n + 1.95)] : [4 + T_SLOT * (n + 0.6), 4 + T_SLOT * (n + 1.7)]),
     5.3,
     // The end of the page.
     6 + pinned("contact"),
