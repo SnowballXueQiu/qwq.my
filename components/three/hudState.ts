@@ -19,4 +19,6 @@ export const hudState = {
     { x: 0, y: 0, r: 0 },
   ],
   eyesVisible: false,
+  /** The toys are out and waiting to be poked. */
+  toyTime: false,
 };

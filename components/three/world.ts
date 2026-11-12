@@ -37,7 +37,8 @@ export const roadX = (z: number) => Math.sin((z - T_START) * 0.045) * 3.2;
 export function buildCameraKeys(): CameraKey[] {
   const keys: CameraKey[] = [
     { s: 0, pos: [0, 0, 14], look: [0, 0, 0] },
-    { s: 0.55, pos: [0, 0, 14], look: [0, 0, 0] },
+    // Hold after the tear so there's time to play with the toys that burst out.
+    { s: 0.78, pos: [0, 0, 14], look: [0, 0, 0] },
     { s: 1.0, pos: [0, 0, -14], look: [0, 0, WORLD.about.z] },
     { s: 1.45, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z], roll: -7 },
     { s: 1.78, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z], roll: 9 },

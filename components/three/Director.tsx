@@ -136,8 +136,8 @@ export function Director() {
     frameState.s = s;
     frameState.depth = reading ? 1 : smooth(0.1, 0.36, s);
     frameState.breakAmount = reading ? 0 : smooth(0.3, 0.95, s) * 1.7;
-    frameState.leap = reading ? 1 : smooth(0.4, 0.66, s);
-    frameState.park = reading ? 1 : smooth(0.74, 1.0, s);
+    frameState.leap = reading ? 1 : smooth(0.38, 0.58, s);
+    frameState.park = reading ? 1 : smooth(0.8, 1.0, s);
     frameState.finale = reading ? 0 : smooth(5.58, 5.96, s);
 
     const calm = prefersReducedMotion();
@@ -199,6 +199,7 @@ export function Director() {
     h.velocity = frameState.velocity;
     h.speed = frameState.speed;
     h.sinceCut = sinceCut;
+    h.toyTime = !reading && s > 0.52 && s < 0.8 && free > 0.5;
     const anchor = free > 0.5 ? anchorFor(s) : null;
     if (anchor) {
       anchorWorld.project(camera);

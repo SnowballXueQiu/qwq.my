@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferAttribute, Group, IcosahedronGeometry, SphereGeometry, TorusGeometry, BoxGeometry } from "three";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
+import { frameState } from "../frameState";
 
 // Wireframe by barycentric distance: every triangle edge is printed as a line,
 // but the globe stays solid, so the back half is hidden like a real drawing.
@@ -72,14 +73,17 @@ export function Globe({ lat = 35, lon = 105, radius = 3.2, ...group }: { lat?: n
     [geo, mats],
   );
 
+  const root = useRef<Group>(null);
   useFrame((_, dt) => {
+    // Only once we've flown in; from the hero it would sit right behind QwQ's eye.
+    if (root.current) root.current.visible = frameState.s > 0.85 && frameState.s < 2.2;
     if (spin.current) spin.current.rotation.y += dt * 0.25;
     if (orbit.current) orbit.current.rotation.y += dt * 0.8;
   });
 
   const out = latLon(lat, lon, radius + 0.35);
   return (
-    <group {...group}>
+    <group ref={root} {...group}>
       <group ref={spin} rotation={[0.35, 0, 0]}>
         <mesh geometry={geo.sphere} material={mats.wire} />
         <mesh geometry={geo.head} material={mats.accent} position={out} />

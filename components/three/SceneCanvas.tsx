@@ -8,6 +8,7 @@ import { Director } from "./Director";
 import { BugGame } from "./game/BugGame";
 import { InteractionBridge } from "./interact/InteractionBridge";
 import { PaperDoodles } from "./interact/PaperDoodles";
+import { Toys } from "./toys/Toys";
 import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
 import { AboutStage } from "./stages/AboutStage";
@@ -52,6 +53,7 @@ export default function SceneCanvas({
       <InkPipeline />
       <HeroStage />
       <PaperDoodles />
+      <Toys />
       <DebrisField />
       <Atmosphere />
       <AboutStage />

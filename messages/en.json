@@ -29,7 +29,8 @@
     "kicker": "Student / Developer",
     "tagline": "Drawing a blueprint that moves, somewhere between code and coursework.",
     "scroll": "Scroll",
-    "draw": "✎ Drag to draw on the sheet (hold Shift for red)"
+    "draw": "✎ Drag to draw on the sheet (hold Shift for red)",
+    "toys": "✦ poke the toys — or drag to spin them ✦"
   },
   "about": {
     "heading": "About",

@@ -25,7 +25,7 @@ const BINARY = (() => {
  * a roll dial, focus brackets that kick on cuts, a leader line from the
  * active panel to what it describes, and dimension lines on the paper.
  */
-export function Hud() {
+export function Hud({ toyHint }: { toyHint: string }) {
   const readA = useRef<HTMLDivElement>(null);
   const readB = useRef<HTMLDivElement>(null);
   const code = useRef<HTMLPreElement>(null);
@@ -35,6 +35,7 @@ export function Hud() {
   const brackets = useRef<HTMLDivElement>(null);
   const leader = useRef<SVGSVGElement>(null);
   const dims = useRef<SVGSVGElement>(null);
+  const hint = useRef<HTMLDivElement>(null);
 
   const source = useMemo(() => {
     const lines = (compositeFragment + postFragment).split("\n").filter((l) => l.trim());
@@ -99,6 +100,8 @@ export function Hud() {
         }
         ctx.stroke();
       }
+
+      if (hint.current) hint.current.style.opacity = home && h.toyTime ? "1" : "0";
 
       if (dial.current) dial.current.setAttribute("transform", `rotate(${-h.cam.roll} 32 32)`);
       if (dialText.current) dialText.current.textContent = `YAW ${pad(h.cam.yaw, 3, 1)}`;
@@ -221,6 +224,13 @@ export function Hud() {
           <circle cx={32} cy={32} r={2} fill="currentColor" />
         </svg>
         <div ref={dialText} className="font-mono text-[8px]" />
+      </div>
+
+      <div
+        ref={hint}
+        className="label absolute left-1/2 top-[18%] -translate-x-1/2 bg-ink px-2 py-1 text-paper opacity-0 transition-opacity duration-500"
+      >
+        {toyHint}
       </div>
 
       {/* Focus brackets around the frame's centre. */}

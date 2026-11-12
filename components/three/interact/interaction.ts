@@ -22,3 +22,10 @@ export function impulsesSince(lastSeen: number): [Impulse[], number] {
 
 /** Elements that own their clicks; the world shouldn't react underneath them. */
 export const UI_SELECTOR = "a, button, input, textarea, [data-panel], [role='slider'], [role='dialog'], header";
+
+/** A 3D object handled this press itself; world-level click effects should stand down. */
+const claim = { at: 0 };
+export const claimPointer = () => {
+  claim.at = performance.now();
+};
+export const pointerClaimed = () => performance.now() - claim.at < 60;

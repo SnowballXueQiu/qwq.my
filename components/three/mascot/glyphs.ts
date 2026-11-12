@@ -36,8 +36,11 @@ export const STROKE = 0.27;
 export function createGlyphs() {
   const ring = new TorusGeometry(1, STROKE, 20, 72);
   const tail = stroke(new QuadraticBezierCurve3(v(0.7, -0.7), v(0.95, -1.18), v(1.4, -1.34)), STROKE * 0.92, 24);
-  const pupil = new SphereGeometry(0.4, 28, 20).scale(1, 1, 0.55);
-  const highlight = new SphereGeometry(0.12, 12, 10);
+  // Small, glossy pupils read as cute; big dark ones read as eyeballs.
+  const pupil = new SphereGeometry(0.29, 28, 20).scale(1, 1.08, 0.55);
+  const highlight = new SphereGeometry(0.1, 12, 10);
+  const sparkle = new SphereGeometry(0.045, 8, 6);
+  const blush = new SphereGeometry(0.26, 20, 12).scale(1, 0.45, 0.2);
 
   const caretPoints = Array.from({ length: 9 }, (_, i) => {
     const a = Math.PI * (0.92 - (i / 8) * 0.84);
@@ -90,7 +93,7 @@ export function createGlyphs() {
   const tear = new SphereGeometry(0.16, 14, 12).scale(1, 1.4, 1);
   const zee = stroke(polyline([v(-0.3, 0.3), v(0.3, 0.3), v(-0.3, -0.3), v(0.3, -0.3)], 0.05), 0.08, 40);
 
-  return { ring, tail, pupil, highlight, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthA, mouthAFill, hand, tear, zee };
+  return { ring, tail, pupil, highlight, sparkle, blush, caret, dash, chevron, spiral, mouthW, mouthOmega, mouthA, mouthAFill, hand, tear, zee };
 }
 
 export type Glyphs = ReturnType<typeof createGlyphs>;

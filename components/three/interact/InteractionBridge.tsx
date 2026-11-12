@@ -6,7 +6,7 @@ import { prefersReducedMotion } from "@/lib/scroll";
 import { useSite } from "@/lib/store";
 import { postFx } from "../pipeline/InkPipeline";
 import { frameState } from "../frameState";
-import { UI_SELECTOR, pointer, pushImpulse } from "./interaction";
+import { UI_SELECTOR, pointer, pointerClaimed, pushImpulse } from "./interaction";
 
 /**
  * Turns pointer input into world input: tracks the pointer in NDC, and makes
@@ -26,7 +26,7 @@ export function InteractionBridge() {
       pointer.inside = false;
     };
     const onDown = (e: PointerEvent) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 || pointerClaimed()) return;
       const html = document.documentElement;
       if (html.classList.contains("menu-open") || html.classList.contains("game-open")) return;
       if ((e.target as Element | null)?.closest(UI_SELECTOR)) return;

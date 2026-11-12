@@ -57,7 +57,7 @@ function FloorGrid() {
     const m = mesh.current;
     if (!m) return;
     const f = frameState;
-    m.visible = f.s > 0.6 && f.s < 5.75 && f.overview < 0.3 && f.game < 0.5;
+    m.visible = f.s > 0.8 && f.s < 5.75 && f.overview < 0.3 && f.game < 0.5;
     // Snap to the grid so the lines stay put while the plane slides along.
     const x = Math.round(camera.position.x / (GRID * 5)) * GRID * 5;
     const z = Math.round(camera.position.z / (GRID * 5)) * GRID * 5;

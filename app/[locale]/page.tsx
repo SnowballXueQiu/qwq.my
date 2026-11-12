@@ -24,7 +24,7 @@ export default async function Home() {
     <main id="main">
       <SheetTriggers />
 
-      <SheetSection id="hero" title={s.hero} length={2.4} sticky>
+      <SheetSection id="hero" title={s.hero} length={3} sticky>
         <HeroIntro>
           <p className="label mb-4 text-accent">{profile.roles[locale]}</p>
           <h1 className="font-display text-[clamp(4rem,16vw,16rem)] font-black leading-[0.82] tracking-[-0.04em] font-condensed">

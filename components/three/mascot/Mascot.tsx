@@ -7,6 +7,7 @@ import type { Expression } from "@/lib/store";
 import { createInkMaterial, Fill, type InkMaterial } from "../materials/inkMaterial";
 import { createGlyphs } from "./glyphs";
 import { useMascotBrain } from "./useMascotBrain";
+import { pointerClaimed } from "../interact/interaction";
 
 type EyeKind = "Q" | "O" | ">" | "<" | "^" | "-" | "@";
 type MouthKind = "w" | "ω" | "A";
@@ -34,7 +35,7 @@ const EYE_PARTS: Record<EyeKind, string[]> = {
 
 export const EYE_X = 2.12;
 export const EYE_Y = 0.3;
-const PUPIL_TRAVEL = 0.3;
+const PUPIL_TRAVEL = 0.34;
 const TEARS = 14;
 
 class Spring {
@@ -61,7 +62,9 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
   const glyphs = useMemo(() => createGlyphs(), []);
   const mats = useMemo(
     () => ({
-      stroke: createInkMaterial({ wobble: 0.035, wobbleFrequency: 1.4 }),
+      // A lighter tone keeps the rings clean line-art instead of fleshy shading.
+      stroke: createInkMaterial({ wobble: 0.035, wobbleFrequency: 1.4, toneBias: 0.22 }),
+      blush: createInkMaterial({ fill: Fill.ink, accent: 1 }),
       pupil: createInkMaterial({ fill: Fill.ink }),
       highlight: createInkMaterial({ fill: Fill.paper }),
       mouthFill: createInkMaterial({ fill: Fill.ink }),
@@ -90,7 +93,7 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
     const ndc = new Vector2();
     const onDown = (e: PointerEvent) => {
       const mesh = hitArea.current;
-      if (!mesh || !root.current?.visible) return;
+      if (!mesh || !root.current?.visible || pointerClaimed()) return;
       ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
       ray.setFromCamera(ndc, camera);
       if (ray.intersectObject(mesh, false).length) {
@@ -181,8 +184,10 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
     }
 
     // Head turns toward the pointer, breathes, and squashes when poked.
-    tilt.current.y += (state.pointer.x * 0.38 - tilt.current.y) * 0.06;
-    tilt.current.x += (-state.pointer.y * 0.26 - tilt.current.x) * 0.06;
+    // A flat drawing can't turn its head (half of it would slip behind the paper).
+    const turn = handle?.current?.depth ?? 1;
+    tilt.current.y += (state.pointer.x * 0.3 * turn - tilt.current.y) * 0.06;
+    tilt.current.x += (-state.pointer.y * 0.2 * turn - tilt.current.x) * 0.06;
     const sq = squash.current.step(0, dt, 260, 9);
     if (face.current) {
       face.current.rotation.set(tilt.current.x, tilt.current.y, Math.sin(t * 0.7) * 0.03);
@@ -256,10 +261,14 @@ export function Mascot({ handle }: { handle?: React.RefObject<MascotHandle | nul
             <group userData={{ part: "pupil" }}>
               <group ref={pupils[i]} position={[0, 0, 0.12]}>
                 <mesh geometry={glyphs.pupil} material={mats.pupil} />
-                <mesh geometry={glyphs.highlight} material={mats.highlight} position={[-0.14, 0.16, 0.2]} />
+                <mesh geometry={glyphs.highlight} material={mats.highlight} position={[-0.1, 0.12, 0.16]} />
+                <mesh geometry={glyphs.sparkle} material={mats.highlight} position={[0.1, -0.1, 0.16]} />
               </group>
             </group>
           </group>
+        ))}
+        {[-1, 1].map((side) => (
+          <mesh key={`blush${side}`} geometry={glyphs.blush} material={mats.blush} position={[side * (EYE_X + 0.15), EYE_Y - 1.35, 0.25]} />
         ))}
         <group ref={mouth} position={[0, -0.12, 0]}>
           <mesh userData={{ part: "w" }} geometry={glyphs.mouthW} material={mats.stroke} />

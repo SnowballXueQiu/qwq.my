@@ -135,6 +135,11 @@ const SOUNDS: Record<string, (intensity: number) => void> = {
     tone("square", 2400, 2400, 0.015, 0.04);
   },
   buzz: () => tone("sawtooth", 95, 70, 0.28, 0.16),
+  quack: () => {
+    tone("sawtooth", 560, 360, 0.11, 0.12);
+    tone("square", 1100, 700, 0.08, 0.04);
+    tone("sawtooth", 520, 330, 0.12, 0.1, 0.14);
+  },
   pen: () => hiss(0.18, 0.06, { type: "lowpass", from: 1800, to: 900 }),
   boot: () => [0, 0.08, 0.16].forEach((d, k) => tone("square", 660 * (1 + k * 0.5), 660 * (1 + k * 0.5), 0.05, 0.05, d)),
   party: () =>

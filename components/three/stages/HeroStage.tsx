@@ -47,13 +47,14 @@ export function HeroStage() {
     const park = Math.max(f.park, f.game);
     const leap = Math.max(f.leap, f.game);
     const finale = f.finale * (1 - f.game);
-    const near = frustumAt(camera, 6.5, aspect);
+    const near = frustumAt(camera, 11, aspect);
     const corner = frustumAt(camera, 9, aspect);
     // hero → leap (toward the lens) → park (companion corner) → finale (centre stage)
+    // Hop forward to centre stage among the toys — not into the lens.
     let x = mix(hero.x, 0, leap);
-    let y = mix(hero.y, near.halfH * 0.04, leap);
-    let z = mix(-HERO_DIST, -6.5, leap);
-    let s = hero.scale;
+    let y = mix(hero.y, near.halfH * 0.12, leap);
+    let z = mix(-HERO_DIST, -11, leap);
+    let s = mix(hero.scale, hero.scale * 0.72, leap);
     x = mix(x, corner.halfW * (portrait ? 0.62 : 0.82), park);
     y = mix(y, -corner.halfH * (portrait ? 0.62 : 0.42), park);
     z = mix(z, -9, park);
@@ -66,7 +67,7 @@ export function HeroStage() {
     g.position.set(x, y, z);
     g.scale.setScalar(s);
     // A little spin as it bursts through.
-    g.rotation.z = Math.sin(leap * Math.PI) * 0.18 * (1 - park);
+    g.rotation.z = Math.sin(leap * Math.PI) * 0.12 * (1 - park);
 
     // Where the eyes are on screen, so the HUD can dimension the drawing.
     hudState.eyesVisible = f.s < 0.42 && f.game < 0.5 && !portrait;
