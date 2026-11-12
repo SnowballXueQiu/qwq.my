@@ -35,7 +35,8 @@ export function Globe({ lat = 35, lon = 105, radius = 3.2, ...group }: { lat?: n
   const spin = useRef<Group>(null);
   const orbit = useRef<Group>(null);
   const geo = useMemo(() => {
-    const sphere = new IcosahedronGeometry(radius, 3).toNonIndexed();
+    // Polyhedron geometries are already non-indexed: one vertex per triangle corner.
+    const sphere = new IcosahedronGeometry(radius, 3);
     const n = sphere.attributes.position.count;
     const bary = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) bary[i * 3 + (i % 3)] = 1;
