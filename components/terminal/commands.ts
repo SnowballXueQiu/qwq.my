@@ -147,6 +147,10 @@ export const commands: Record<string, Command> = {
       ctx.navigate(`/${ctx.locale}/blog/${p.slug}`);
     },
   },
+  lab: {
+    summary: { zh: "打开实验室（流体、反应扩散）", en: "open the lab (fluids, reaction–diffusion)" },
+    run: (_, ctx) => ctx.navigate(`/${ctx.locale}/lab`),
+  },
   whoami: {
     summary: { zh: "你是谁", en: "who are you" },
     run: (_, ctx) => ctx.print(t(ctx, "visitor —— 一位有好奇心的访客 (◉w◉)", "visitor — a curious one (◉w◉)")),

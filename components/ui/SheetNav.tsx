@@ -10,9 +10,11 @@ import { useSite } from "@/lib/store";
 export function SheetNav({
   locale,
   titles,
+  labLabel,
 }: {
   locale: Locale;
   titles: Record<SheetId, string>;
+  labLabel: string;
 }) {
   const active = useSite((s) => s.sheet);
   const isHome = usePathname() === `/${locale}`;
@@ -50,6 +52,12 @@ export function SheetNav({
             </li>
           );
         })}
+        <li>
+          <Link href={`/${locale}/lab`} className="label flex items-baseline gap-1.5 text-accent">
+            <span>LAB</span>
+            <span>{labLabel}</span>
+          </Link>
+        </li>
       </ol>
     </nav>
   );

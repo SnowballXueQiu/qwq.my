@@ -106,5 +106,21 @@
   "sound": {
     "on": "Sound on",
     "off": "Sound off"
+  },
+  "lab": {
+    "title": "Lab",
+    "lead": "Small things running live on the GPU — hand-written GLSL, drawn in the same paper and ink as the rest of the site.",
+    "nav": "Lab",
+    "fluid": {
+      "title": "Ink fluid",
+      "body": "A stable-fluids solver: advection, vorticity confinement and 20 Jacobi pressure iterations per frame, with dye drawn as halftone. Hover for ink; hold the button or Shift for red pencil.",
+      "hint": "move to stir · hold for red"
+    },
+    "rd": {
+      "title": "Reaction–diffusion",
+      "body": "Gray–Scott: A is fed in, B eats A and decays. Nudge two numbers and the growth turns from coral to mazes, spots or waves. 14 iterations per frame.",
+      "hint": "click or drag to seed",
+      "reset": "Reset"
+    }
   }
 }

@@ -84,7 +84,7 @@ export function SheetFrame({
           </Link>
           {/* Pathname-aware pieces suspend for request-time params; keep the frame static around them. */}
           <Suspense fallback={<span />}>
-            <SheetNav locale={locale} titles={dict.sheets} />
+            <SheetNav locale={locale} titles={dict.sheets} labLabel={dict.lab.nav} />
           </Suspense>
           <div className="flex items-center gap-2">
             <SoundToggle labels={dict.sound} />
