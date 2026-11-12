@@ -9,6 +9,7 @@ import { BugGame } from "./game/BugGame";
 import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
 import { AboutStage } from "./stages/AboutStage";
+import { Atmosphere } from "./stages/Atmosphere";
 import { FinaleStage } from "./stages/FinaleStage";
 import { HeroStage } from "./stages/HeroStage";
 import { OverviewMap } from "./stages/OverviewMap";
@@ -48,6 +49,7 @@ export default function SceneCanvas({
       <InkPipeline />
       <HeroStage />
       <DebrisField />
+      <Atmosphere />
       <AboutStage />
       <SkillsStage />
       <ProjectsStage />

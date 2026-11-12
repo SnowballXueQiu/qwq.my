@@ -6,6 +6,7 @@ import { fitScale } from "../framing";
 import { KineticText } from "../text/KineticText";
 import { cue, frameState } from "../frameState";
 import { WORLD } from "../world";
+import { Globe } from "./Globe";
 
 const isPunct = (_: number, c: string) => "();=.".includes(c);
 
@@ -14,6 +15,8 @@ export function AboutStage() {
   const fit = useThree((s) => fitScale(s.size.width / s.size.height));
   return (
     <group position={[0, 0, WORLD.about.z]} scale={fit}>
+      {/* "based: 中国" — the pin sits on the location in content/profile.ts. */}
+      <Globe position={[-11, 1.5, -6]} />
       <KineticText
         text="init(me);"
         size={4.4}
