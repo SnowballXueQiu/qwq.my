@@ -1,0 +1,31 @@
+# qwq.my in production: the site plus a Cloudflare Tunnel.
+# The site publishes no ports at all; the only way in is through the tunnel,
+# so the server's IP never appears in DNS. Settings live in .env (see .env.example).
+services:
+  web:
+    build:
+      context: .
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org}
+    image: qwq-my:latest
+    restart: unless-stopped
+    environment:
+      # Optional: lifts GitHub's anonymous rate limit for the live contribution data.
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    # Must be able to read the credentials file on the host.
+    user: "${TUNNEL_UID:-65532}:${TUNNEL_GID:-65532}"
+    command: ["tunnel", "run", "${TUNNEL_ID:?set TUNNEL_ID in .env}"]
+    environment:
+      TUNNEL_URL: http://web:3000
+      TUNNEL_CRED_FILE: /etc/cloudflared/credentials.json
+      # TCP to the edge; UDP/QUIC is unreliable on some networks.
+      TUNNEL_TRANSPORT_PROTOCOL: http2
+    volumes:
+      - ${TUNNEL_CREDENTIALS:?set TUNNEL_CREDENTIALS in .env}:/etc/cloudflared/credentials.json:ro

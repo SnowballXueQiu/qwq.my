@@ -36,6 +36,23 @@ pnpm lint
 - **Debug 模式**：从终端输入 `debug`、点技能面板的按钮，或者在 404 页启动。
 - **QwQ**：眼睛跟着鼠标走；悬停变 `OwO`，戳它变 `>w<`，连戳五下会哭，甩鼠标会晕，发呆会睡着，离开窗口也会哭。
 
+## 部署（Docker + Cloudflare Tunnel）
+
+生产环境用 `docker compose` 跑两个容器：
+
+- `web`：Next.js standalone 服务，不向宿主机暴露任何端口；
+- `tunnel`：cloudflared，通过 Cloudflare Tunnel 把 `qwq.my` 和 `www.qwq.my` 接到 `web`（`www` 会 301 到裸域名）。
+
+DNS 里只有指向隧道的代理 CNAME，服务器 IP 不会出现。
+
+```bash
+cp .env.example .env   # 填 TUNNEL_ID、TUNNEL_CREDENTIALS 等
+docker compose up -d --build
+docker compose logs -f
+```
+
+更新：把代码同步到服务器后再执行一次 `docker compose up -d --build`。
+
 ## 年度回顾视频（Remotion）
 
 ```bash

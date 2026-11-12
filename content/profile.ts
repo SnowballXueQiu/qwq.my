@@ -61,6 +61,7 @@ export const profile = {
     { label: "Telegram", value: "@Snowball_233", href: "https://t.me/Snowball_233" },
     { label: "Discord", value: "SnowballXueQiu", copy: true },
     { label: "QQ", value: "2957202260", copy: true },
-    { label: "Blog", value: "blog.qwq.my", href: "https://blog.qwq.my" },
+    // Same-site path: the proxy sends /blog to the visitor's language.
+    { label: "Blog", value: "qwq.my/blog", href: "/blog" },
   ] as { label: string; value: string; href?: string; copy?: boolean }[],
 };
