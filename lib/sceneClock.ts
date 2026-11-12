@@ -31,6 +31,13 @@ export function getSceneTime(): number {
   return 0;
 }
 
+/** The page offset (px) at scene time `s`: the inverse of getSceneTime. */
+export function scrollForSceneTime(s: number) {
+  if (!measured) return 0;
+  const i = Math.max(0, Math.min(Math.floor(s), spans.length - 1));
+  return spans[i].top + (s - i) * spans[i].height;
+}
+
 /** Whether the home page's sheets are on screen (false on blog/project pages). */
 export const hasSheets = () => measured;
 

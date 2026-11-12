@@ -4,8 +4,8 @@ import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { emit } from "@/lib/fx";
 import type { Locale } from "@/lib/i18n";
-import { scrollToTarget } from "@/lib/scroll";
-import { sheets } from "@/lib/sheets";
+import { scrollToSheet } from "@/components/scroll/beats";
+import { sheets, type SheetId } from "@/lib/sheets";
 import type { PostMeta } from "@/lib/postTypes";
 import type { Expression } from "@/lib/store";
 
@@ -85,7 +85,7 @@ export const commands: Record<string, Command> = {
         ctx.navigate(`/${ctx.locale}#${id}`);
       } else {
         ctx.close();
-        setTimeout(() => scrollToTarget(`#${id}`), 80);
+        setTimeout(() => scrollToSheet(id as SheetId), 80);
       }
     },
   },

@@ -52,6 +52,34 @@ export const PLAZA_S = {
 };
 
 /**
+ * Where scrolling comes to rest, in scene time: one beat per shot (each skill
+ * card, project screen and milestone gets its own). A wheel flick, a swipe or
+ * an arrow key moves exactly one beat, however hard it is, so the ride never
+ * races past a stop.
+ */
+export function beatTimes(portrait = false): number[] {
+  const slot = (id: "skills" | "projects", n: number) => pinned(id) / n;
+  const n = timeline.length;
+  return [
+    0,
+    // The sheet has torn and the toys are out.
+    0.68,
+    // init(me).
+    1.3,
+    (MAP_S.hold + MAP_S.leave) / 2,
+    ...skillGroups.map((_, i) => 2 + slot("skills", skillGroups.length) * (i + 0.5)),
+    ...projects.map((_, i) => 3 + slot("projects", projectCount) * (i + 0.5)),
+    ...timeline.map((_, i) => 4 + T_SLOT * (i + 0.5)),
+    // The GitHub city: among the towers, then the year from above (a phone pans it in two halves).
+    4 + T_SLOT * (n + 0.6),
+    ...(portrait ? [4 + T_SLOT * (n + 1.45), 4 + T_SLOT * (n + 1.95)] : [4 + T_SLOT * (n + 1.7)]),
+    5.3,
+    // The end of the page.
+    6 + pinned("contact"),
+  ];
+}
+
+/**
  * Where milestone `i` of `n` stands: a little ahead of where the camera is
  * while that milestone is the current one, so it sits in frame as you read.
  */

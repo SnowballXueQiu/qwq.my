@@ -5,7 +5,7 @@ import { Html, Line } from "@react-three/drei";
 import { Vector3 } from "three";
 import type { Line2 } from "three/examples/jsm/lines/Line2.js";
 import { emit, on } from "@/lib/fx";
-import { scrollToTarget } from "@/lib/scroll";
+import { scrollToSheet } from "@/components/scroll/beats";
 import { sheetNumber, sheets } from "@/lib/sheets";
 import { palette } from "@/lib/tokens";
 import { sampleCamera } from "../Director";
@@ -55,7 +55,7 @@ export function OverviewMap({ titles }: { titles: Record<(typeof sheets)[number]
             data-cursor="FLY"
             onClick={() => {
               emit("menu", { open: false });
-              setTimeout(() => scrollToTarget(`#${id}`), 60);
+              setTimeout(() => scrollToSheet(id), 60);
             }}
             className="group flex items-center gap-2 whitespace-nowrap border border-[#f1ede4] bg-[#141414] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[0.12em] text-[#f1ede4] transition-colors hover:bg-[#e8402a]"
           >

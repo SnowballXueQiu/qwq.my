@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Locale } from "@/lib/i18n";
-import { scrollToTarget } from "@/lib/scroll";
+import { scrollToSheet } from "@/components/scroll/beats";
 import { sheetNumber, sheets, type SheetId } from "@/lib/sheets";
 import { useSite } from "@/lib/store";
 
@@ -31,7 +31,7 @@ export function SheetNav({
                 onClick={(e) => {
                   if (!isHome) return;
                   e.preventDefault();
-                  scrollToTarget(`#${id}`);
+                  scrollToSheet(id);
                 }}
                 aria-current={isActive ? "location" : undefined}
                 className="label group flex items-baseline gap-1.5"

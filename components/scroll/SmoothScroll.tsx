@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { prefersReducedMotion, scrollMotion, setLenis } from "@/lib/scroll";
 import { useSite } from "@/lib/store";
+import { beatScroll, installBeats } from "./beats";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,8 +25,10 @@ export function SmoothScroll() {
       return () => window.removeEventListener("scroll", updateProgress);
     }
 
-    const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9 });
+    // On the home page, wheel and touch go beat by beat (see beats.ts).
+    const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9, virtualScroll: beatScroll });
     setLenis(lenis);
+    const uninstallBeats = installBeats(lenis);
     lenis.on("scroll", (l: Lenis) => {
       scrollMotion.velocity = l.velocity;
       ScrollTrigger.update();
@@ -38,6 +41,7 @@ export function SmoothScroll() {
 
     return () => {
       gsap.ticker.remove(tick);
+      uninstallBeats();
       lenis.destroy();
       setLenis(null);
     };
