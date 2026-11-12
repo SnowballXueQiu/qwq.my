@@ -28,7 +28,8 @@
   "hero": {
     "kicker": "Student / Developer",
     "tagline": "Drawing a blueprint that moves, somewhere between code and coursework.",
-    "scroll": "Scroll"
+    "scroll": "Scroll",
+    "draw": "✎ Drag to draw on the sheet (hold Shift for red)"
   },
   "about": {
     "heading": "About",

@@ -138,6 +138,7 @@ export function InkPipeline({
         uLine: { value: new Vector3(...srgb(palette.paper)) },
         uShockCenter: { value: new Vector2(0.5, 0.5) },
         uShockAge: { value: -1 },
+        uAccent: { value: new Vector3(...srgb(palette.accent)) },
       },
     });
     const scene = new Scene();

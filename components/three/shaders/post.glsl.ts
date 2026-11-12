@@ -19,6 +19,7 @@ uniform float uVignette;
 uniform vec3 uLine;         // streak colour (follows paper/ink inversion)
 uniform vec2 uShockCenter;  // uv
 uniform float uShockAge;    // seconds since the click, <0 = none
+uniform vec3 uAccent;
 in vec2 vUv;
 out vec4 fragColor;
 
@@ -28,13 +29,16 @@ void main() {
   c.x *= uResolution.x / uResolution.y;
 
   // Ink shockwave: a ring pushing pixels outward from where you clicked.
+  float shockRing = 0.0;
   if (uShockAge >= 0.0 && uShockAge < 1.2) {
     vec2 d = uv - uShockCenter;
     d.x *= uResolution.x / uResolution.y;
     float dist = length(d);
-    float radius = uShockAge * 0.9;
-    float ring = exp(-pow((dist - radius) * 22.0, 2.0)) * (1.0 - uShockAge / 1.2);
-    uv -= normalize(d + 1e-5) * ring * 0.035 * vec2(uResolution.y / uResolution.x, 1.0);
+    float radius = 1.0 - pow(1.0 - uShockAge / 1.2, 3.0);
+    float fade = 1.0 - uShockAge / 1.2;
+    float ring = exp(-pow((dist - radius * 0.9) * 18.0, 2.0)) * fade;
+    uv -= normalize(d + 1e-5) * ring * 0.07 * vec2(uResolution.y / uResolution.x, 1.0);
+    shockRing = exp(-pow((dist - radius * 0.9) * 140.0, 2.0)) * fade;
   }
 
   // Barrel distortion that bulges with the CRT amount.
@@ -66,6 +70,7 @@ void main() {
   float roll = smoothstep(0.0, 0.1, 0.1 - abs(fract(vUv.y * 0.7 - uTime * 0.6) - 0.5));
   col *= 1.0 - uCRT * (0.22 * scan - roll * 0.15);
 
+  col = mix(col, uAccent, shockRing);
   col *= 1.0 - uVignette * smoothstep(0.45, 1.05, length(c));
   if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) col = vec3(0.0);
   fragColor = vec4(col, 1.0);

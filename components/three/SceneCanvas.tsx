@@ -6,6 +6,8 @@ import { PerformanceMonitor } from "@react-three/drei";
 import type { SheetId } from "@/lib/sheets";
 import { Director } from "./Director";
 import { BugGame } from "./game/BugGame";
+import { InteractionBridge } from "./interact/InteractionBridge";
+import { PaperDoodles } from "./interact/PaperDoodles";
 import { InkPipeline } from "./pipeline/InkPipeline";
 import { DebrisField } from "./stages/DebrisField";
 import { AboutStage } from "./stages/AboutStage";
@@ -46,8 +48,10 @@ export default function SceneCanvas({
         onFallback={() => setDpr(1)}
       />
       <Director />
+      <InteractionBridge />
       <InkPipeline />
       <HeroStage />
+      <PaperDoodles />
       <DebrisField />
       <Atmosphere />
       <AboutStage />

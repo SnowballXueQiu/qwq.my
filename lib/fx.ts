@@ -11,6 +11,10 @@ export type FxEvents = {
   menu: { open: boolean };
   video: { open: boolean };
   sceneReady: Record<string, never>;
+  /** ↑↑↓↓←→←→BA */
+  party: { seconds: number };
+  /** Play a named sound effect (no-op while muted). */
+  sound: { name: string; intensity?: number };
   /** A bug was squashed at a screen position. */
   hit: { x: number; y: number; points: number; combo: number };
 };

@@ -31,7 +31,10 @@ export default async function Home() {
             {profile.name[locale]}
           </h1>
           <p className="mt-6 max-w-xl text-lg text-ink-soft">{dict.hero.tagline}</p>
-          <p className="label mt-10 text-ink-soft">↓ {dict.hero.scroll}</p>
+          <p className="label mt-10 flex flex-wrap gap-x-6 gap-y-2 text-ink-soft">
+            <span>↓ {dict.hero.scroll}</span>
+            <span className="hidden text-accent md:inline">{dict.hero.draw}</span>
+          </p>
         </HeroIntro>
       </SheetSection>
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, type ThreeElements } from "@react-three/fiber";
-import { Group, Vector3, Euler } from "three";
+import { Euler, Group, Raycaster, Vector2, Vector3 } from "three";
+import { impulsesSince } from "../interact/interaction";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { createInkMaterial } from "../materials/inkMaterial";
 import { clamp01, withOverview } from "../frameState";
@@ -17,6 +18,11 @@ type Letter = {
   away: Vector3;
   awayRot: Euler;
   accent: boolean;
+  /** Knock-about state: clicked letters fly off and spring back. */
+  off: Vector3;
+  vel: Vector3;
+  wobble: Vector3;
+  wobbleVel: Vector3;
 };
 
 export type KineticTextProps = Omit<ThreeElements["group"], "children"> & {
@@ -103,6 +109,10 @@ export function KineticText({
           away: dir.multiplyScalar(18 + r() * 22),
           awayRot: new Euler((r() - 0.5) * 9, (r() - 0.5) * 9, (r() - 0.5) * 9),
           accent: accent?.(i, ch) ?? false,
+          off: new Vector3(),
+          vel: new Vector3(),
+          wobble: new Vector3(),
+          wobbleVel: new Vector3(),
         });
       }
       pen += advance;
@@ -123,12 +133,41 @@ export function KineticText({
     [materials],
   );
 
-  useFrame(() => {
+  const knock = useMemo(() => ({ ray: new Raycaster(), ndc: new Vector2(), seen: 0, local: new Vector3() }), []);
+
+  useFrame((state, rawDt) => {
     const g = root.current;
     if (!g) return;
+    const dt = Math.min(rawDt, 1 / 30);
     const p = withOverview(progress());
     g.visible = p > 0 && p < 2;
+    const [blasts, seen] = impulsesSince(knock.seen);
+    knock.seen = seen;
     if (!g.visible) return;
+
+    // Clicks blast nearby letters outward on screen; a direct hit sends one flying.
+    for (const b of blasts) {
+      knock.ndc.set(b.x, b.y);
+      knock.ray.setFromCamera(knock.ndc, state.camera);
+      const hit = knock.ray.intersectObjects(g.children, false)[0];
+      const inv = g.matrixWorld.clone().invert();
+      g.children.forEach((child, i) => {
+        const l = letters[i];
+        if (!l) return;
+        child.getWorldPosition(knock.local);
+        knock.local.project(state.camera);
+        const dx = knock.local.x - b.x;
+        const dy = knock.local.y - b.y;
+        const d = Math.hypot(dx, dy);
+        const direct = hit?.object === child;
+        if (!direct && d > 0.35) return;
+        const f = direct ? 1 : (1 - d / 0.35) * 0.6;
+        // Push in the camera plane away from the click, plus a kick away from the lens.
+        knock.local.set(dx, dy, -0.6).normalize().transformDirection(state.camera.matrixWorld).transformDirection(inv);
+        l.vel.addScaledVector(knock.local, 34 * size * f);
+        l.wobbleVel.set((Math.random() - 0.5) * 30 * f, (Math.random() - 0.5) * 30 * f, (Math.random() - 0.5) * 24 * f);
+      });
+    }
     const n = Math.max(letters.length, 1);
     g.children.forEach((child, i) => {
       const l = letters[i];
@@ -137,11 +176,16 @@ export function KineticText({
       const a = easeOut(clamp01((p - lag) / 0.65));
       const out = clamp01((p - 1 - lag * 0.6) / 0.6);
       const o = out * out;
-      child.position.lerpVectors(l.from, l.home, a).addScaledVector(l.away, o);
+      // Springs: knocked letters overshoot and wobble back into the word.
+      l.vel.addScaledVector(l.off, -60 * dt).multiplyScalar(Math.pow(0.02, dt));
+      l.off.addScaledVector(l.vel, dt);
+      l.wobbleVel.addScaledVector(l.wobble, -90 * dt).multiplyScalar(Math.pow(0.05, dt));
+      l.wobble.addScaledVector(l.wobbleVel, dt);
+      child.position.lerpVectors(l.from, l.home, a).addScaledVector(l.away, o).add(l.off);
       child.rotation.set(
-        l.fromRot.x * (1 - a) + l.awayRot.x * o,
-        l.fromRot.y * (1 - a) + l.awayRot.y * o,
-        l.fromRot.z * (1 - a) + l.awayRot.z * o,
+        l.fromRot.x * (1 - a) + l.awayRot.x * o + l.wobble.x,
+        l.fromRot.y * (1 - a) + l.awayRot.y * o + l.wobble.y,
+        l.fromRot.z * (1 - a) + l.awayRot.z * o + l.wobble.z,
       );
       child.visible = a > 0.001 && out < 1;
     });

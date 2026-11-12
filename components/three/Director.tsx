@@ -98,7 +98,7 @@ export function Director() {
       pos: new Vector3(),
       target: new Vector3(),
       // Effects requested from outside the canvas, as wall-clock deadlines.
-      fx: { flashUntil: 0, glitchUntil: 0, glitchAmount: 0, menu: false },
+      fx: { flashUntil: 0, glitchUntil: 0, glitchAmount: 0, menu: false, partyUntil: 0 },
     }),
     [],
   );
@@ -107,6 +107,9 @@ export function Director() {
     const offs = [
       on("flash", ({ duration = 0.12 }) => {
         fx.flashUntil = performance.now() + duration * 1000;
+      }),
+      on("party", ({ seconds }) => {
+        fx.partyUntil = performance.now() + seconds * 1000;
       }),
       on("menu", ({ open }) => {
         fx.menu = open;
@@ -203,10 +206,15 @@ export function Director() {
       h.anchor.visible = false;
     }
 
+    // Party: everything on the beat.
+    const partying = performance.now() < fx.partyUntil;
+    frameState.party += ((partying ? 1 : 0) - frameState.party) * Math.min(delta * 4, 1);
+    const beat = partying ? Math.pow(1 - ((t * 2.2) % 1), 3) : 0;
+
     // Lens and film.
     const transit = o > 0.03 && o < 0.97 ? 0.6 : 0;
     postFx.speed = calm ? 0 : smooth(0.2, 1, frameState.speed) * free;
-    postFx.aberration = calm ? 0 : frameState.speed * 0.6 + punch * 0.8 + pipelineTarget.glitch * 0.7;
+    postFx.aberration = calm ? 0 : frameState.speed * 0.6 + punch * 0.8 + pipelineTarget.glitch * 0.7 + beat * 1.2;
     postFx.crt = calm ? 0 : Math.max(punch * 0.9, transit, pipelineTarget.glitch * 0.6);
     postFx.vignette = 0.35 + frameState.speed * 0.3;
 
@@ -228,7 +236,7 @@ export function Director() {
       pipelineTarget.glitch = 0;
       return;
     }
-    pipelineTarget.flash = since < 0.09 || wall < fx.flashUntil ? 1 : 0;
+    pipelineTarget.flash = since < 0.09 || wall < fx.flashUntil || beat > 0.92 ? 1 : 0;
     pipelineTarget.glitch = Math.max(
       Math.max(0, 1 - since / 0.4) * 0.9,
       wall < fx.glitchUntil ? fx.glitchAmount : 0,

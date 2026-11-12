@@ -19,6 +19,8 @@ export const frameState = {
   speed: 0,
   /** Seconds since the last hard cut (drives punch-ins and shake). */
   sinceCut: 99,
+  /** 0–1 while the Konami-code party is on. */
+  party: 0,
 };
 
 /** In the overview map every set piece shows fully assembled. */
