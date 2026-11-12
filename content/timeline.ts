@@ -16,6 +16,8 @@ export type TimelineEvent = {
   title: L10n;
   detail: L10n;
   media?: TimelineMedia;
+  /** A few lines of code shown in an editor under the sign. `typos` get a squiggly underline. */
+  code?: { file: string; lang: string; source: string; typos?: string[] };
 };
 
 const cert = (name: string) => ({ zh: `/media/awards/${name}-zh.jpg`, en: `/media/awards/${name}-en.jpg` });
@@ -41,6 +43,7 @@ export const timeline: TimelineEvent[] = [
     kind: "project",
     title: { zh: "发布 sb.h", en: "Released sb.h" },
     detail: { zh: "一个整活头文件，意外收获 350+ Star。", en: "A joke header that somehow got 350+ stars." },
+    code: { file: "main.cpp", lang: "C++", source: '#include "sb.h"\n\nint mian() {}', typos: ["mian"] },
   },
   {
     date: "2024-11",

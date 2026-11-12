@@ -24,6 +24,7 @@ export const projects: Project[] = [
     role: { zh: "作者", en: "Author" },
     tags: ["Next.js", "Three.js", "Remotion"],
     href: "https://qwq.my",
+    repo: "https://github.com/SnowballXueQiu/qwq.my",
   },
   {
     slug: "sb-h",

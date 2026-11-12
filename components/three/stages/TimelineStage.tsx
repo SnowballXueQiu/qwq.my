@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { BoxGeometry, BufferAttribute, BufferGeometry, DoubleSide, Group, InstancedMesh, Object3D } from "three";
 import { Html } from "@react-three/drei";
-import { KIND_LABEL, timeline, whenLabel, type TimelineMedia } from "@/content/timeline";
+import { KIND_LABEL, timeline, whenLabel, type TimelineEvent, type TimelineMedia } from "@/content/timeline";
 import type { Locale } from "@/lib/i18n";
 import { showLightbox } from "@/components/ui/Lightbox";
 import { useDomLayer } from "../dom/useDomLayer";
@@ -175,6 +175,7 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
           )}
           <p className="mt-2 text-[20px] font-extrabold leading-tight">{event.title[locale]}</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">{event.detail[locale]}</p>
+          {event.code && <EditorSnippet code={event.code} />}
         </div>
       </Html>
 
@@ -194,6 +195,47 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
         </Html>
       )}
     </group>
+  );
+}
+
+const KEYWORDS = new Set(["int", "void", "char", "auto", "const", "return", "using", "namespace"]);
+
+/** A few lines of C-family code dressed as an editor tab: line numbers, a little highlighting, squiggles under typos. */
+function EditorSnippet({ code }: { code: NonNullable<TimelineEvent["code"]> }) {
+  const typos = new Set(code.typos);
+  const line = (text: string) =>
+    text.split(/(#\w+|"[^"]*"|\b\w+\b)/).map((tok, i) => {
+      if (!tok) return null;
+      if (tok.startsWith("#")) return <span key={i} className="text-accent">{tok}</span>;
+      if (tok.startsWith('"')) return <span key={i} className="text-ink-soft">{tok}</span>;
+      if (KEYWORDS.has(tok)) return <span key={i} className="font-bold text-accent">{tok}</span>;
+      if (typos.has(tok)) {
+        return (
+          <span key={i} className="underline decoration-accent decoration-wavy decoration-[1.5px] underline-offset-[3px]">
+            {tok}
+          </span>
+        );
+      }
+      return tok;
+    });
+  return (
+    <div className="mt-3 border border-ink font-mono text-[12px]">
+      <div className="flex items-center gap-1.5 border-b border-ink px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-ink-soft">
+        <span className="size-[7px] rounded-full bg-accent" />
+        <span className="size-[7px] rounded-full border border-ink" />
+        <span className="size-[7px] rounded-full border border-ink" />
+        <span className="ml-1.5 normal-case tracking-normal text-ink">{code.file}</span>
+        <span className="ml-auto">{code.lang}</span>
+      </div>
+      <pre className="py-1.5 leading-[1.55]">
+        {code.source.split("\n").map((text, i) => (
+          <div key={i} className="flex">
+            <span className="w-7 shrink-0 select-none pr-2 text-right text-ink-soft/60">{i + 1}</span>
+            <code>{line(text)}</code>
+          </div>
+        ))}
+      </pre>
+    </div>
   );
 }
 
