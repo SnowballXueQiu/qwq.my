@@ -7,14 +7,21 @@ import { sheets, type SheetId } from "@/lib/sheets";
 import { useSite } from "@/lib/store";
 
 /**
- * Beat scrolling for the home page. The film rests on beats (see beatTimes);
- * a wheel gesture, a swipe or an arrow key glides exactly one beat on, at a
- * fixed eased pace, however hard you scroll. Anything that leaves the page
- * between beats (the scrubber, a resize) settles onto the nearest one.
+ * Beat scrolling for the home page. The film rests on beats (see beatTimes).
+ * Scrolling pulls the page toward the next beat against a little resistance;
+ * pull far enough and it glides the rest of the way, at a fixed eased pace,
+ * however hard you scrolled. Let go short of that and it springs back. One
+ * gesture moves at most one beat. Anything that leaves the page between beats
+ * (the scrubber, a resize) settles onto the nearest one.
  */
 
 /** Quiet time (ms) that ends a wheel gesture. */
 const GAP = 180;
+/** Quiet time (ms) after which a pull that fell short springs back. */
+const RELEASE = 420;
+
+/** Wheel scrolling (px) it takes to move on: about three notches of a mouse wheel. */
+const wheelThreshold = () => Math.min(300, Math.max(160, innerHeight * 0.26));
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -24,8 +31,13 @@ const state = {
   landTimer: 0,
   /** One more step asked for mid-glide (+1 / −1), taken on landing. */
   queued: 0,
-  wheel: { at: 0, armed: true, sum: 0, peak: 0, low: Infinity },
-  touch: null as null | { x: number; y: number; t: number; axis: "" | "x" | "y"; fired: boolean },
+  /** The beat the page rests on, or is gliding to (px). */
+  home: 0,
+  /** Scrolling (px, signed) gathered toward the next beat, not yet enough to move on. */
+  pull: 0,
+  releaseTimer: 0,
+  wheel: { at: 0, armed: true, peak: 0, low: Infinity },
+  touch: null as null | { x: number; y: number; axis: "" | "x" | "y"; trail: [number, number][]; fired: boolean },
   pointerDown: false,
   settleTimer: 0,
 };
@@ -42,10 +54,22 @@ function beatYs(lenis: Lenis) {
   return beatTimes(portrait).map((s) => Math.min(Math.round(scrollForSceneTime(s)), lenis.limit));
 }
 
-function glide(lenis: Lenis, y: number) {
+const nearestBeat = (lenis: Lenis) => {
+  const y = lenis.animatedScroll;
+  return beatYs(lenis).reduce((a, b) => (Math.abs(b - y) < Math.abs(a - y) ? b : a));
+};
+
+/** The next beat past `from` in `dir`, if there is one. */
+const nextBeat = (lenis: Lenis, from: number, dir: number) => {
+  const ys = beatYs(lenis);
+  return dir > 0 ? ys.find((b) => b > from + 2) : ys.findLast((b) => b < from - 2);
+};
+
+function glide(lenis: Lenis, y: number, duration?: number) {
   // Longer moves (the hero, the map) take a little longer, but never drag.
   const d = Math.abs(y - lenis.animatedScroll) / innerHeight;
-  const duration = Math.min(1.6, Math.max(0.85, 0.55 + 0.5 * d));
+  duration ??= Math.min(1.6, Math.max(0.85, 0.55 + 0.5 * d));
+  state.home = y;
   state.until = performance.now() + duration * 1000;
   lenis.scrollTo(y, { duration, easing: easeInOut, force: true });
   window.clearTimeout(state.landTimer);
@@ -57,44 +81,80 @@ function glide(lenis: Lenis, y: number) {
   }, duration * 1000 + 40);
 }
 
-/** One beat down (+1) or up (−1). Mid-glide, it waits for the landing. */
-function step(lenis: Lenis, dir: number) {
+/** One beat down (+1) or up (−1) from `from`. Mid-glide, it waits for the landing. */
+function step(lenis: Lenis, dir: number, from = lenis.animatedScroll) {
   if (gliding()) {
     state.queued = dir;
     return;
   }
-  const ys = beatYs(lenis);
-  const y = lenis.animatedScroll;
-  const next = dir > 0 ? ys.find((b) => b > y + 2) : ys.findLast((b) => b < y - 2);
+  const next = nextBeat(lenis, from, dir);
   if (next !== undefined) glide(lenis, next);
+}
+
+/** Starts a pull from the beat the page is resting on. */
+function beginPull(lenis: Lenis) {
+  if (!gliding() && state.pull === 0) state.home = nearestBeat(lenis);
+}
+
+/** Leans the page toward the next beat by the pull, with resistance; nothing to lean toward past the ends. */
+function showPull(lenis: Lenis) {
+  if (gliding()) return;
+  const dir = Math.sign(state.pull);
+  const next = dir ? nextBeat(lenis, state.home, dir) : undefined;
+  const room = next === undefined ? 0 : Math.min(Math.abs(next - state.home) * 0.4, innerHeight * 0.16);
+  const lean = room ? dir * room * (1 - Math.exp((-Math.abs(state.pull) * 0.5) / room)) : 0;
+  lenis.scrollTo(state.home + lean, { lerp: 0.2, force: true });
+}
+
+/** A pull that fell short goes back where it came from. */
+function springBack(lenis: Lenis) {
+  window.clearTimeout(state.releaseTimer);
+  if (state.pull === 0) return;
+  state.pull = 0;
+  if (!gliding()) glide(lenis, state.home, 0.45);
+}
+
+/** Moves on in the pull's direction (from the beat it started at). */
+function commitPull(lenis: Lenis) {
+  window.clearTimeout(state.releaseTimer);
+  const dir = Math.sign(state.pull);
+  state.pull = 0;
+  step(lenis, dir, state.home);
 }
 
 function onWheel(lenis: Lenis, event: WheelEvent, dy: number) {
   if (event.cancelable) event.preventDefault();
   const now = performance.now();
   const w = state.wheel;
-  if (now - w.at > GAP) Object.assign(w, { armed: true, sum: 0, peak: 0, low: Infinity });
+  if (now - w.at > GAP) Object.assign(w, { armed: true, peak: 0, low: Infinity });
   w.at = now;
   const m = Math.abs(dy);
   // One gesture, one step: a long spin of the wheel or a trackpad's inertia
-  // tail is swallowed. A fresh push during the tail (it dies away, then
-  // surges) counts as a new gesture.
+  // tail is swallowed once it has moved on. A fresh push during the tail (it
+  // dies away, then surges) counts as a new gesture.
   w.peak = Math.max(w.peak, m);
   if (m < w.peak * 0.5) w.low = Math.min(w.low, m);
-  if (!w.armed && w.low < Infinity && m > w.low * 2.5 && m > 12) Object.assign(w, { armed: true, sum: 0, peak: m, low: Infinity });
+  if (!w.armed && w.low < Infinity && m > w.low * 2.5 && m > 12) Object.assign(w, { armed: true, peak: m, low: Infinity });
   if (!w.armed) return;
-  // Ignore the faintest brush of a trackpad.
-  w.sum += m;
-  if (w.sum < 2.5) return;
-  w.armed = false;
-  step(lenis, Math.sign(dy));
+  beginPull(lenis);
+  state.pull += dy;
+  if (Math.abs(state.pull) >= wheelThreshold()) {
+    w.armed = false;
+    commitPull(lenis);
+    return;
+  }
+  showPull(lenis);
+  window.clearTimeout(state.releaseTimer);
+  state.releaseTimer = window.setTimeout(() => springBack(lenis), RELEASE);
 }
 
 function onTouch(lenis: Lenis, event: TouchEvent) {
   const t = event.touches[0] ?? event.changedTouches[0];
   if (!t) return;
+  const now = performance.now();
   if (event.type === "touchstart") {
-    state.touch = { x: t.clientX, y: t.clientY, t: performance.now(), axis: "", fired: false };
+    beginPull(lenis);
+    state.touch = { x: t.clientX, y: t.clientY, axis: "", trail: [[now, t.clientY]], fired: false };
     return;
   }
   const g = state.touch;
@@ -106,16 +166,29 @@ function onTouch(lenis: Lenis, event: TouchEvent) {
     // Sideways drags stay with the page (a code block that scrolls, a toy).
     if (g.axis === "x") return;
     if (event.cancelable) event.preventDefault();
-    // Step as soon as the swipe reads clearly, not on release: it feels immediate.
-    if (!g.fired && Math.abs(dy) > Math.max(24, innerHeight * 0.04)) {
+    if (g.fired) return;
+    g.trail.push([now, t.clientY]);
+    if (g.trail.length > 6) g.trail.shift();
+    // The page leans with the finger (scrolling is the other way round).
+    state.pull = -dy;
+    // A long drag moves on without waiting for the release.
+    if (Math.abs(dy) > innerHeight * 0.3) {
       g.fired = true;
-      step(lenis, dy < 0 ? 1 : -1);
+      commitPull(lenis);
+      return;
     }
+    showPull(lenis);
     return;
   }
-  // A short, quick flick that never got far still counts.
-  if (g.axis === "y" && !g.fired && Math.abs(dy) > 10 && performance.now() - g.t < 300) step(lenis, dy < 0 ? 1 : -1);
+  // Released: far enough, or a real flick, moves on; anything less springs back.
   state.touch = null;
+  if (g.axis !== "y" || g.fired) return;
+  const [t0, y0] = g.trail[0];
+  const speed = Math.abs(t.clientY - y0) / Math.max(now - t0, 1);
+  const far = Math.abs(dy) > Math.max(64, innerHeight * 0.1);
+  const flick = speed > 0.5 && Math.abs(dy) > Math.max(48, innerHeight * 0.06);
+  if (far || flick) commitPull(lenis);
+  else springBack(lenis);
 }
 
 /** Lenis' virtualScroll hook: returns false where beats take the event over. */
@@ -156,14 +229,13 @@ function onKey(e: KeyboardEvent) {
 
 function settle() {
   const lenis = getLenis();
-  if (!active(lenis) || gliding() || state.pointerDown || state.touch) return;
+  if (!active(lenis) || gliding() || state.pointerDown || state.touch || state.pull !== 0) return;
   if (lenis.isScrolling) {
     scheduleSettle();
     return;
   }
-  const y = lenis.scroll;
-  const nearest = beatYs(lenis).reduce((a, b) => (Math.abs(b - y) < Math.abs(a - y) ? b : a));
-  if (Math.abs(nearest - y) > 2) glide(lenis, nearest);
+  const nearest = nearestBeat(lenis);
+  if (Math.abs(nearest - lenis.animatedScroll) > 2) glide(lenis, nearest);
 }
 
 function scheduleSettle() {
@@ -189,6 +261,7 @@ export function installBeats(lenis: Lenis) {
     for (const type of ["pointerdown", "pointerup", "pointercancel"] as const) window.removeEventListener(type, onPointer, true);
     window.clearTimeout(state.settleTimer);
     window.clearTimeout(state.landTimer);
+    window.clearTimeout(state.releaseTimer);
   };
 }
 
@@ -203,5 +276,7 @@ export function scrollToSheet(id: SheetId) {
   const portrait = innerWidth < innerHeight;
   const s = beatTimes(portrait).find((b) => b >= i) ?? i;
   state.queued = 0;
+  state.pull = 0;
+  window.clearTimeout(state.releaseTimer);
   glide(lenis, Math.min(scrollForSceneTime(s), lenis.limit));
 }
