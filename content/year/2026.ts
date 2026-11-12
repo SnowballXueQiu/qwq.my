@@ -2,26 +2,46 @@ import type { L10n } from "@/lib/i18n";
 import type { GithubData } from "@/lib/githubFetch";
 import snapshot from "@/content/github.json";
 
+/** Simple facts read straight off the contribution calendar. */
+function calendarFacts(github: GithubData) {
+  const days = github.weeks.flat();
+  let best = days[0] ?? { date: "", count: 0 };
+  let streak = 0;
+  let longest = 0;
+  for (const d of days) {
+    if (d.count > best.count) best = d;
+    streak = d.count > 0 ? streak + 1 : 0;
+    longest = Math.max(longest, streak);
+  }
+  return { best, longest, active: days.filter((d) => d.count > 0).length, total: days.length };
+}
+
 /**
- * Data for the year-in-review film, built from GitHub (live on the site,
- * the committed snapshot when rendering offline) plus hand-written highlights.
+ * Data for the year-in-review film, all of it from GitHub (live on the site,
+ * the committed snapshot when rendering offline).
  */
 export function buildYearData(github: GithubData) {
+  const f = calendarFacts(github);
+  const repos = github.contributedTo.length + github.otherRepos;
+  const names = github.contributedTo.map((r) => r.split("/")[1]).join("、");
   return {
     year: 2026,
     stats: [
       { key: "contributions", value: github.total, label: { zh: "次贡献 · 近一年", en: "contributions · last year" } satisfies L10n },
+      { key: "touched", value: repos, label: { zh: "个参与过的仓库", en: "repositories contributed to" } satisfies L10n },
       { key: "repos", value: github.repos, label: { zh: "个公开仓库", en: "public repos" } satisfies L10n },
       { key: "followers", value: github.followers, label: { zh: "位关注者", en: "followers" } satisfies L10n },
-      { key: "classes", value: 14, label: { zh: "次授课 × 90 分钟", en: "classes taught × 90 min" } satisfies L10n },
     ],
     /** One number per day, Sunday-first weeks, oldest first. */
     contributions: github.weeks.flatMap((w) => w.map((d) => d.count)),
     highlights: [
-      { zh: "歆云教育科技 · 全栈开发实习", en: "Full-stack intern at Xinyun Education Technology" },
-      { zh: "受邀为海南比勒费尔德应用科学大学授课", en: "Invited to teach at Hainan Bielefeld University of Applied Sciences" },
-      { zh: "指导 10 篇学生 IEEE 格式课程论文", en: "Supervised 10 student papers in IEEE format" },
-      { zh: "qwq.my 上线", en: "qwq.my went live" },
+      { zh: `最忙的一天：${f.best.date}，${f.best.count} 次贡献`, en: `Busiest day: ${f.best.date}, ${f.best.count} contributions` },
+      { zh: `最长连续：${f.longest} 天`, en: `Longest streak: ${f.longest} days` },
+      { zh: `活跃天数：${f.active} / ${f.total}`, en: `Active days: ${f.active} / ${f.total}` },
+      {
+        zh: `参与了 ${repos} 个仓库：${names} 等`,
+        en: `Contributed to ${repos} repositories, incl. ${github.contributedTo.map((r) => r.split("/")[1]).join(", ")}`,
+      },
     ] satisfies L10n[],
   };
 }

@@ -70,6 +70,12 @@ const roadPrint = /* glsl */ `
 `;
 
 const DF = 4; // drei Html distanceFactor: 1 CSS px = DF / 400 world units
+/**
+ * drei stacks Html by camera distance mapped onto this range (over the whole
+ * near→far span). A wide range keeps nearer signs/exhibits above farther ones;
+ * a narrow one rounds neighbours to the same z-index and DOM order wins.
+ */
+const Z_RANGE = [1_000_000, 0];
 
 type GithubScene = { total: number; weeks: { date: string; count: number }[][] };
 
@@ -142,7 +148,7 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
         position={[side * 0.2, 4.6, 0]}
         rotation={[0, -side * 0.28, 0]}
         style={{ pointerEvents: "none" }}
-        zIndexRange={[20, 0]}
+        zIndexRange={Z_RANGE}
       >
         <div ref={sign} className="w-[300px] border-2 border-ink bg-paper/90 p-3.5 text-ink" style={{ opacity: 0 }}>
           <div className="flex items-baseline justify-between gap-3 border-b border-ink pb-1.5">
@@ -151,6 +157,12 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
               {String(index + 1).padStart(2, "0")} · {KIND_LABEL[event.kind][locale]}
             </span>
           </div>
+          {event.logo && (
+            <div className="mt-2.5 inline-block bg-[#141414] px-2.5 py-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element -- drawn inside a CSS 3D transform */}
+              <img src={event.logo.src} alt={event.logo.alt[locale]} className="block h-[38px] w-auto" draggable={false} />
+            </div>
+          )}
           <p className="mt-2 text-[20px] font-extrabold leading-tight">{event.title[locale]}</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-ink-soft">{event.detail[locale]}</p>
         </div>
@@ -164,7 +176,7 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
           portal={layer}
           position={[roadX(z - 3) - x - side * 1.6, 2.7, -3]}
           style={{ pointerEvents: "none" }}
-          zIndexRange={[20, 0]}
+          zIndexRange={Z_RANGE}
         >
           <div ref={exhibit} className="pointer-events-auto" style={{ opacity: 0 }}>
             <Exhibit media={media} locale={locale} />
@@ -355,7 +367,7 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
         position={[x0, ROAD_Y + 0.2, z0 + 3.6]}
         rotation={[-1.05, 0, 0]}
         style={{ pointerEvents: "none" }}
-        zIndexRange={[20, 0]}
+        zIndexRange={Z_RANGE}
       >
         <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0 }}>
           <span className="font-display text-[64px] font-black leading-none text-accent">{github.total}</span>

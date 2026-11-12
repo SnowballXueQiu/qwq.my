@@ -56,12 +56,7 @@ export function TimelineReadout({
         <span className="tabular-nums">
           {github.total} {labels.contributions} · {github.repos} {labels.repos}
         </span>
-        <span className="ml-auto flex -space-x-1">
-          {github.orgs.map((o) => (
-            // eslint-disable-next-line @next/next/no-img-element -- remote avatar, tiny
-            <img key={o.login} src={o.avatar} alt={o.login} title={o.login} width={18} height={18} className="size-[18px] border border-ink bg-paper" />
-          ))}
-        </span>
+        <span className="ml-auto">↗</span>
       </a>
       <PlayYearButton label={labels.play} />
     </Panel>

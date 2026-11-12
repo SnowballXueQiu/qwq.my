@@ -69,7 +69,7 @@ export function CrosshairCursor() {
       data-visible="false"
       data-hover="false"
       aria-hidden
-      className="group pointer-events-none fixed inset-0 z-50 hidden opacity-0 transition-opacity duration-300 data-[visible=true]:opacity-100 [@media(pointer:fine)]:block"
+      className="group pointer-events-none fixed inset-0 z-[200] hidden opacity-0 transition-opacity duration-300 data-[visible=true]:opacity-100 [@media(pointer:fine)]:block"
     >
       <div ref={h} className="absolute left-0 top-0 h-px w-full bg-ink/15" />
       <div ref={v} className="absolute left-0 top-0 h-full w-px bg-ink/15" />

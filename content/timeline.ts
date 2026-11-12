@@ -9,6 +9,8 @@ export type TimelineMedia =
 export type TimelineEvent = {
   date: string; // YYYY-MM, for ordering
   /** Shown instead of the date when the month isn't the point (e.g. "2026 秋"). */
+  /** An organisation logo for the roadside sign (white artwork, drawn on a dark plate). */
+  logo?: { src: string; alt: L10n };
   when?: L10n;
   kind: TimelineKind;
   title: L10n;
@@ -42,15 +44,18 @@ export const timeline: TimelineEvent[] = [
     date: "2024-11",
     kind: "work",
     title: { zh: "苦力怕论坛技术总管", en: "Head of tech at KLPBBS" },
-    detail: { zh: "同时在徐州驰飞实习。", en: "Alongside an internship at Xuzhou Chifei." },
+    detail: {
+      zh: "同时在徐州驰飞互联网科技有限公司实习。",
+      en: "Alongside an internship at Xuzhou Chifei Internet Technology Co., Ltd.",
+    },
   },
   {
     date: "2025-07",
     kind: "award",
     title: { zh: "AdventureX 黑客松 三等奖 + 优秀奖", en: "AdventureX hackathon: Third Prize + Excellence Award" },
     detail: {
-      zh: "项目 Counter-Strike Market Arbitrage。Kimi For Vibe Coding 赛道三等奖，共享算力赛道优秀奖。杭州。",
-      en: "Project: Counter-Strike Market Arbitrage. Third Prize in the Kimi For Vibe Coding track, Excellence Award in Shared Computing Power. Hangzhou.",
+      zh: "项目 Counter-Strike Market Arbitrage。Kimi For Vibe Coding 赛道三等奖，共享算力赛道优秀奖。",
+      en: "Project: Counter-Strike Market Arbitrage. Third Prize in the Kimi For Vibe Coding track, Excellence Award in Shared Computing Power.",
     },
     media: {
       type: "certificates",
@@ -68,12 +73,16 @@ export const timeline: TimelineEvent[] = [
     kind: "school",
     title: { zh: "进入天津师范大学", en: "Started at Tianjin Normal University" },
     detail: { zh: "人工智能专业，2025 级。", en: "Artificial Intelligence, class of 2025." },
+    logo: { src: "/media/logos/tjnu.png", alt: { zh: "天津师范大学", en: "Tianjin Normal University" } },
   },
   {
     date: "2025-10",
     kind: "work",
-    title: { zh: "北京医索科技 · 前端开发实习", en: "Frontend intern at Beijing Yisuo Technology" },
-    detail: { zh: "前端开发实习。", en: "Frontend development internship." },
+    title: { zh: "北京医索科技 · 前端开发实习", en: "Frontend intern at Sciland" },
+    detail: {
+      zh: "Sciland（原 MedgeAI）：自进化 AI 科研工作空间。",
+      en: "Sciland (formerly MedgeAI), a self-evolving AI research workspace.",
+    },
   },
   {
     date: "2025-11",
