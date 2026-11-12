@@ -52,14 +52,13 @@ export const PLAZA_S = {
 };
 
 /**
- * Where scrolling comes to rest, in scene time: one beat per shot (each skill
- * card, project screen and milestone gets its own). A wheel flick, a swipe or
- * an arrow key moves exactly one beat, however hard it is, so the ride never
- * races past a stop.
+ * Where scrolling comes to rest, in scene time, up to the timeline: one beat
+ * per shot (each skill card and project screen gets its own). A wheel flick,
+ * a swipe or an arrow key moves exactly one beat, however hard it is, so the
+ * ride never races past a stop. The last beat is where the road begins.
  */
-export function beatTimes(portrait = false): number[] {
+export function beatTimes(): number[] {
   const slot = (id: "skills" | "projects", n: number) => pinned(id) / n;
-  const n = timeline.length;
   return [
     0,
     // The sheet has torn and the toys are out.
@@ -69,15 +68,16 @@ export function beatTimes(portrait = false): number[] {
     (MAP_S.hold + MAP_S.leave) / 2,
     ...skillGroups.map((_, i) => 2 + slot("skills", skillGroups.length) * (i + 0.5)),
     ...projects.map((_, i) => 3 + slot("projects", projectCount) * (i + 0.5)),
-    ...timeline.map((_, i) => 4 + T_SLOT * (i + 0.5)),
-    // The GitHub city: among the towers, then the year from above. A phone is too narrow for
-    // the street view; it pans the year in two halves instead.
-    ...(portrait ? [4 + T_SLOT * (n + 1.45), 4 + T_SLOT * (n + 1.95)] : [4 + T_SLOT * (n + 0.6), 4 + T_SLOT * (n + 1.7)]),
-    5.3,
-    // The end of the page.
-    6 + pinned("contact"),
+    FLOW.start,
   ];
 }
+
+/**
+ * From the first milestone to the end of the page, scrolling is continuous:
+ * the ride down the road, the city, writing, contact. A hard fling is caught
+ * at the writing shot rather than running on to the end.
+ */
+export const FLOW = { start: 4 + T_SLOT * 0.5, catches: [5.3], end: 6 + pinned("contact") };
 
 /**
  * Where milestone `i` of `n` stands: a little ahead of where the camera is
@@ -132,8 +132,9 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     const slot = pinned("projects") / projectCount;
     keys.push({ s: 3 + slot * (i + HOLD_IN), ...stop }, { s: 3 + slot * (i + HOLD_OUT), ...stop });
   }
-  // Timeline: stop at each milestone (sign on the verge, exhibit in the middle
-  // of the road when there is one), then rise over the contribution plaza.
+  // Timeline: one unbroken ride down the road, turning toward each milestone
+  // (sign on the verge, exhibit in the middle of the road when there is one)
+  // as it passes, then rising over the contribution plaza.
   const tSlot = T_SLOT;
   timeline.forEach((event, i) => {
     const z = milestoneZ(i, timeline.length);
@@ -148,7 +149,7 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
       // Lean into the bends like a motorbike.
       roll: (roadX(camZ - 8) - roadX(camZ)) * 4,
     });
-    keys.push({ s: 4 + tSlot * (i + HOLD_IN), ...at(z + 15) }, { s: 4 + tSlot * (i + HOLD_OUT), ...at(z + 13) });
+    keys.push({ s: 4 + tSlot * (i + 0.5), ...at(z + 14) });
   });
   // The GitHub city: roll up to the foot of the towers looking up at them,
   // then crane up and back until the whole year reads as the familiar grid.
@@ -167,8 +168,9 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     );
   } else {
     keys.push(
+      // Still drifting up while the year reads, so the ride never stalls.
       { s: 4 + tSlot * (n + 1.45), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
-      { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
+      { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 54, PLAZA_Z + 56], look: [px + 2, -4, PLAZA_Z + 3], roll: 0 },
     );
   }
   keys.push(
