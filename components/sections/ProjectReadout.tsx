@@ -30,6 +30,7 @@ export function ProjectReadout({
       <h3 className="font-display mt-2 text-4xl font-extrabold tracking-tight">
         <ScrambleText text={p.title} />
       </h3>
+      <p className="label mt-1 text-accent">{p.role[locale]}</p>
       <p className="mt-2 text-sm text-ink-soft">{p.summary[locale]}</p>
       <p className="label mt-3 text-ink-soft">{p.tags.join(" · ")}</p>
       <div className="mt-4 flex gap-2">

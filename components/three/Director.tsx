@@ -16,6 +16,7 @@ import { WORLD, roadX } from "./world";
 import { buildCameraKeys } from "./world";
 import { projects } from "@/content/projects";
 import { timeline } from "@/content/timeline";
+import { skillGroups } from "@/content/skills";
 
 /** Camera keyframes along scene time. Between keys the camera eases. */
 const KEYS = buildCameraKeys();
@@ -61,8 +62,9 @@ function anchorFor(s: number): { label: string } | null {
     return { label: "REF 02-A · init(me)" };
   }
   if (sheet === 2) {
-    anchorWorld.set(0, 0, WORLD.skills.start - (WORLD.skills.start - WORLD.skills.end) * f);
-    return { label: "REF 03-T · tunnel axis" };
+    const i = Math.min(skillGroups.length - 1, Math.floor(f * skillGroups.length));
+    anchorWorld.set(0.4, 2.6, WORLD.skills.start - WORLD.skills.spacing * i);
+    return { label: `REF 03-${String(i + 1).padStart(2, "0")} · ${skillGroups[i].code}` };
   }
   if (sheet === 3) {
     const i = Math.min(projects.length - 1, Math.floor(f * projects.length));

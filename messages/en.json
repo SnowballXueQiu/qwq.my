@@ -1,7 +1,7 @@
 {
   "meta": {
-    "title": "Snowball · qwq.my",
-    "description": "Snowball's personal site: student and developer. Projects, timeline, writing, and a shape-shifting QwQ."
+    "title": "Snowball_233 · qwq.my",
+    "description": "Snowball_233's site: AI student at Tianjin Normal University and developer. Projects, timeline, writing, and a drawing that tears open."
   },
   "sheets": {
     "hero": "Hello",
@@ -39,17 +39,14 @@
     "based": "Based in"
   },
   "skills": {
-    "heading": "Exploded view",
-    "bom": "Bill of materials",
-    "part": "Part",
-    "item": "Item",
-    "level": "Level",
-    "since": "Since"
+    "heading": "Toolbox",
+    "bom": "Bill of materials"
   },
   "projects": {
     "heading": "Projects",
     "view": "View project",
-    "source": "Source"
+    "source": "Source",
+    "role": "Role"
   },
   "timeline": {
     "heading": "Timeline",

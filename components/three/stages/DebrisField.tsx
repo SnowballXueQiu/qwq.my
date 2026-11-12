@@ -16,7 +16,7 @@ import { WORLD } from "../world";
 import { frameState } from "../frameState";
 import { impulsesSince, pointer } from "../interact/interaction";
 
-const PER_KIND = 48;
+const PER_KIND = 36;
 // Debris spans the whole flight, from just past the paper to the finale.
 const NEAR = -16;
 const FAR = WORLD.contact.z + 20;
@@ -40,7 +40,8 @@ export function DebrisField() {
     return kinds.map(() =>
       Array.from({ length: PER_KIND }, () => {
         const angle = r() * Math.PI * 2;
-        const radius = 5 + r() * 13;
+        // Keep the middle of the frame clear for the type.
+        const radius = 9 + r() * 12;
         return {
           x: Math.cos(angle) * radius,
           y: Math.sin(angle) * radius * 0.7,

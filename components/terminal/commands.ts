@@ -1,6 +1,6 @@
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
-import { skills } from "@/content/skills";
+import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { emit } from "@/lib/fx";
 import type { Locale } from "@/lib/i18n";
@@ -102,7 +102,7 @@ export const commands: Record<string, Command> = {
           ...profile.bio.map((p) => p[l]),
         );
       } else if (file === "skills") {
-        skills.forEach((s) => ctx.print(`${s.name.padEnd(18)} ${"▮".repeat(s.level)}${"▯".repeat(5 - s.level)}  since ${s.since}`));
+        skillGroups.forEach((g) => ctx.print(`${g.title[l].padEnd(10)} ${g.items.join(" · ")}`));
       } else if (file === "timeline") {
         timeline.forEach((e) => ctx.print(`${e.date}  ${e.title[l]}`));
       } else {
@@ -113,7 +113,7 @@ export const commands: Record<string, Command> = {
   projects: {
     summary: { zh: "列出项目", en: "list projects" },
     run: (_, ctx) => {
-      projects.forEach((p, i) => ctx.print(`[${i + 1}] ${p.title.padEnd(16)} ${p.year}  ${p.summary[ctx.locale]}`));
+      projects.forEach((p, i) => ctx.print(`[${i + 1}] ${p.title.padEnd(16)} ${p.year}  ${p.role[ctx.locale]} — ${p.summary[ctx.locale]}`));
       ctx.print(t(ctx, "用 open <编号> 打开", "use open <n> to open one"));
     },
   },

@@ -69,7 +69,7 @@ function FloorGrid() {
   return <mesh ref={mesh} geometry={geometry} material={material} rotation={[-Math.PI / 2, 0, 0]} />;
 }
 
-const BITS = 260;
+const BITS = 150;
 
 /** Specks of data streaming past the lens; they stretch into streaks with speed. */
 function DataStream() {
@@ -137,7 +137,6 @@ function BackdropNumerals() {
   const items = useMemo(
     () => [
       { n: "02", pos: [14, 4, WORLD.about.z - 34] as const, from: 0.8, to: 2.1 },
-      { n: "03", pos: [-16, 6, WORLD.skills.end - 40] as const, from: 1.9, to: 3.1 },
       { n: "04", pos: [18, 8, WORLD.projects.start - WORLD.projects.spacing * (WORLD.projects.count - 1) - 40] as const, from: 2.9, to: 4.1 },
       { n: "05", pos: [-20, 6, WORLD.timeline.end - 40] as const, from: 3.9, to: 5.1 },
       { n: "06", pos: [16, 7, WORLD.writing.z - 36] as const, from: 4.8, to: 5.75 },

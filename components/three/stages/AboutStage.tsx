@@ -7,6 +7,7 @@ import { KineticText } from "../text/KineticText";
 import { cue, frameState } from "../frameState";
 import { WORLD } from "../world";
 import { Globe } from "./Globe";
+import { profile } from "@/content/profile";
 
 const isPunct = (_: number, c: string) => "();=.".includes(c);
 
@@ -16,7 +17,7 @@ export function AboutStage() {
   return (
     <group position={[0, 0, WORLD.about.z]} scale={fit}>
       {/* "based: 中国" — the pin sits on the location in content/profile.ts. */}
-      <Globe position={[-11, 1.5, -6]} />
+      <Globe position={[-11, 1.5, -6]} lat={profile.geo.lat} lon={profile.geo.lon} />
       <KineticText
         text="init(me);"
         size={4.4}

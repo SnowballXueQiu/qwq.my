@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "雪球 · qwq.my",
-    "description": "雪球的个人站：学生、开发者。项目、经历、文章，以及一只会变形的 QwQ。"
+    "description": "雪球（Snowball_233）的个人站：天津师范大学人工智能专业学生、开发者。项目、经历、文章，以及一张会被撕开的图纸。"
   },
   "sheets": {
     "hero": "你好",
@@ -39,17 +39,14 @@
     "based": "坐标"
   },
   "skills": {
-    "heading": "技能爆炸图",
-    "bom": "物料清单 BOM",
-    "part": "零件",
-    "item": "名称",
-    "level": "熟练度",
-    "since": "始于"
+    "heading": "技能清单",
+    "bom": "物料清单 BOM"
   },
   "projects": {
     "heading": "项目",
     "view": "查看项目",
-    "source": "源码"
+    "source": "源码",
+    "role": "角色"
   },
   "timeline": {
     "heading": "经历",

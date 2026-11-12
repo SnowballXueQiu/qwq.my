@@ -7,31 +7,37 @@ export type TimelineEvent = {
   detail: L10n;
 };
 
-// 占位内容：DNA 螺旋的每一级横档就是一条经历，按时间排序。
+// 经历公路上的路标，按时间排序。
 export const timeline: TimelineEvent[] = [
   {
-    date: "2020-09",
-    kind: "life",
-    title: { zh: "写下第一行代码", en: "First line of code" },
-    detail: { zh: "用 Python 写了一个猜数字游戏。", en: "A number-guessing game in Python." },
+    date: "2024-08",
+    kind: "project",
+    title: { zh: "成为《Rust 语言圣经》协作者", en: "Joined the Rust Course as a collaborator" },
+    detail: { zh: "给 course.rs 补全和修订内容。", en: "Filling in and revising chapters of course.rs." },
   },
   {
-    date: "2022-07",
+    date: "2024-08",
     kind: "project",
-    title: { zh: "第一个开源项目", en: "First open-source project" },
-    detail: { zh: "在 GitHub 上收到了第一颗星。", en: "Got the first star on GitHub." },
+    title: { zh: "苦力怕论坛问卷系统前端", en: "KLPBBS survey frontend" },
+    detail: { zh: "和 TeamVastsea 一起做，跑在 wj.klpbbs.com。", en: "With TeamVastsea, running at wj.klpbbs.com." },
   },
   {
     date: "2024-09",
-    kind: "school",
-    title: { zh: "进入大学", en: "Started university" },
-    detail: { zh: "计算机科学与技术专业。", en: "Majoring in Computer Science." },
+    kind: "project",
+    title: { zh: "发布 sb.h", en: "Released sb.h" },
+    detail: { zh: "一个整活头文件，意外收获 350+ Star。", en: "A joke header that somehow got 350+ stars." },
   },
   {
-    date: "2025-05",
-    kind: "award",
-    title: { zh: "某某竞赛获奖", en: "Placeholder contest award" },
-    detail: { zh: "和队友熬了三个通宵。", en: "Three all-nighters with the team." },
+    date: "2025-09",
+    kind: "school",
+    title: { zh: "进入天津师范大学", en: "Started at Tianjin Normal University" },
+    detail: { zh: "人工智能专业，2025 级。", en: "Artificial Intelligence, class of 2025." },
+  },
+  {
+    date: "2025-10",
+    kind: "project",
+    title: { zh: "SignInPlus 签到插件", en: "SignInPlus check-in plugin" },
+    detail: { zh: "用 Kotlin 写的 Spigot 插件，我是主要作者。", en: "A Kotlin plugin for Spigot servers; I'm the lead author." },
   },
   {
     date: "2026-11",

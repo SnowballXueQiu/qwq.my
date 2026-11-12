@@ -1,5 +1,5 @@
 import { projects } from "@/content/projects";
-import { skills } from "@/content/skills";
+import { skillGroups } from "@/content/skills";
 
 type V3 = [number, number, number];
 /** `roll` is the dutch angle in degrees. */
@@ -10,7 +10,11 @@ export type CameraKey = { s: number; pos: V3; look: V3; roll?: number };
  * paper (z≈0) through each set piece in scroll order.
  */
 const projectCount = projects.length;
-const P_START = -150;
+/** Skills: one station per group, evenly spaced. */
+const S_START = -72;
+const S_SPACING = 16;
+const S_END = S_START - S_SPACING * (skillGroups.length - 1);
+const P_START = S_END - 40;
 const P_SPACING = 18;
 const P_END = P_START - P_SPACING * (projectCount - 1);
 const T_START = P_END - 28;
@@ -20,7 +24,7 @@ const C_Z = W_Z - 46;
 
 export const WORLD = {
   about: { z: -46 },
-  skills: { start: -70, end: -70 - Math.max(skills.length - 1, 1) * 6.5, radius: 5.4 },
+  skills: { start: S_START, end: S_END, spacing: S_SPACING, count: skillGroups.length },
   projects: { start: P_START, spacing: P_SPACING, side: 4.4, count: projectCount },
   timeline: { start: T_START, end: T_END },
   writing: { z: W_Z },
@@ -37,10 +41,12 @@ export function buildCameraKeys(): CameraKey[] {
     { s: 1.0, pos: [0, 0, -14], look: [0, 0, WORLD.about.z] },
     { s: 1.45, pos: [3.6, 1.3, -28], look: [0, 0, WORLD.about.z], roll: -7 },
     { s: 1.78, pos: [-1.2, 0.4, -33], look: [0, 0, WORLD.about.z], roll: 9 },
-    { s: 2.0, pos: [0, 0, WORLD.skills.start + 8], look: [0, 0, WORLD.skills.start - 30], roll: 0 },
-    // Corkscrew through the skills tunnel.
-    { s: 2.92, pos: [0, 0, WORLD.skills.end - 6], look: [0, 0, WORLD.skills.end - 40], roll: 200 },
   ];
+  // Skills: glide level and calm past one station per group, so the type stays legible.
+  for (let i = 0; i < skillGroups.length; i++) {
+    const z = S_START - S_SPACING * i;
+    keys.push({ s: 2 + (i + 0.5) / skillGroups.length, pos: [1.2, 0.3, z + 17.5], look: [3.6, 0.2, z - 4], roll: 0 });
+  }
   for (let i = 0; i < projectCount; i++) {
     const z = P_START - P_SPACING * i;
     const side = i % 2 === 0 ? 1 : -1;
@@ -48,7 +54,7 @@ export function buildCameraKeys(): CameraKey[] {
       s: 3 + (i + 0.5) / projectCount,
       pos: [-side * 1.4, 0.6, z + 10],
       look: [side * WORLD.projects.side * 0.85, 0, z],
-      roll: 360 - side * 6,
+      roll: -side * 6,
     });
   }
   const roadKeys = 5;
@@ -60,13 +66,13 @@ export function buildCameraKeys(): CameraKey[] {
       pos: [roadX(z), 2.4, z],
       look: [roadX(z - 22), 0.4, z - 22],
       // Lean into the bends like a motorbike.
-      roll: 360 + (roadX(z - 8) - roadX(z)) * 4,
+      roll: (roadX(z - 8) - roadX(z)) * 4,
     });
   }
   keys.push(
-    { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 365 },
-    { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 360 },
-    { s: 7, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 360 },
+    { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 5 },
+    { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 0 },
+    { s: 7, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 0 },
   );
   return keys;
 }

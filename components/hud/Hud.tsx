@@ -196,7 +196,7 @@ export function Hud() {
           maskImage: "linear-gradient(transparent, black 20%, black 80%, transparent)",
         }}
       >
-        <pre ref={code} className="whitespace-pre font-mono text-[8px] leading-[11px] opacity-35">
+        <pre ref={code} className="whitespace-pre font-mono text-[8px] leading-[11px] opacity-20">
           {source}
         </pre>
       </div>

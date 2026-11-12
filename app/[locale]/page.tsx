@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
-import { skills } from "@/content/skills";
+import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { listPosts } from "@/lib/posts";
@@ -9,7 +9,7 @@ import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
 import { ProjectReadout } from "@/components/sections/ProjectReadout";
-import { DebugButton } from "@/components/game/DebugButton";
+import { SkillsPanel } from "@/components/sections/SkillsPanel";
 import { Reveal } from "@/components/sections/Reveal";
 import { TimelineReadout } from "@/components/sections/TimelineReadout";
 import { SheetSection } from "@/components/sections/SheetSection";
@@ -76,39 +76,12 @@ export default async function Home() {
         </Reveal>
       </SheetSection>
 
-      <SheetSection id="skills" title={s.skills} length={2.4} sticky>
-        <Reveal className="max-w-[380px]">
-          <Panel>
-            <h2 data-line className="font-display mb-3 text-2xl font-extrabold tracking-tight">
-              {dict.skills.heading}
-            </h2>
-            <table className="w-full border-collapse font-mono text-xs">
-              <caption className="label mb-2 text-left text-ink-soft">{dict.skills.bom}</caption>
-              <thead>
-                <tr className="label border-y border-ink text-left text-ink-soft">
-                  <th className="py-1 pr-2 font-normal">{dict.skills.part}</th>
-                  <th className="py-1 pr-2 font-normal">{dict.skills.item}</th>
-                  <th className="py-1 pr-2 font-normal">{dict.skills.level}</th>
-                  <th className="py-1 font-normal">{dict.skills.since}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {skills.map((skill, i) => (
-                  <tr data-line key={skill.name} className="border-b border-rule">
-                    <td className="py-1 pr-2 text-accent">{String(i + 1).padStart(2, "0")}</td>
-                    <td className="py-1 pr-2">{skill.name}</td>
-                    <td className="py-1 pr-2 tracking-[0.15em]">
-                      {"▮".repeat(skill.level)}
-                      <span className="text-rule">{"▯".repeat(5 - skill.level)}</span>
-                    </td>
-                    <td className="py-1 tabular-nums">{skill.since}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <DebugButton label={dict.game.start} />
-          </Panel>
-        </Reveal>
+      <SheetSection id="skills" title={s.skills} length={Math.max(3, skillGroups.length * 0.55)} sticky>
+        <SkillsPanel
+          groups={skillGroups}
+          locale={locale}
+          labels={{ heading: dict.skills.heading, bom: dict.skills.bom, debug: dict.game.start }}
+        />
       </SheetSection>
 
       <SheetSection id="projects" title={s.projects} length={Math.max(3, projects.length * 0.85)} sticky>
