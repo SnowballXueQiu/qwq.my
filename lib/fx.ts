@@ -2,7 +2,6 @@ import type { Expression } from "./store";
 
 /** Cross-tree effects: the DOM (terminal, menus) pokes the 3D scene and vice versa. */
 export type FxEvents = {
-  flash: { duration?: number };
   glitch: { duration?: number; amount?: number };
   face: { expression: Expression; duration?: number };
   crash: Record<string, never>;

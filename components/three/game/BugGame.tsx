@@ -241,8 +241,7 @@ export function BugGame() {
         bug.alive = false;
         game.miss();
         play("buzz");
-        emit("glitch", { duration: 0.35, amount: 0.9 });
-        emit("flash", { duration: 0.08 });
+        emit("glitch", { duration: 0.3, amount: 0.35 });
         emit("face", { expression: "QAQ", duration: 1.2 });
       }
     });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { emit, on } from "@/lib/fx";
+import { on } from "@/lib/fx";
 import { prefersReducedMotion } from "@/lib/scroll";
 
 const LOG = [
@@ -55,7 +55,6 @@ export function BootScreen() {
       if (cancelled) return;
       sessionStorage.setItem(SESSION_KEY, "1");
       setLeaving(true);
-      emit("flash", { duration: 0.1 });
       setTimeout(() => !cancelled && setVisible(false), 450);
     };
     void play(false);
@@ -73,7 +72,7 @@ export function BootScreen() {
   return (
     <div
       aria-hidden
-      className="fixed inset-0 z-[95] flex items-end bg-[#141414] p-[8vw] font-mono text-[13px] text-[#f1ede4] transition-[clip-path] duration-[450ms] ease-[steps(6)]"
+      className="fixed inset-0 z-[95] flex items-end bg-[#141414] p-[8vw] font-mono text-[13px] text-[#f1ede4] transition-[clip-path] duration-700 ease-out"
       style={{ clipPath: leaving ? "inset(0 0 100% 0)" : "inset(0 0 0 0)" }}
     >
       <div className="space-y-1">

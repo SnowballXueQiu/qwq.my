@@ -5,6 +5,7 @@ import { skillGroups } from "@/content/skills";
 import { timeline } from "@/content/timeline";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { listPosts } from "@/lib/posts";
+import { SHEET_LENGTH } from "@/lib/sheetLengths";
 import { SheetTriggers } from "@/components/scroll/SheetTriggers";
 import { HeroIntro } from "@/components/sections/HeroIntro";
 import { Panel } from "@/components/sections/Panel";
@@ -24,7 +25,7 @@ export default async function Home() {
     <main id="main">
       <SheetTriggers />
 
-      <SheetSection id="hero" title={s.hero} length={3} sticky>
+      <SheetSection id="hero" title={s.hero} length={SHEET_LENGTH.hero} sticky>
         <HeroIntro>
           <p className="label mb-4 text-accent">{profile.roles[locale]}</p>
           <h1 className="font-display text-[clamp(4rem,16vw,16rem)] font-black leading-[0.82] tracking-[-0.04em] font-condensed">
@@ -38,7 +39,7 @@ export default async function Home() {
         </HeroIntro>
       </SheetSection>
 
-      <SheetSection id="about" title={s.about} length={2} sticky>
+      <SheetSection id="about" title={s.about} length={SHEET_LENGTH.about} sticky>
         <Reveal className="max-w-[440px] [perspective:1100px]">
           <Panel className="origin-left [transform:rotateY(14deg)_rotateX(4deg)] transition-transform duration-500 hover:[transform:none]">
             <pre className="overflow-x-auto font-mono text-[13px] leading-6">
@@ -76,7 +77,7 @@ export default async function Home() {
         </Reveal>
       </SheetSection>
 
-      <SheetSection id="skills" title={s.skills} length={Math.max(3, skillGroups.length * 0.55)} sticky>
+      <SheetSection id="skills" title={s.skills} length={SHEET_LENGTH.skills} sticky>
         <SkillsPanel
           groups={skillGroups}
           locale={locale}
@@ -84,15 +85,15 @@ export default async function Home() {
         />
       </SheetSection>
 
-      <SheetSection id="projects" title={s.projects} length={Math.max(3, projects.length * 0.85)} sticky>
+      <SheetSection id="projects" title={s.projects} length={SHEET_LENGTH.projects} sticky>
         <ProjectReadout projects={projects} locale={locale} labels={dict.projects} />
       </SheetSection>
 
-      <SheetSection id="timeline" title={s.timeline} length={Math.max(3, timeline.length * 0.7)} sticky>
+      <SheetSection id="timeline" title={s.timeline} length={SHEET_LENGTH.timeline} sticky>
         <TimelineReadout events={timeline} locale={locale} playLabel={dict.video.play} />
       </SheetSection>
 
-      <SheetSection id="writing" title={s.writing} length={1.6} sticky>
+      <SheetSection id="writing" title={s.writing} length={SHEET_LENGTH.writing} sticky>
         <Reveal className="max-w-[460px]">
           <Panel>
             <h2 data-line className="font-display text-3xl font-extrabold tracking-tight">
@@ -120,7 +121,7 @@ export default async function Home() {
         </Reveal>
       </SheetSection>
 
-      <SheetSection id="contact" title={s.contact} length={1.8} sticky>
+      <SheetSection id="contact" title={s.contact} length={SHEET_LENGTH.contact} sticky>
         <h2 className="font-display text-[clamp(3rem,10vw,9rem)] font-black leading-[0.85] tracking-[-0.04em] font-condensed">
           {dict.contact.heading}
         </h2>

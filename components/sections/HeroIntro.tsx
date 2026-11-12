@@ -26,9 +26,9 @@ export function HeroIntro({ children }: { children: React.ReactNode }) {
           scrollTrigger: { trigger: section, start: "top top", end: "bottom top", scrub: true },
         })
         .to(el, { duration: 0.38 })
-        .to(el, { duration: 0.04, x: 6, skewX: -8, clipPath: "inset(0 0 52% 0)", ease: "steps(3)" })
-        .to(el, { duration: 0.04, x: -18, skewX: 14, clipPath: "inset(38% 0 8% 0)", ease: "steps(2)" })
-        .to(el, { duration: 0.04, x: 40, opacity: 0, clipPath: "inset(70% 0 0 0)", ease: "steps(2)" })
+        .to(el, { duration: 0.04, x: 6, skewX: -8, clipPath: "inset(0 0 52% 0)", ease: "power2.in" })
+        .to(el, { duration: 0.04, x: -18, skewX: 14, clipPath: "inset(38% 0 8% 0)", ease: "power2.in" })
+        .to(el, { duration: 0.04, x: 40, opacity: 0, clipPath: "inset(70% 0 0 0)", ease: "power2.in" })
         .to(el, { duration: 0.5 });
     }, el);
     return () => ctx.revert();

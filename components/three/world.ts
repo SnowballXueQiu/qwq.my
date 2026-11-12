@@ -1,5 +1,6 @@
 import { projects } from "@/content/projects";
 import { skillGroups } from "@/content/skills";
+import { pinned } from "@/lib/sheetLengths";
 
 type V3 = [number, number, number];
 /** `roll` is the dutch angle in degrees. */
@@ -46,24 +47,25 @@ export function buildCameraKeys(): CameraKey[] {
   // Skills: glide level and calm past one station per group, so the type stays legible.
   for (let i = 0; i < skillGroups.length; i++) {
     const z = S_START - S_SPACING * i;
-    keys.push({ s: 2 + (i + 0.5) / skillGroups.length, pos: [1.2, 0.3, z + 17.5], look: [3.6, 0.2, z - 4], roll: 0 });
+    // Stations share the stretch where the skills panel is pinned:
+    // arrive, hold while you read, then move on.
+    const slot = pinned("skills") / skillGroups.length;
+    const station = { pos: [1.2, 0.3, z + 17.5] as V3, look: [3.6, 0.2, z - 4] as V3, roll: 0 };
+    keys.push({ s: 2 + slot * (i + 0.12), ...station }, { s: 2 + slot * (i + 0.88), ...station });
   }
   for (let i = 0; i < projectCount; i++) {
     const z = P_START - P_SPACING * i;
     const side = i % 2 === 0 ? 1 : -1;
-    keys.push({
-      s: 3 + (i + 0.5) / projectCount,
-      pos: [-side * 1.4, 0.6, z + 10],
-      look: [side * WORLD.projects.side * 0.85, 0, z],
-      roll: -side * 6,
-    });
+    const stop = { pos: [-side * 1.4, 0.6, z + 10] as V3, look: [side * WORLD.projects.side * 0.85, 0, z] as V3, roll: -side * 6 };
+    const slot = pinned("projects") / projectCount;
+    keys.push({ s: 3 + slot * (i + 0.15), ...stop }, { s: 3 + slot * (i + 0.85), ...stop });
   }
   const roadKeys = 5;
   for (let i = 0; i <= roadKeys; i++) {
     const t = i / roadKeys;
     const z = T_START + 6 - (T_START - T_END + 6) * t;
     keys.push({
-      s: 4.05 + t * 0.9,
+      s: 4.02 + t * (pinned("timeline") - 0.02),
       pos: [roadX(z), 2.4, z],
       look: [roadX(z - 22), 0.4, z - 22],
       // Lean into the bends like a motorbike.

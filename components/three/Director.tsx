@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
+import { itemAt } from "@/lib/sheetLengths";
 import { getScrollVelocity, prefersReducedMotion } from "@/lib/scroll";
 import { play, setAmbientSpeed } from "@/lib/sound";
 import { useSite } from "@/lib/store";
@@ -21,7 +22,7 @@ import { skillGroups } from "@/content/skills";
 /** Camera keyframes along scene time. Between keys the camera eases. */
 const KEYS = buildCameraKeys();
 
-/** Moments where the edit hard-cuts: a one-frame inversion flash plus a glitch tail. */
+/** Moments where the edit cuts: a punch-in, a little shake and a short glitch tail (no full-frame flashes: photosensitive-safe). */
 const CUTS = [0.47, 2.0, 3.0, 4.0, 5.0, 5.78];
 
 const a = new Vector3();
@@ -62,18 +63,18 @@ function anchorFor(s: number): { label: string } | null {
     return { label: "REF 02-A · init(me)" };
   }
   if (sheet === 2) {
-    const i = Math.min(skillGroups.length - 1, Math.floor(f * skillGroups.length));
+    const i = itemAt("skills", f, skillGroups.length);
     anchorWorld.set(0.4, 2.6, WORLD.skills.start - WORLD.skills.spacing * i);
     return { label: `REF 03-${String(i + 1).padStart(2, "0")} · ${skillGroups[i].code}` };
   }
   if (sheet === 3) {
-    const i = Math.min(projects.length - 1, Math.floor(f * projects.length));
+    const i = itemAt("projects", f, projects.length);
     const side = i % 2 === 0 ? 1 : -1;
     anchorWorld.set(side * WORLD.projects.side, 0, WORLD.projects.start - WORLD.projects.spacing * i);
     return { label: `REF 04-${String(i + 1).padStart(2, "0")} · ${projects[i].title}` };
   }
   if (sheet === 4) {
-    const i = Math.min(timeline.length - 1, Math.floor(f * timeline.length));
+    const i = itemAt("timeline", f, timeline.length);
     const { start, end } = WORLD.timeline;
     const z = start - ((i + 0.5) / timeline.length) * (start - end);
     anchorWorld.set(roadX(z) + (i % 2 === 0 ? -3 : 3), 2.5, z);
@@ -101,23 +102,19 @@ export function Director() {
       pos: new Vector3(),
       target: new Vector3(),
       // Effects requested from outside the canvas, as wall-clock deadlines.
-      fx: { flashUntil: 0, glitchUntil: 0, glitchAmount: 0, menu: false, partyUntil: 0 },
+      fx: { glitchUntil: 0, glitchAmount: 0, menu: false, partyUntil: 0 },
     }),
     [],
   );
 
   useEffect(() => {
     const offs = [
-      on("flash", ({ duration = 0.12 }) => {
-        fx.flashUntil = performance.now() + duration * 1000;
-      }),
       on("party", ({ seconds }) => {
         fx.partyUntil = performance.now() + seconds * 1000;
       }),
       on("menu", ({ open }) => {
         fx.menu = open;
         play("whoosh", 1.4);
-        fx.flashUntil = performance.now() + 90;
       }),
       on("glitch", ({ duration = 0.6, amount = 1 }) => {
         fx.glitchUntil = performance.now() + duration * 1000;
@@ -214,12 +211,13 @@ export function Director() {
     // Party: everything on the beat.
     const partying = performance.now() < fx.partyUntil;
     frameState.party += ((partying ? 1 : 0) - frameState.party) * Math.min(delta * 4, 1);
-    const beat = partying ? Math.pow(1 - ((t * 2.2) % 1), 3) : 0;
+    // A smooth sway, not a strobe.
+    const beat = partying ? 0.5 + 0.5 * Math.sin(t * 2.4) : 0;
 
     // Lens and film.
     const transit = o > 0.03 && o < 0.97 ? 0.6 : 0;
     postFx.speed = calm ? 0 : smooth(0.2, 1, frameState.speed) * free;
-    postFx.aberration = calm ? 0 : frameState.speed * 0.6 + punch * 0.8 + pipelineTarget.glitch * 0.7 + beat * 1.2;
+    postFx.aberration = calm ? 0 : frameState.speed * 0.6 + punch * 0.8 + pipelineTarget.glitch * 0.7 + beat * 0.5;
     postFx.crt = calm ? 0 : Math.max(punch * 0.9, transit, pipelineTarget.glitch * 0.6);
     postFx.vignette = 0.35 + frameState.speed * 0.3;
 
@@ -243,15 +241,10 @@ export function Director() {
     const wall = performance.now();
     // No strobing for people who asked the OS for less motion.
     if (prefersReducedMotion()) {
-      pipelineTarget.flash = 0;
       pipelineTarget.glitch = 0;
       return;
     }
-    pipelineTarget.flash = since < 0.09 || wall < fx.flashUntil || beat > 0.92 ? 1 : 0;
-    pipelineTarget.glitch = Math.max(
-      Math.max(0, 1 - since / 0.4) * 0.9,
-      wall < fx.glitchUntil ? fx.glitchAmount : 0,
-    );
+    pipelineTarget.glitch = Math.max(Math.max(0, 1 - since / 0.3) * 0.35, wall < fx.glitchUntil ? fx.glitchAmount : 0);
   }, -1);
 
   return null;

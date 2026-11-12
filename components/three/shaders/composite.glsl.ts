@@ -11,7 +11,7 @@ void main() {
 /**
  * Turns the G-buffer into a drawing: Sobel ink lines from depth/normal/id,
  * screen-space halftone and hatching from tone, paper grain, and the
- * paper⇄ink inversion, flash and glitch used for scene cuts.
+ * paper⇄ink inversion and the glitch used on scene cuts.
  */
 export const compositeFragment = /* glsl */ `
 precision highp float;
@@ -29,7 +29,6 @@ uniform vec3 uInk;
 uniform vec3 uAccent;
 uniform float uInvert;      // 0 paper surfaces + ink lines, 1 the reverse
 uniform float uBgInvert;    // background: 0 paper, 1 ink
-uniform float uFlash;       // full-frame inversion for hard cuts
 uniform float uGlitch;      // horizontal slice displacement
 uniform float uBoil;        // hand-drawn line jitter, in CSS px
 uniform float uTime;
@@ -137,8 +136,6 @@ void main() {
   // Paper grain, re-seeded on the same 12fps clock as the line boil.
   col += (hash12(gl_FragCoord.xy + frame * 17.0) - 0.5) * 0.035;
 
-  // A hard-cut flash swaps paper and ink across the whole frame.
-  col = mix(col, uPaper + uInk - col, uFlash);
   fragColor = vec4(col, 1.0);
 }
 `;

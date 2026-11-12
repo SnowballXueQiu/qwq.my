@@ -1,7 +1,7 @@
 import { AbsoluteFill, Sequence } from "remotion";
 import { year2026, type YearData } from "@/content/year/2026";
 import type { Locale } from "@/lib/i18n";
-import { BigYear, Boot, CutFlash, Heatmap, Highlights, Outro, Projects, Stats } from "./scenes";
+import { BigYear, Boot, Heatmap, Highlights, Outro, Projects, Stats } from "./scenes";
 import { loadVideoFonts } from "./theme";
 
 export type YearInReviewProps = { locale: Locale; data?: YearData };
@@ -43,7 +43,6 @@ export function YearInReview({ locale, data = year2026 }: YearInReviewProps) {
         return (
           <Sequence key={name} name={name} from={from} durationInFrames={length}>
             {scene}
-            {from > 0 && <CutFlash />}
           </Sequence>
         );
       })}

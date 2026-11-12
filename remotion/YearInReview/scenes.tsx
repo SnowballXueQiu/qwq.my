@@ -91,7 +91,7 @@ export function BigYear({ year }: { year: number }) {
   return (
     <AbsoluteFill style={{ background: C.ink }}>
       <ThreeCanvas width={width} height={height} camera={{ fov: 35, position: [0, 0, 14], near: 0.1, far: 200 }} flat>
-        <InkPipeline time={frame / fps} controls={{ invert: 1, bgInvert: 1, flash: frame >= 140 && frame < 142 ? 1 : 0, glitch: 0 }} />
+        <InkPipeline time={frame / fps} controls={{ invert: 1, bgInvert: 1, glitch: 0 }} />
         <KineticText typeface={fonts.display} text={String(year)} size={4.4} depth={1.4} position={[0, 0.5, 0]} accent={(i) => i === 3} progress={progress} />
         <KineticText
           font="mono"
@@ -247,8 +247,3 @@ export function Outro({ locale }: { locale: Locale }) {
   );
 }
 
-/** Two frames of full inversion on every hard cut. */
-export function CutFlash() {
-  const frame = useCurrentFrame();
-  return frame < 2 ? <AbsoluteFill style={{ background: C.paper, mixBlendMode: "difference" }} /> : null;
-}

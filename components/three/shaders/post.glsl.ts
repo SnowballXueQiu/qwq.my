@@ -55,12 +55,12 @@ void main() {
   // Warp streaks radiating from the vanishing point.
   if (uSpeed > 0.01) {
     float ang = atan(c.y, c.x);
+    // Each lane keeps its streak and the dashes flow outward: motion, not flicker.
     float lane = floor((ang + 3.14159) * 60.0);
-    float flick = floor(uTime * 18.0);
-    float pick = step(0.78, hash12(vec2(lane, flick)));
+    float pick = step(0.78, hash12(vec2(lane, 3.0)));
     float len = length(c);
-    float reach = mix(0.9, 0.25, hash12(vec2(lane, flick + 7.0)) * uSpeed);
-    float streak = pick * smoothstep(reach, reach + 0.25, len) * (1.0 - smoothstep(0.98, 1.2, len));
+    float dash = smoothstep(0.35, 0.5, fract(len * 2.2 - uTime * (1.2 + hash12(vec2(lane, 9.0)))));
+    float streak = pick * dash * smoothstep(0.25, 0.5, len) * (1.0 - smoothstep(0.98, 1.2, len));
     float thin = 1.0 - smoothstep(0.0, 0.35, abs(fract((ang + 3.14159) * 60.0) - 0.5) * 2.0);
     col = mix(col, uLine, streak * thin * min(uSpeed * 1.4, 1.0));
   }

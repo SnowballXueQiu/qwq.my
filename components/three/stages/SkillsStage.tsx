@@ -51,14 +51,13 @@ function Station({ index }: { index: number }) {
     [geometry, material],
   );
 
-  // Arrive as the camera approaches; leave sideways rather than into the lens.
+  // Assemble as the camera approaches; once it has passed, the card is out of frame.
   const cue = () => {
     const s = frameState.s;
     if (s < 1.85 || s > 3.15) return -1;
     const camZ = frameState.cameraZ;
-    const arrive = clamp01((z + 34 - camZ) / 14);
-    const leave = clamp01((z + 4 - camZ) / 6);
-    return leave > 0 ? 1 + leave : arrive;
+    if (camZ < z + 6) return -1;
+    return clamp01((z + 36 - camZ) / 14);
   };
 
   useFrame(() => {
@@ -67,9 +66,8 @@ function Station({ index }: { index: number }) {
     const p = withOverview(cue());
     g.visible = p > 0 && p < 2;
     const rise = Math.min(Math.max(p, 0), 1);
-    const out = Math.max(p - 1, 0);
-    g.position.set(5.2 + out * 9, (1 - rise) * -3, z);
-    g.rotation.y = -0.12 - out * 0.8;
+    g.position.set(5.2, (1 - rise) * -3, z);
+    g.rotation.y = -0.12;
     material.uniforms.uActive.value = rise;
   });
 

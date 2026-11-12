@@ -30,12 +30,11 @@ export const OVERLAY_LAYER = 1;
 export type PipelineControls = {
   invert: number;
   bgInvert: number;
-  flash: number;
   glitch: number;
 };
 
 /** Mutable per-frame look; scenes write here, the pipeline eases toward it. */
-export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, flash: 0, glitch: 0 };
+export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, glitch: 0 };
 
 /** Set while another canvas (the year-in-review player) owns the shared shader clock. */
 export const sitePipeline = { paused: false };
@@ -106,7 +105,6 @@ export function InkPipeline({
         uAccent: { value: new Vector3(...srgb(palette.accent)) },
         uInvert: { value: 0 },
         uBgInvert: { value: 0 },
-        uFlash: { value: 0 },
         uGlitch: { value: 0 },
         uBoil: { value: 0.6 },
         uTime: sharedUniforms.uTime,
@@ -183,13 +181,12 @@ export function InkPipeline({
     if (external) {
       u.uInvert.value = controls.invert;
       u.uBgInvert.value = controls.bgInvert;
-      u.uFlash.value = controls.flash;
       u.uGlitch.value = controls.glitch;
     } else {
-      const k = 1 - Math.exp(-delta * 10);
+      // Paper ⇄ ink as a slow cross-fade (~0.8s), never a sudden full-frame swap.
+      const k = 1 - Math.exp(-delta * 3);
       u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
       u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
-      u.uFlash.value = pipelineTarget.flash;
       u.uGlitch.value = pipelineTarget.glitch;
       u.uBoil.value = reducedMotion ? 0 : 0.6;
       // Keep the CSS world in step with the shader's notion of light and dark.

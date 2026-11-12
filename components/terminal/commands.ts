@@ -201,14 +201,6 @@ export const commands: Record<string, Command> = {
       ctx.navigate(location.pathname.replace(/^\/(zh|en)/, `/${l}`) + location.hash);
     },
   },
-  invert: {
-    summary: { zh: "反白闪一下", en: "flash the frame" },
-    run: (_, ctx) => {
-      emit("flash", { duration: 0.15 });
-      emit("glitch", { duration: 0.4, amount: 0.7 });
-      ctx.print(ok("✓"));
-    },
-  },
   qwq: {
     summary: { zh: "让 QwQ 换个表情", en: "make QwQ pull a face" },
     usage: "[face]",

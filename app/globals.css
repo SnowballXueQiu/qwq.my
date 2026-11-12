@@ -130,19 +130,21 @@ html.lenis body {
   overscroll-behavior: contain;
 }
 
-/* sudo rm -rf / — everything on the page loses its grip. */
-@keyframes crash-jitter {
-  0% { transform: translate(0, 0) skewX(0); clip-path: inset(0); }
-  20% { transform: translate(-12px, 4px) skewX(6deg); clip-path: inset(10% 0 40% 0); }
-  40% { transform: translate(18px, -6px) skewX(-10deg); clip-path: inset(50% 0 5% 0); }
-  60% { transform: translate(-6px, 14px) skewX(3deg); clip-path: inset(0 0 70% 0); }
-  80% { transform: translate(10px, -10px) skewX(-4deg); clip-path: inset(30% 0 20% 0); }
-  100% { transform: translate(0, 60px) rotate(-3deg); clip-path: inset(0); opacity: 0.2; }
+/* sudo rm -rf / — the page loses its grip and slides away (smoothly; no strobing). */
+@keyframes crash-sink {
+  0% { transform: none; opacity: 1; }
+  30% { transform: translate(-8px, 6px) rotate(-1deg); }
+  100% { transform: translate(0, 120px) rotate(-4deg); opacity: 0; }
+}
+
+@keyframes panic-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 html.is-crashing main,
 html.is-crashing header {
-  animation: crash-jitter 1.6s steps(12) forwards;
+  animation: crash-sink 1.6s cubic-bezier(0.5, 0, 0.75, 0) forwards;
 }
 
 /* While the overview map is open the page copy steps aside for the 3D world. */
