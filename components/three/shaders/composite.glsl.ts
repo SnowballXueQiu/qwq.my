@@ -72,7 +72,8 @@ float hatch(vec2 sp, float darkness, float angle, float from) {
 void main() {
   vec2 px = 1.0 / uResolution;
   vec2 uv = vUv;
-  float frame = floor(uTime * 12.0);
+  // Glitch bands re-roll quickly; nothing else in the frame is stepped, so motion stays fluid.
+  float frame = floor(uTime * 30.0);
 
   if (uGlitch > 0.0) {
     float band = floor(uv.y * 28.0);
@@ -80,7 +81,8 @@ void main() {
     if (r < uGlitch * 0.7) uv.x += (hash12(vec2(frame, band)) - 0.5) * 0.12 * uGlitch;
   }
 
-  vec2 jitter = (vec2(vnoise(uv * 6.0 + frame * 1.37), vnoise(uv * 6.0 + frame * 2.11 + 19.0)) - 0.5)
+  // A slow, continuous wobble in the line work (was a 12fps "boil", which read as stutter).
+  vec2 jitter = (vec2(vnoise(uv * 6.0 + uTime * 0.6), vnoise(uv * 6.0 + uTime * 0.45 + 19.0)) - 0.5)
     * 2.0 * uBoil * uDpr * px;
   vec2 suv = uv + jitter;
 
@@ -133,8 +135,8 @@ void main() {
   vec3 edgeCol = mix(line, uAccent, step(0.5, accentEdge));
   col = mix(col, edgeCol, clamp(edge, 0.0, 1.0));
 
-  // Paper grain, re-seeded on the same 12fps clock as the line boil.
-  col += (hash12(gl_FragCoord.xy + frame * 17.0) - 0.5) * 0.035;
+    // Paper grain is part of the paper: fixed, not re-seeded every few frames.
+  col += (hash12(gl_FragCoord.xy) - 0.5) * 0.03;
 
   fragColor = vec4(col, 1.0);
 }

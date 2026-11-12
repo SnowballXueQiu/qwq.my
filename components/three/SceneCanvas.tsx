@@ -48,11 +48,8 @@ export default function SceneCanvas({
       onCreated={() => onReady?.()}
       style={{ position: "fixed", inset: 0, zIndex: 0 }}
     >
-      <PerformanceMonitor
-        onChange={({ factor }) => setDpr(Math.round((1 + factor * 0.75) * 4) / 4)}
-        flipflops={3}
-        onFallback={() => setDpr(1)}
-      />
+      {/* Only ever steps down, once, so the canvas isn't reallocated mid-scroll. */}
+      <PerformanceMonitor onDecline={() => setDpr(1)} />
       <Director />
       <InteractionBridge />
       <InkPipeline />

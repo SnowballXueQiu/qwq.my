@@ -23,7 +23,7 @@ export function Reveal({ children, className }: { children: React.ReactNode; cla
           opacity: 1,
           duration: 0.35,
           stagger: 0.06,
-          ease: "steps(8)",
+          ease: "power2.out",
           scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" },
         },
       );

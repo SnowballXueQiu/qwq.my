@@ -56,7 +56,8 @@ export function milestoneZ(i: number, n: number) {
 /** Sideways sway of the timeline road at a given z. */
 export const roadX = (z: number) => Math.sin((z - T_START) * 0.045) * 3.2;
 
-export function buildCameraKeys(): CameraKey[] {
+/** `portrait`: phones look straight down the road at exhibit stops (there is no side panel to clear). */
+export function buildCameraKeys(portrait = false): CameraKey[] {
   const keys: CameraKey[] = [
     { s: 0, pos: [0, 0, 14], look: [0, 0, 0] },
     // Hold after the tear so there's time to play with the toys that burst out.
@@ -90,7 +91,7 @@ export function buildCameraKeys(): CameraKey[] {
     // Stand on the road's centre line at this stop (not where the bend puts us),
     // so both verges are framed evenly.
     const cx = roadX(z);
-    const look: V3 = event.media ? [roadX(z - 3) - side * 1.6, 1.7, z - 3] : [cx, 0.6, z - 18];
+    const look: V3 = event.media && !portrait ? [roadX(z - 3) - side * 1.6, 1.7, z - 3] : event.media ? [roadX(z - 3), 1.9, z - 3] : [cx, 0.6, z - 18];
     const at = (camZ: number): Omit<CameraKey, "s"> => ({
       pos: [cx, 2.2, camZ],
       look,
@@ -107,9 +108,19 @@ export function buildCameraKeys(): CameraKey[] {
     { s: 4 + tSlot * (n + 0.1), pos: [px, 1.3, PLAZA_Z + 24], look: [px, 7, PLAZA_Z], roll: 0 },
     { s: 4 + tSlot * (n + 0.75), pos: [px + 1.5, 1.5, PLAZA_Z + 13], look: [px + 1, 9, PLAZA_Z - 2], roll: -4 },
     { s: 4 + tSlot * (n + 1.1), pos: [px + 6, 18, PLAZA_Z + 30], look: [px + 2, 0, PLAZA_Z], roll: 0 },
-    { s: 4 + tSlot * (n + 1.45), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
-    { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
   );
+  if (portrait) {
+    // A narrow screen can't hold the whole year at once: fly over it, January to November.
+    keys.push(
+      { s: 4 + tSlot * (n + 1.4), pos: [px - 19, 36, PLAZA_Z + 36], look: [px - 19, -6, PLAZA_Z + 1], roll: 0 },
+      { s: 4 + tSlot * (n + 1.95), pos: [px + 19, 36, PLAZA_Z + 36], look: [px + 19, -6, PLAZA_Z + 1], roll: 0 },
+    );
+  } else {
+    keys.push(
+      { s: 4 + tSlot * (n + 1.45), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
+      { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
+    );
+  }
   keys.push(
     { s: 5.35, pos: [2.2, 0.6, W_Z + 13], look: [0, 0, W_Z], roll: 5 },
     { s: 5.92, pos: [0, 0, C_Z + 14], look: [0, 0, C_Z], roll: 0 },

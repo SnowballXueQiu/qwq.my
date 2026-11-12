@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, Vector3 } from "three";
 import { on } from "@/lib/fx";
 import { getSceneTime } from "@/lib/sceneClock";
-import { TIMELINE_SLOTS, itemAt } from "@/lib/sheetLengths";
+import { itemAt } from "@/lib/sheetLengths";
 import { getScrollVelocity, prefersReducedMotion } from "@/lib/scroll";
 import { play, setAmbientSpeed } from "@/lib/sound";
 import { useSite } from "@/lib/store";
@@ -13,22 +13,78 @@ import { pipelineTarget, postFx } from "./pipeline/InkPipeline";
 import { frameState, smooth } from "./frameState";
 import { BASE_FOV } from "./framing";
 import { hudState } from "./hudState";
-import { WORLD, milestoneZ, roadX } from "./world";
-import { buildCameraKeys } from "./world";
+import { WORLD, buildCameraKeys, type CameraKey } from "./world";
 import { projects } from "@/content/projects";
-import { timeline, whenLabel } from "@/content/timeline";
 import { skillGroups } from "@/content/skills";
 
-/** Camera keyframes along scene time. Between keys the camera eases. */
-const KEYS = buildCameraKeys();
+/**
+ * Monotone cubic (Fritsch–Carlson) tangents for one channel of the keys:
+ * velocity is continuous through every key, nothing overshoots, and where two
+ * keys hold the same value (a stop) the camera really stands still.
+ */
+function monotoneTangents(xs: number[], ys: number[]) {
+  const n = xs.length;
+  const d = Array.from({ length: n - 1 }, (_, i) => (ys[i + 1] - ys[i]) / Math.max(xs[i + 1] - xs[i], 1e-6));
+  const m = Array.from({ length: n }, (_, i) => (i === 0 ? d[0] : i === n - 1 ? d[n - 2] : d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2));
+  for (let i = 0; i < n - 1; i++) {
+    if (d[i] === 0) {
+      m[i] = 0;
+      m[i + 1] = 0;
+      continue;
+    }
+    const a = m[i] / d[i];
+    const b = m[i + 1] / d[i];
+    const h = Math.hypot(a, b);
+    if (h > 3) {
+      m[i] = (3 / h) * a * d[i];
+      m[i + 1] = (3 / h) * b * d[i];
+    }
+  }
+  // The film starts and ends at rest.
+  m[0] = 0;
+  m[n - 1] = 0;
+  return m;
+}
 
-/** Moments where the edit cuts: a punch-in, a little shake and a short glitch tail (no full-frame flashes: photosensitive-safe). */
+/** Camera keyframes along scene time, joined by a monotone cubic. Returns a sampler. */
+function cameraSpline(keys: CameraKey[]) {
+  const xs = keys.map((k) => k.s);
+  const channels = [
+    ...[0, 1, 2].map((c) => keys.map((k) => k.pos[c])),
+    ...[0, 1, 2].map((c) => keys.map((k) => k.look[c])),
+    keys.map((k) => k.roll ?? 0),
+  ];
+  const tangents = channels.map((ys) => monotoneTangents(xs, ys));
+  const out = new Array<number>(channels.length);
+  /** Camera position and target at scene time `s`; returns the dutch angle in degrees. */
+  return (s: number, pos: Vector3, target: Vector3) => {
+    const x = Math.min(Math.max(s, xs[0]), xs[xs.length - 1]);
+    let i = 0;
+    while (i < xs.length - 2 && x > xs[i + 1]) i++;
+    const h = xs[i + 1] - xs[i] || 1e-6;
+    const t = (x - xs[i]) / h;
+    const t2 = t * t;
+    const t3 = t2 * t;
+    const h00 = 2 * t3 - 3 * t2 + 1;
+    const h10 = t3 - 2 * t2 + t;
+    const h01 = -2 * t3 + 3 * t2;
+    const h11 = t3 - t2;
+    for (let c = 0; c < channels.length; c++) {
+      const y = channels[c];
+      const m = tangents[c];
+      out[c] = h00 * y[i] + h10 * h * m[i] + h01 * y[i + 1] + h11 * h * m[i + 1];
+    }
+    pos.set(out[0], out[1], out[2]);
+    target.set(out[3], out[4], out[5]);
+    return out[6];
+  };
+}
+
+export const sampleCamera = cameraSpline(buildCameraKeys());
+const sampleCameraPortrait = cameraSpline(buildCameraKeys(true));
+
+/** Moments where the edit cuts: a gentle push-in and a short glitch tail (no full-frame flashes: photosensitive-safe). */
 const CUTS = [0.47, 2.0, 3.0, 4.0, 5.0, 5.78];
-
-const a = new Vector3();
-const b = new Vector3();
-const look = new Vector3();
-const lookB = new Vector3();
 
 /** Overview map: high and off to the side, taking in the whole flight path. */
 const OVERVIEW_POS = new Vector3(165, 195, 45);
@@ -38,18 +94,6 @@ export const ARENA = new Vector3(0, 800, 0);
 const ARENA_LOOK = new Vector3(0, 800, -100);
 const scratchPos = new Vector3();
 const scratchLook = new Vector3();
-
-/** Camera position and target at scene time `s`; returns the dutch angle in degrees. */
-export function sampleCamera(s: number, pos: Vector3, target: Vector3) {
-  let i = 0;
-  while (i < KEYS.length - 2 && s > KEYS[i + 1].s) i++;
-  const k0 = KEYS[i];
-  const k1 = KEYS[i + 1];
-  const t = smooth(k0.s, k1.s, s);
-  pos.lerpVectors(a.set(...k0.pos), b.set(...k1.pos), t);
-  target.lerpVectors(look.set(...k0.look), lookB.set(...k1.look), t);
-  return (k0.roll ?? 0) + ((k1.roll ?? 0) - (k0.roll ?? 0)) * t;
-}
 
 const parallax = { x: 0, y: 0 };
 const anchorWorld = new Vector3();
@@ -73,16 +117,7 @@ function anchorFor(s: number): { label: string } | null {
     anchorWorld.set(side * WORLD.projects.side, 0, WORLD.projects.start - WORLD.projects.spacing * i);
     return { label: `REF 04-${String(i + 1).padStart(2, "0")} · ${projects[i].title}` };
   }
-  if (sheet === 4) {
-    const i = itemAt("timeline", f, TIMELINE_SLOTS);
-    if (i >= timeline.length) {
-      anchorWorld.set(roadX(WORLD.timeline.plazaZ), 0, WORLD.timeline.plazaZ);
-      return { label: "REF 05-GH · github" };
-    }
-    const z = milestoneZ(i, timeline.length);
-    anchorWorld.set(roadX(z) + (i % 2 === 0 ? -3 : 3), 3.2, z);
-    return { label: `REF 05-${String(i + 1).padStart(2, "0")} · ${whenLabel(timeline[i], "en")}` };
-  }
+  // The timeline's roadside signs label themselves; a leader line would only cover them.
   return null;
 }
 
@@ -141,25 +176,26 @@ export function Director() {
     frameState.finale = reading ? 0 : smooth(5.58, 5.96, s);
 
     const calm = prefersReducedMotion();
-    let roll = sampleCamera(s, pos, target);
+    let roll = (state.size.width < state.size.height ? sampleCameraPortrait : sampleCamera)(s, pos, target);
     frameState.cameraZ = pos.z;
 
     // Speed: Lenis velocity, smoothed, as a 0–1 magnitude.
     const v = calm ? 0 : getScrollVelocity();
-    frameState.velocity += (v - frameState.velocity) * Math.min(delta * 8, 1);
+    frameState.velocity += (v - frameState.velocity) * Math.min(delta * 4, 1);
     frameState.speed = Math.min(Math.abs(frameState.velocity) / 40, 1);
     const sinceCut = state.clock.elapsedTime - cut.at;
     frameState.sinceCut = sinceCut;
-    const punch = calm ? 0 : sinceCut < 0.8 ? Math.exp(-sinceCut * 5.5) : 0;
+    // A gentle push-in after each cut (eases out over ~0.8s).
+    const punch = calm ? 0 : sinceCut < 1.2 ? Math.pow(1 - sinceCut / 1.2, 3) : 0;
 
     // Hand-held: the pointer nudges the camera, cuts shake it, speed leans it.
     parallax.x += (state.pointer.x - parallax.x) * Math.min(delta * 3, 1);
     parallax.y += (state.pointer.y - parallax.y) * Math.min(delta * 3, 1);
     const free = calm ? 0 : 1 - Math.max(frameState.overview, frameState.game);
     const t = state.clock.elapsedTime;
-    pos.x += (parallax.x * 0.55 + Math.sin(t * 47) * punch * 0.3) * free;
-    pos.y += (parallax.y * 0.35 + Math.cos(t * 53) * punch * 0.3) * free;
-    roll += (frameState.velocity * 0.12 + Math.sin(t * 31) * punch * 2) * free;
+    pos.x += parallax.x * 0.55 * free;
+    pos.y += parallax.y * 0.35 * free;
+    roll += frameState.velocity * 0.04 * free;
     // Ease toward (or back from) the overview map.
     frameState.overview += ((fx.menu ? 1 : 0) - frameState.overview) * (1 - Math.exp(-Math.min(delta, 0.1) * 2.6));
     const o = smooth(0, 1, frameState.overview);
@@ -177,7 +213,7 @@ export function Director() {
     camera.rotateZ(((roll * (1 - Math.max(o, g))) * Math.PI) / 180);
     if (camera instanceof PerspectiveCamera) {
       // Warp wider with speed; punch in on every cut.
-      const fov = BASE_FOV + frameState.speed * 10 * free - punch * 9;
+      const fov = BASE_FOV + frameState.speed * 6 * free - punch * 3;
       const far = 220 + o * 1200;
       if (Math.abs(camera.far - far) > 1 || Math.abs(camera.fov - fov) > 0.01) {
         camera.far = far;

@@ -36,14 +36,24 @@ export const profile = {
       href: "https://klpbbs.com",
       logo: "/media/logos/klpbbs.png",
     },
-    { org: { zh: "course.rs《Rust 语言圣经》", en: "course.rs (The Rust Course)" }, role: { zh: "Collaborator", en: "Collaborator" }, href: "https://course.rs" },
+    {
+      org: { zh: "course.rs《Rust 语言圣经》", en: "course.rs (The Rust Course)" },
+      role: { zh: "协作者", en: "Collaborator" },
+      href: "https://course.rs",
+      logo: "/media/logos/course-rs.png",
+    },
     {
       org: { zh: "Inf Network", en: "Inf Network" },
       role: { zh: "我的世界服务器服主（重建中…）", en: "Minecraft server owner (rebuilding…)" },
       href: "https://github.com/Inf-Network",
       logo: "/media/logos/inf-network.png",
     },
-    { org: { zh: "MCSL2", en: "MCSL2" }, role: { zh: "我的世界开服器 · 后端开发", en: "Minecraft server launcher · backend" }, href: "https://github.com/MCSLTeam/MCSL2" },
+    {
+      org: { zh: "MCSL2", en: "MCSL2" },
+      role: { zh: "我的世界开服器 · 后端开发", en: "Minecraft server launcher · backend" },
+      href: "https://github.com/MCSLTeam/MCSL2",
+      logo: "/media/logos/mcsl2.png",
+    },
   ] satisfies { org: L10n; role: L10n; href: string; logo?: string }[],
   email: "snowballstudio233@gmail.com",
   /** `href` opens it; `copy` puts the handle on the clipboard instead (no public URL). */

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import { fitScale } from "../framing";
 import { Group, PlaneGeometry } from "three";
 import { skillGroups } from "@/content/skills";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
@@ -29,6 +30,12 @@ const platePrint = /* glsl */ `
 
 function Station({ index }: { index: number }) {
   const group = skillGroups[index];
+  const aspect = useThree((st) => st.size.width / st.size.height);
+  const portrait = aspect < 1;
+  // Phones: shrink the card to fit and centre it on the camera's line of sight
+  // (no panel to make room for there).
+  const fit = portrait ? fitScale(aspect) : 1;
+  const baseX = portrait ? 3.15 : 5.2;
   const z = WORLD.skills.start - WORLD.skills.spacing * index;
   const root = useRef<Group>(null);
   const { geometry, material } = useMemo(
@@ -66,7 +73,8 @@ function Station({ index }: { index: number }) {
     const p = withOverview(cue());
     g.visible = p > 0 && p < 2;
     const rise = Math.min(Math.max(p, 0), 1);
-    g.position.set(5.2, (1 - rise) * -3, z);
+    g.position.set(baseX, (1 - rise) * -3, z);
+    g.scale.setScalar(fit);
     g.rotation.y = -0.12;
     material.uniforms.uActive.value = rise;
   });

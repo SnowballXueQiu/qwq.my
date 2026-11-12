@@ -18,7 +18,8 @@ export function SkillsPanel({
 }) {
   const active = useSceneIndex("skills", groups.length);
   return (
-    <Panel className="max-w-[420px]">
+    // On phones the 3D card already shows the group in view; the full list would hide it.
+    <Panel className="hidden max-w-[420px] md:block">
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-2xl font-extrabold tracking-tight">{labels.heading}</h2>
         <span className="label text-ink-soft">{labels.bom}</span>

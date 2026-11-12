@@ -34,6 +34,7 @@ export const timeline: TimelineEvent[] = [
     kind: "project",
     title: { zh: "成为《Rust 语言圣经》协作者", en: "Joined the Rust Course as a collaborator" },
     detail: { zh: "给 course.rs 补全和修订内容。", en: "Filling in and revising chapters of course.rs." },
+    logo: { src: "/media/logos/course-rs.png", alt: { zh: "《Rust 语言圣经》", en: "The Rust Course" } },
   },
   {
     date: "2024-09",

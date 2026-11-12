@@ -188,7 +188,7 @@ export function InkPipeline({
       u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
       u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
       u.uGlitch.value = pipelineTarget.glitch;
-      u.uBoil.value = reducedMotion ? 0 : 0.6;
+      u.uBoil.value = reducedMotion ? 0 : 0.35;
       // Keep the CSS world in step with the shader's notion of light and dark.
       const site = useSite.getState();
       if (Math.abs(site.tone - u.uInvert.value) > 0.01) site.setTone(u.uInvert.value);

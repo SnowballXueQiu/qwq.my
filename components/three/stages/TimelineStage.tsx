@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { BoxGeometry, BufferAttribute, BufferGeometry, DoubleSide, Group, InstancedMesh, Object3D } from "three";
 import { Html } from "@react-three/drei";
 import { KIND_LABEL, timeline, whenLabel, type TimelineMedia } from "@/content/timeline";
@@ -11,7 +11,6 @@ import { useDomLayer } from "../dom/useDomLayer";
 import { MilestoneMarker, useMarkerKit, type MarkerKit } from "./MilestoneMarkers";
 import { PelicanRider } from "./PelicanRider";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
-import { KineticText } from "../text/KineticText";
 import { clamp01, frameState, withOverview } from "../frameState";
 import { PLAZA_S, WORLD, milestoneZ, roadX } from "../world";
 
@@ -101,6 +100,10 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
   const side = index % 2 === 0 ? -1 : 1;
   const x = roadX(z) + side * (ROAD_W / 2 + 1.4);
   const root = useRef<Group>(null);
+  const aspect = useThree((st) => st.size.width / st.size.height);
+  // Phones: the verges are out of frame, so the sign and the exhibit move to the
+  // middle of the road, smaller, and only the stop you're at shows its sign.
+  const portrait = aspect < 1;
 
   // Arrive as the camera approaches; gone once it has driven past.
   const near = () => {
@@ -108,7 +111,8 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
     if (s < 3.85 || s > 5.3) return -1;
     const camZ = frameState.cameraZ;
     const arrive = clamp01((z + 36 - camZ) / 12);
-    const leave = clamp01((z + 8 - camZ) / 4);
+    // Gone before the camera reaches the next stop (stops are ~10 apart, it halts ~14 short).
+    const leave = clamp01((z + 12 - camZ) / 3);
     return leave > 0 ? 1 + leave : arrive;
   };
   // The sign and exhibit only belong to the stop you're at.
@@ -119,7 +123,7 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
     if (d > 26 || d < 7) return -1;
     return d > 17 ? (26 - d) / 9 : d > 10 ? 1 : 1 + (10 - d) / 3;
   };
-  const sign = useCueFade(near);
+  const sign = useCueFade(() => (portrait ? here() : near()));
   const exhibit = useCueFade(here);
 
   useFrame(() => {
@@ -144,10 +148,10 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
           the frame so the index panel never covers it. */}
       <Html
         transform
-        distanceFactor={DF}
+        distanceFactor={portrait ? DF * 0.7 : DF}
         portal={layer}
-        position={[side * 0.2, 4.6, 0]}
-        rotation={[0, -side * 0.28, 0]}
+        position={portrait ? [roadX(z) - x, 4.9, -2] : [side * 0.2, 4.6, 0]}
+        rotation={[0, portrait ? 0 : -side * 0.28, 0]}
         style={{ pointerEvents: "none" }}
         zIndexRange={Z_RANGE}
       >
@@ -178,9 +182,9 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
       {media && (
         <Html
           transform
-          distanceFactor={DF}
+          distanceFactor={portrait ? DF * 0.55 : DF}
           portal={layer}
-          position={[roadX(z - 3) - x - side * 1.6, 2.7, -3]}
+          position={portrait ? [roadX(z - 3) - x, 1.7, -3] : [roadX(z - 3) - x - side * 1.6, 2.7, -3]}
           style={{ pointerEvents: "none" }}
           zIndexRange={Z_RANGE}
         >
@@ -271,6 +275,7 @@ const towerPrint = /* glsl */ `
  * until it reads as the familiar grid. Hover a tower for its day.
  */
 function ContributionPlaza({ github, locale, layer }: { github: GithubScene; locale: Locale; layer: React.RefObject<HTMLElement> }) {
+  const portrait = useThree((st) => st.size.width < st.size.height);
   const z0 = WORLD.timeline.plazaZ;
   const x0 = roadX(z0);
   const root = useRef<Group>(null);
@@ -344,11 +349,15 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
     return s > PLAZA_S.end - 0.02 ? 1 + Math.min((s - (PLAZA_S.end - 0.02)) / 0.03, 0.99) : Math.min(t, 1);
   };
   const caption = useCueFade(captionCue);
+  const monthEls = useRef<(HTMLDivElement | null)[]>([]);
 
   useFrame((_, dt) => {
     const g = root.current;
     if (!g) return;
     g.visible = visible();
+    // Month labels show as the camera starts craning up over the city.
+    const showMonths = g.visible && frameState.s > PLAZA_S.street + (PLAZA_S.overhead - PLAZA_S.street) * 0.5 && frameState.overview < 0.3;
+    for (const el of monthEls.current) if (el) el.style.opacity = showMonths ? "1" : "0";
     if (!g.visible) {
       reveal.current = 0;
       return;
@@ -397,23 +406,26 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
           {...hover(kind)}
         />
       ))}
+      {/* Month labels along the front of the city: real text, crisp at any angle. */}
       {months.map((m, i) => (
-        <KineticText
+        <Html
           key={`${m.text}${i}`}
-          font="mono"
-          text={m.text}
-          size={0.8}
-          depth={0.08}
-          align="left"
-          position={[m.x - CELL / 2, ROAD_Y + 0.1, z0 + 4 * CELL + 0.8]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          seed={200 + i}
-          progress={() => (frameState.s > PLAZA_S.overhead - 0.06 && visible() ? 1 : withOverview(-1))}
-        />
+          transform
+          distanceFactor={portrait ? DF * 2.5 : DF * 4}
+          portal={layer}
+          position={[m.x - CELL / 2 + 0.6, ROAD_Y + 0.1, z0 + 4 * CELL + 1.2]}
+          rotation={[-1.0, 0, 0]}
+          style={{ pointerEvents: "none" }}
+          zIndexRange={Z_RANGE}
+        >
+          <div ref={(el) => void (monthEls.current[i] = el)} className="font-mono text-[20px] font-bold tracking-[0.12em] text-ink" style={{ opacity: 0 }}>
+            {m.text}
+          </div>
+        </Html>
       ))}
       <Html
         transform
-        distanceFactor={DF * 6}
+        distanceFactor={portrait ? DF * 2.4 : DF * 6}
         portal={layer}
         position={[x0, ROAD_Y + 0.2, z0 + 4 * CELL + 4.2]}
         rotation={[-1.0, 0, 0]}
@@ -423,7 +435,7 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
         <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0 }}>
           <span className="font-display text-[64px] font-black leading-none text-accent">{github.total}</span>
           <span className="font-mono text-[18px] uppercase tracking-[0.12em]">
-            {locale === "zh" ? "次贡献 · 近一年 · 一天一栋楼" : "contributions in the last year · one tower a day"}
+            {locale === "zh" ? "次贡献 · 近一年" : "contributions in the last year"}
           </span>
         </div>
       </Html>

@@ -28,10 +28,11 @@ export function TimelineReadout({
   const atPlaza = index >= events.length;
   return (
     <Panel className="relative z-20 max-w-[400px] font-mono">
-      <p className="label text-ink-soft">
+      {/* On phones the roadside signs carry the story; keep just the GitHub line and the film. */}
+      <p className="label hidden text-ink-soft md:block">
         <span className="text-accent">while</span> (alive) {"{"}
       </p>
-      <ol className="mt-1.5 text-[11px] leading-[18px]">
+      <ol className="mt-1.5 hidden text-[11px] leading-[18px] md:block">
         {events.map((e, i) => (
           <li
             key={e.date + e.title.en}
@@ -42,13 +43,13 @@ export function TimelineReadout({
           </li>
         ))}
       </ol>
-      <p className="label mt-1 text-ink-soft">{"}"}</p>
+      <p className="label mt-1 hidden text-ink-soft md:block">{"}"}</p>
       <a
         href={`https://github.com/${github.login}`}
         target="_blank"
         rel="noreferrer"
         data-cursor="GITHUB"
-        className={`mt-2 flex items-center gap-2 border-t pt-2 text-[11px] transition-colors hover:text-accent ${
+        className={`flex items-center gap-2 text-[11px] transition-colors hover:text-accent md:mt-2 md:border-t md:pt-2 ${
           atPlaza ? "border-accent text-accent" : "border-rule"
         }`}
       >

@@ -25,10 +25,9 @@ const WHEELBASE = 1.24;
 const CRANK = 0.17;
 const THIGH = 0.5;
 const SHIN = 0.5;
-/** How fast the pelican rides past the camera, and over what stretch of road. */
-const OVERTAKE_SPEED = 3.2;
-const LOOP = 36;
-const LANE = 1.2;
+/** How far ahead of the camera the pelican rides, and how far right of the centre line. */
+const LEAD = 13;
+const LANE = 0.55;
 
 const UP = new Vector3(0, 1, 0);
 
@@ -55,8 +54,9 @@ function knee(hip: Vector3, foot: Vector3, out: Vector3) {
 }
 
 /**
- * A pelican on a bicycle, riding toward you along the timeline road every few
- * seconds. Built forward along +x; the rig turns it to follow the road.
+ * A pelican on a bicycle that stands in for you on the timeline road: it rides
+ * ahead of the camera in whichever direction you scroll. Built forward along
+ * +x; the rig turns it to follow the road.
  */
 export function PelicanRider() {
   const rig = useRef<Group>(null);
@@ -126,7 +126,7 @@ export function PelicanRider() {
     () => ({ d: new Vector3(), q: new Quaternion(), foot: new Vector3(), knee: new Vector3(), hip: new Vector3(), pos: new Vector3(), last: new Vector3() }),
     [],
   );
-  const state = useRef({ wheelAngle: 0, wrapped: true });
+  const state = useRef({ wheelAngle: 0, lastCamZ: null as number | null, wantDir: -1, facing: -1, speed: 0 });
 
   useFrame(({ clock }, rawDt) => {
     const g = rig.current;
@@ -135,31 +135,36 @@ export function PelicanRider() {
     const s = frameState.s;
     g.visible = s > 3.92 && s < PLAZA_S.street && frameState.overview < 0.3 && frameState.game < 0.5;
     if (!g.visible) {
-      state.current.wrapped = true;
+      state.current.lastCamZ = null;
       return;
     }
 
-    // Oncoming in the other lane: appears far up the road, pedals toward you
-    // and passes on your left, so you get the bill, the pouch and the profile.
-    const rel = (clock.elapsedTime * OVERTAKE_SPEED) % LOOP;
-    const z = frameState.cameraZ - LOOP + 4 + rel;
+    // The pelican is you: it rides a little ahead of the camera, in the
+    // direction you're scrolling, and stands on the pedals when you stop.
+    const st = state.current;
+    const camZ = frameState.cameraZ;
+    const camDz = st.lastCamZ === null ? 0 : camZ - st.lastCamZ;
+    st.lastCamZ = camZ;
+    // Heading: -1 when the camera moves down the road (scrolling on), +1 when it backs up.
+    if (Math.abs(camDz) > 0.002) st.wantDir = camDz < 0 ? -1 : 1;
+    // Turn around smoothly (a U-turn in its own lane) when the direction flips.
+    st.facing += (st.wantDir - st.facing) * Math.min(dt * 5, 1);
+    const z = camZ - LEAD;
     const x = roadX(z);
-    // Heading toward +z (toward the camera) along the road.
-    const dx = roadX(z + 1) - x;
+    const dx = roadX(z - 1) - x;
     const n = Math.hypot(dx, 1);
-    // Its right-hand lane is our left: offset perpendicular to its heading.
-    g.position.set(x - (1 / n) * LANE, ROAD_Y, z + (dx / n) * LANE);
-    g.rotation.set(0, Math.atan2(-1, dx), Math.sin(clock.elapsedTime * 2.2) * 0.03);
+    // Forward heading along the road is (dx, -1); flip it when riding back.
+    const turn = (1 - st.facing) / 2; // 0 = riding on, 1 = riding back
+    const heading = Math.atan2(1, dx) + turn * Math.PI;
+    g.position.set(x + (1 / n) * LANE, ROAD_Y, z + (dx / n) * LANE);
+    g.rotation.set(0, heading, Math.sin(clock.elapsedTime * 1.6) * 0.02 * (1 - Math.min(st.speed, 1)));
+    g.scale.setScalar(0.85);
 
-    // Wheels and cranks turn with the distance actually covered.
-    scratch.pos.copy(g.position);
-    const moved = state.current.wrapped ? 0 : scratch.pos.distanceTo(scratch.last);
-    state.current.wrapped = rel < 0.2;
-    // Fade in from the distance by scale, so it never pops into view.
-    g.scale.setScalar(0.85 * Math.min(rel / 4, 1));
-    scratch.last.copy(scratch.pos);
-    state.current.wheelAngle -= (moved || OVERTAKE_SPEED * dt) / WHEEL_R;
-    const wa = state.current.wheelAngle;
+    // Wheels and cranks turn with the distance the camera (= you) actually covered.
+    const travelled = Math.abs(camDz);
+    st.speed += (travelled / Math.max(dt, 1e-3) - st.speed) * Math.min(dt * 6, 1);
+    st.wheelAngle -= travelled / WHEEL_R;
+    const wa = st.wheelAngle;
     wheels.forEach((w) => w.current && (w.current.rotation.z = wa));
     const ca = wa * 0.55;
     if (crank.current) crank.current.rotation.z = ca;
@@ -178,7 +183,7 @@ export function PelicanRider() {
     });
 
     // A little head bob in time with the pedalling.
-    if (head.current) head.current.rotation.z = Math.sin(ca * 2) * 0.06;
+    if (head.current) head.current.rotation.z = Math.sin(ca * 2) * 0.06 + (st.speed < 0.2 ? Math.sin(clock.elapsedTime * 1.3) * 0.05 : 0);
   });
 
   const frameTube = (a: Vector3, b: Vector3, key: string) => {
