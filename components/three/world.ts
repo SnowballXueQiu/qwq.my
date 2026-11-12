@@ -102,9 +102,9 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     // Footprints: turn and look down on the map while the about panel scrolls away.
     ...(portrait
       ? [
-          // High enough that the whole country fits a phone's width.
-          { s: MAP_S.hold, pos: [MAP.x, MAP.y + 64, MAP.z + 12] as V3, look: [MAP.x, MAP.y, MAP.z + 1.5] as V3, roll: 0 },
-          { s: MAP_S.leave, pos: [MAP.x, MAP.y + 64, MAP.z + 12] as V3, look: [MAP.x, MAP.y, MAP.z + 1.5] as V3, roll: 0 },
+          // High enough that the whole country fits a phone's width, and a little north so the title fits above.
+          { s: MAP_S.hold, pos: [MAP.x, MAP.y + 64, MAP.z + 8.3] as V3, look: [MAP.x, MAP.y, MAP.z - 2.2] as V3, roll: 0 },
+          { s: MAP_S.leave, pos: [MAP.x, MAP.y + 64, MAP.z + 8.3] as V3, look: [MAP.x, MAP.y, MAP.z - 2.2] as V3, roll: 0 },
         ]
       : [
           // Looking a little west of centre puts the map on the right, clear of the panels on the left.
@@ -124,7 +124,11 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
   for (let i = 0; i < projectCount; i++) {
     const z = P_START - P_SPACING * i;
     const side = i % 2 === 0 ? 1 : -1;
-    const stop = { pos: [-side * 1.4, 0.6, z + 10] as V3, look: [side * WORLD.projects.side * 0.85, 0, z] as V3, roll: -side * 6 };
+    // A phone is too narrow for the angled view: stand square to the screen, far enough back to
+    // take in all of it, and keep it above the readout card at the bottom.
+    const stop = portrait
+      ? { pos: [side * 1.8, 0.6, z + 21.5] as V3, look: [side * WORLD.projects.side, -2.2, z] as V3, roll: 0 }
+      : { pos: [-side * 1.4, 0.6, z + 10] as V3, look: [side * WORLD.projects.side * 0.85, 0, z] as V3, roll: -side * 6 };
     const slot = pinned("projects") / projectCount;
     keys.push({ s: 3 + slot * (i + HOLD_IN), ...stop }, { s: 3 + slot * (i + HOLD_OUT), ...stop });
   }

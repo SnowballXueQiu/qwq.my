@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { BoxGeometry, Group, PlaneGeometry } from "three";
 import { projects } from "@/content/projects";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
@@ -30,6 +30,7 @@ const screenPrint = /* glsl */ `
 function Monolith({ index }: { index: number }) {
   const project = projects[index];
   const side = index % 2 === 0 ? 1 : -1;
+  const portrait = useThree((s) => s.size.width < s.size.height);
   const z = WORLD.projects.start - WORLD.projects.spacing * index;
   const group = useRef<Group>(null);
   const hover = useRef(0);
@@ -79,7 +80,8 @@ function Monolith({ index }: { index: number }) {
     // Rise out of the floor on arrival, lean toward the camera on hover.
     const rise = Math.min(Math.max(p, 0), 1);
     g.position.y = -6 * Math.pow(1 - rise, 3);
-    g.rotation.y = -side * (0.42 - hover.current * 0.2);
+    // Turned toward the road; nearly square-on for a phone's straight-ahead view.
+    g.rotation.y = -side * ((portrait ? 0.12 : 0.42) - hover.current * 0.2);
   });
 
   const open = () => {

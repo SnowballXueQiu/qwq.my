@@ -7,7 +7,7 @@ import { CylinderGeometry, ExtrudeGeometry, Group, Path, Shape, SphereGeometry, 
 import { PROVINCE_COUNT, places, visitedProvinces } from "@/content/places";
 import type { Locale } from "@/lib/i18n";
 import { createInkMaterial, Fill } from "../materials/inkMaterial";
-import { clamp01, frameState, withOverview } from "../frameState";
+import { clamp01, frameState, smooth, withOverview } from "../frameState";
 import { useDomLayer } from "../dom/useDomLayer";
 import { MAP_S } from "../world";
 
@@ -67,6 +67,7 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
   const layer = useDomLayer(14);
   const root = useRef<Group>(null);
   const tiles = useRef<(Group | null)[]>([]);
+  const aboutCard = useRef<HTMLElement | null>(null);
   const portrait = useThree((s) => s.size.width < s.size.height);
 
   // One material per province so the ink pass draws every border.
@@ -126,10 +127,18 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
       t.scale.set(1, 1, Math.max(rise * rise * (3 - 2 * rise), 0.001));
     });
     const o = p <= 0 || p >= 2 ? 0 : p < 1 ? clamp01((p - 0.6) / 0.4) : 2 - p;
+    // The about card makes way while the map is up, so the shot is just the map.
+    if (!aboutCard.current?.isConnected) aboutCard.current = document.querySelector<HTMLElement>('[data-sheet="about"] > div');
+    const card = aboutCard.current;
+    if (card) {
+      const away = smooth(MAP_S.arrive, MAP_S.arrive + 0.1, frameState.s);
+      card.style.opacity = away > 0 ? (1 - away).toFixed(3) : "";
+      card.style.visibility = away > 0.99 ? "hidden" : "";
+    }
     const title = layer.current?.querySelector<HTMLElement>("[data-map-title]");
     if (title) {
       const s = frameState.s;
-      const t = s < MAP_S.leave ? clamp01((s - (MAP_S.hold + 0.08)) / 0.05) : o;
+      const t = s < MAP_S.leave ? clamp01((s - MAP_S.hold) / 0.05) : o;
       title.style.opacity = t.toFixed(3);
       title.style.visibility = t > 0.01 && frameState.overview < 0.3 ? "visible" : "hidden";
     }
@@ -139,8 +148,6 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
       el.style.visibility = o > 0.01 && frameState.overview < 0.3 ? "visible" : "hidden";
     }
   });
-
-  const labelSize = portrait ? "text-[10px] px-1 py-0" : "text-[14px]";
 
   return (
     <group ref={root} {...group}>
@@ -168,30 +175,35 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
           <group key={pl.name.en} position={[x, top, -y]}>
             <mesh geometry={pin.stem} material={pin.ink} position={[0, stem / 2, 0]} scale={[1, stem, 1]} />
             <mesh geometry={pin.head} material={pin.paper} position={[0, stem, 0]} />
-            <Html position={[lx - x, stem, -(ly - y)]} center portal={layer} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
-              <div
-                data-map-label
-                className={`whitespace-nowrap border border-ink bg-paper/90 px-1.5 py-0.5 font-mono font-bold text-ink ${labelSize}`}
-                style={{ opacity: 0 }}
-              >
-                {pl.name[locale]}
-              </div>
-            </Html>
-            {/* Leader from the pin head to its label. */}
-            <LeaderLine from={[0, stem, 0]} to={[lx - x, stem, -(ly - y)]} geometry={pin.stem} material={pin.ink} />
+            {/* A phone shows the pins alone: as the list grows, labels would only pile up. */}
+            {portrait ? null : (
+              <>
+                <Html position={[lx - x, stem, -(ly - y)]} center portal={layer} zIndexRange={[20, 0]} style={{ pointerEvents: "none" }}>
+                  <div
+                    data-map-label
+                    className="whitespace-nowrap border border-ink bg-paper/90 px-1.5 py-0.5 font-mono text-[14px] font-bold text-ink"
+                    style={{ opacity: 0 }}
+                  >
+                    {pl.name[locale]}
+                  </div>
+                </Html>
+                {/* Leader from the pin head to its label. */}
+                <LeaderLine from={[0, stem, 0]} to={[lx - x, stem, -(ly - y)]} geometry={pin.stem} material={pin.ink} />
+              </>
+            )}
           </group>
         );
       })}
 
 
-      {/* Title south-west of Tibet; it waits until the about panel has scrolled away. */}
+      {/* Title south-west of Tibet; on a phone it hangs above the map instead (anchored by its bottom edge). */}
       <Html
-        position={portrait ? [project(80, 11)[0], 0.3, -project(80, 11)[1]] : [project(74, 25)[0], 0.3, -project(74, 25)[1]]}
+        position={portrait ? [project(74, 52)[0], 0.3, -project(74, 52)[1]] : [project(74, 25)[0], 0.3, -project(74, 25)[1]]}
         portal={layer}
         zIndexRange={[20, 0]}
         style={{ pointerEvents: "none" }}
       >
-        <div data-map-title className="whitespace-nowrap text-ink" style={{ opacity: 0 }}>
+        <div data-map-title className={`whitespace-nowrap text-ink ${portrait ? "-translate-y-full" : ""}`} style={{ opacity: 0 }}>
           <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-accent">REF 02-B · FOOTPRINTS</p>
           <p className={`font-display font-black leading-none ${portrait ? "text-[22px]" : "text-[34px]"}`}>
             {locale === "zh" ? "去过的地方" : "Places I've been"}
@@ -205,9 +217,9 @@ export function ChinaMap({ locale, ...group }: { locale: Locale } & React.Compon
             {locale === "zh" ? "我的梦想是走遍中国的每一个省份。" : "My dream is to set foot in every province of China."}
           </p>
           {/* Progress toward that dream: one tick per province. */}
-          <div className="mt-2 flex gap-[3px]" aria-hidden>
+          <div className={`mt-2 flex ${portrait ? "gap-[2px]" : "gap-[3px]"}`} aria-hidden>
             {Array.from({ length: PROVINCE_COUNT }, (_, i) => (
-              <span key={i} className={`h-2 w-[5px] ${i < visitedProvinces.size ? "bg-accent" : "border border-ink/40"}`} />
+              <span key={i} className={`h-2 ${portrait ? "w-1" : "w-[5px]"} ${i < visitedProvinces.size ? "bg-accent" : "border border-ink/40"}`} />
             ))}
           </div>
         </div>
