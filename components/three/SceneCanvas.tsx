@@ -35,8 +35,12 @@ export default function SceneCanvas({
   github: { total: number; weeks: { date: string; count: number }[][] };
   locale: Locale;
 }) {
-  // Start sharp and back off on slow devices; the ink lines carry the look even at 1x.
-  const [dpr, setDpr] = useState(1.5);
+  // As sharp as the screen allows within a pixel budget: a phone gets 2x (its screen is small,
+  // and at 1x–1.5x a 3x display turns the type to mush); a big monitor less. Slow devices
+  // step down once, by a quarter.
+  const [sharpest] = useState(() => Math.max(1, Math.min(devicePixelRatio, 2, Math.sqrt(3.2e6 / (innerWidth * innerHeight)))));
+  const [declined, setDeclined] = useState(false);
+  const dpr = declined ? Math.max(1, sharpest * 0.75) : sharpest;
   return (
     <Canvas
       dpr={dpr}
@@ -49,7 +53,7 @@ export default function SceneCanvas({
       style={{ position: "fixed", inset: 0, zIndex: 0 }}
     >
       {/* Only ever steps down, once, so the canvas isn't reallocated mid-scroll. */}
-      <PerformanceMonitor onDecline={() => setDpr(1)} />
+      <PerformanceMonitor onDecline={() => setDeclined(true)} />
       <Director />
       <InteractionBridge />
       <InkPipeline />

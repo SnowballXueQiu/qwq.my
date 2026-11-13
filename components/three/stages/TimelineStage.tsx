@@ -71,6 +71,12 @@ const roadPrint = /* glsl */ `
 
 const DF = 4; // drei Html distanceFactor: 1 CSS px = DF / 400 world units
 /**
+ * CSS-3D text is laid out this many times larger and shrunk back by the
+ * transform. WebKit rasterizes a transformed layer at its layout size, so text
+ * laid out small and scaled up by the transform goes soft on phones.
+ */
+const CRISP = 2;
+/**
  * drei stacks Html by camera distance mapped onto this range (over the whole
  * near→far span). A wide range keeps nearer signs/exhibits above farther ones;
  * a narrow one rounds neighbours to the same z-index and DOM order wins.
@@ -148,14 +154,14 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
           the frame so the index panel never covers it. */}
       <Html
         transform
-        distanceFactor={portrait ? DF * 0.7 : DF}
+        distanceFactor={(portrait ? DF * 0.7 : DF) / CRISP}
         portal={layer}
         position={portrait ? [roadX(z) - x, 4.9, -2] : [side * 0.2, 4.6, 0]}
         rotation={[0, portrait ? 0 : -side * 0.28, 0]}
         style={{ pointerEvents: "none" }}
         zIndexRange={Z_RANGE}
       >
-        <div ref={sign} className="w-[300px] border-2 border-ink bg-paper/90 p-3.5 text-ink" style={{ opacity: 0 }}>
+        <div ref={sign} className="w-[300px] border-2 border-ink bg-paper/90 p-3.5 text-ink" style={{ opacity: 0, zoom: CRISP }}>
           <div className="flex items-baseline justify-between gap-3 border-b border-ink pb-1.5">
             <span className="font-mono text-[22px] font-bold text-accent">{whenLabel(event, locale)}</span>
             <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-soft">
@@ -183,13 +189,13 @@ function Milestone({ index, kit, locale, layer }: { index: number; kit: MarkerKi
       {media && (
         <Html
           transform
-          distanceFactor={portrait ? DF * 0.55 : DF}
+          distanceFactor={(portrait ? DF * 0.55 : DF) / CRISP}
           portal={layer}
           position={portrait ? [roadX(z - 3) - x, 1.7, -3] : [roadX(z - 3) - x - side * 1.6, 2.7, -3]}
           style={{ pointerEvents: "none" }}
           zIndexRange={Z_RANGE}
         >
-          <div ref={exhibit} className="pointer-events-auto" style={{ opacity: 0 }}>
+          <div ref={exhibit} className="pointer-events-auto" style={{ opacity: 0, zoom: CRISP }}>
             <Exhibit media={media} locale={locale} />
           </div>
         </Html>
@@ -453,28 +459,28 @@ function ContributionPlaza({ github, locale, layer }: { github: GithubScene; loc
         <Html
           key={`${m.text}${i}`}
           transform
-          distanceFactor={portrait ? DF * 2.5 : DF * 4}
+          distanceFactor={(portrait ? DF * 2.5 : DF * 4) / CRISP}
           portal={layer}
           position={[m.x - CELL / 2 + 0.6, ROAD_Y + 0.1, z0 + 4 * CELL + 1.2]}
           rotation={[-1.0, 0, 0]}
           style={{ pointerEvents: "none" }}
           zIndexRange={Z_RANGE}
         >
-          <div ref={(el) => void (monthEls.current[i] = el)} className="font-mono text-[20px] font-bold tracking-[0.12em] text-ink" style={{ opacity: 0 }}>
+          <div ref={(el) => void (monthEls.current[i] = el)} className="font-mono text-[20px] font-bold tracking-[0.12em] text-ink" style={{ opacity: 0, zoom: CRISP }}>
             {m.text}
           </div>
         </Html>
       ))}
       <Html
         transform
-        distanceFactor={portrait ? DF * 2.4 : DF * 6}
+        distanceFactor={(portrait ? DF * 2.4 : DF * 6) / CRISP}
         portal={layer}
         position={[x0, ROAD_Y + 0.2, z0 + 4 * CELL + 4.2]}
         rotation={[-1.0, 0, 0]}
         style={{ pointerEvents: "none" }}
         zIndexRange={Z_RANGE}
       >
-        <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0 }}>
+        <div ref={caption} className="flex items-baseline gap-4 whitespace-nowrap text-ink" style={{ opacity: 0, zoom: CRISP }}>
           <span className="font-display text-[64px] font-black leading-none text-accent">{github.total}</span>
           <span className="font-mono text-[18px] uppercase tracking-[0.12em]">
             {locale === "zh" ? "次贡献 · 近一年" : "contributions in the last year"}
