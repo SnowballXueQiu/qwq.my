@@ -36,8 +36,8 @@ export function SheetSection({
         style={{ height: `${length * 100}svh` }}
       >
         <div
-          className={`sticky top-0 flex h-svh flex-col justify-end ${className}`}
-          style={{ paddingInline: "var(--sheet-pad)", paddingBlock: "calc(var(--sheet-pad) + 48px)" }}
+          className={`sticky top-0 flex flex-col justify-end ${className}`}
+          style={{ height: "var(--app-h, 100svh)", paddingInline: "var(--sheet-pad)", paddingBlock: "calc(var(--sheet-pad) + 48px)" }}
         >
           {label}
           {children}

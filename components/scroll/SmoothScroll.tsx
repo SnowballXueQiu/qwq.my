@@ -12,6 +12,23 @@ gsap.registerPlugin(ScrollTrigger);
 
 /** Lenis smooth scrolling driven by the GSAP ticker so ScrollTrigger stays in sync. */
 export function SmoothScroll() {
+  // The box the browser gives fixed elements (where the drawing frame is drawn). Some phone
+  // browsers float their toolbar over the bottom of 100svh; sticky sheets size to this instead
+  // so nothing slips under the toolbar or past the frame.
+  useEffect(() => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;inset:0;visibility:hidden;pointer-events:none";
+    document.body.appendChild(probe);
+    const fit = () => document.documentElement.style.setProperty("--app-h", `${probe.getBoundingClientRect().height}px`);
+    const observer = new ResizeObserver(fit);
+    observer.observe(probe);
+    fit();
+    return () => {
+      observer.disconnect();
+      probe.remove();
+    };
+  }, []);
+
   useEffect(() => {
     const setProgress = useSite.getState().setProgress;
     const updateProgress = () => {
