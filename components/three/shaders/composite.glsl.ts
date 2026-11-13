@@ -32,6 +32,7 @@ uniform float uBgInvert;    // background: 0 paper, 1 ink
 uniform float uGlitch;      // horizontal slice displacement
 uniform float uBoil;        // hand-drawn line jitter, in CSS px
 uniform float uTime;
+uniform float uView;        // 0 the drawing; 1–8 one G-buffer channel or stage (terminal: gbuffer)
 in vec2 vUv;
 out vec4 fragColor;
 
@@ -137,6 +138,29 @@ void main() {
 
     // Paper grain is part of the paper: fixed, not re-seeded every few frames.
   col += (hash12(gl_FragCoord.xy) - 0.5) * 0.03;
+
+  // What the composite reads, one channel at a time (the terminal's \`gbuffer\` command).
+  int view = int(uView + 0.5);
+  if (view > 0) {
+    bool on = c.a > 0.5;
+    vec3 v = uPaper;
+    if (view == 1 && on) v = mix(uInk, uPaper, c.r);                       // tone
+    if (view == 2 && on) v = mix(vec3(0.82, 0.8, 0.76), uAccent, step(0.5, c.g)); // accent
+    if (view == 3 && on) v = mix(uPaper * 0.85, uInk, c.b);                // fill
+    if (view == 4 && on) v = n.xyz;                                         // normals
+    if (view == 5 && on) v = 0.35 + 0.6 * vec3(hash12(vec2(n.a * 251.0, 1.0)), hash12(vec2(n.a * 251.0, 7.0)), hash12(vec2(n.a * 251.0, 13.0))); // ids
+    if (view == 6 && on) {                                                  // depth: log scale + a contour every 0.2 units
+      v = mix(uInk, uPaper, clamp(log(d / 4.0) / log(16.0), 0.0, 1.0));
+      v = mix(v, uAccent, smoothstep(0.86, 1.0, fract(d * 5.0)) * 0.55);
+    }
+    if (view == 7) v = mix(uPaper, uInk, clamp(edge, 0.0, 1.0));            // lines only
+    if (view == 8 && on && c.b < 0.25) {                                    // dots and hatching only
+      float dk = 1.0 - c.r;
+      float ink = max(halftone(sp, dk), max(hatch(sp, dk, 0.785398, 0.55), hatch(sp, dk, -0.785398, 0.78)));
+      v = mix(uPaper, uInk, ink);
+    }
+    col = v;
+  }
 
   fragColor = vec4(col, 1.0);
 }

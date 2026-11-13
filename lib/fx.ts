@@ -14,6 +14,8 @@ export type FxEvents = {
   party: { seconds: number };
   /** Play a named sound effect (no-op while muted). */
   sound: { name: string; intensity?: number };
+  /** Show one G-buffer channel or composite stage (0 = the drawing). */
+  view: { mode: number };
   /** A bug was squashed at a screen position. */
   hit: { x: number; y: number; points: number; combo: number };
 };

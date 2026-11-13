@@ -30,6 +30,20 @@ type Command = {
 };
 
 const t = (ctx: Context, zh: string, en: string) => (ctx.locale === "zh" ? zh : en);
+
+/** The composite's inputs and stages, in pipeline order (index = shader view mode). */
+const VIEWS = [
+  { name: "off", zh: "成片", en: "the finished drawing" },
+  { name: "tone", zh: "明暗：半兰伯特光照，越亮越白", en: "tone: half-Lambert light, brighter is whiter" },
+  { name: "accent", zh: "强调色：哪些表面用朱红", en: "accent: which surfaces are vermilion" },
+  { name: "fill", zh: "填充方式：网点、纸、墨", en: "fill: shaded, paper or solid ink" },
+  { name: "normal", zh: "视空间法线（xyz → rgb）", en: "view-space normals (xyz → rgb)" },
+  { name: "id", zh: "物体 id：每种材质一个颜色", en: "object ids: one colour per material" },
+  { name: "depth", zh: "线性深度：越远越白", en: "linear depth: farther is lighter" },
+  { name: "lines", zh: "只看墨线", en: "ink lines only" },
+  { name: "dots", zh: "只看网点和排线", en: "halftone and hatching only" },
+];
+let view = 0;
 const ok = (text: string): Line => ({ kind: "ok", text });
 const err = (text: string): Line => ({ kind: "err", text });
 const accent = (text: string): Line => ({ kind: "accent", text });
@@ -222,6 +236,18 @@ export const commands: Record<string, Command> = {
       const expression = (FACES.includes(face as Expression) ? face : FACES[Math.floor(Math.random() * FACES.length)]) as Expression;
       emit("face", { expression, duration: 3 });
       ctx.print(accent(expression));
+    },
+  },
+  gbuffer: {
+    summary: { zh: "看渲染管线里的一层", en: "look at one layer of the render pipeline" },
+    usage: "[tone|accent|fill|normal|id|depth|lines|dots|off]",
+    args: () => VIEWS.map((v) => v.name),
+    run: ([name], ctx) => {
+      const found = VIEWS.findIndex((v) => v.name === name);
+      // No argument steps through the layers in order.
+      view = found >= 0 ? found : (view + 1) % VIEWS.length;
+      emit("view", { mode: view });
+      ctx.print(`${accent(VIEWS[view].name)}  ${t(ctx, VIEWS[view].zh, VIEWS[view].en)}`);
     },
   },
   debug: {

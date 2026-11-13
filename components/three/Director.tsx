@@ -155,6 +155,9 @@ export function Director() {
         fx.menu = open;
         play("whoosh", 1.4);
       }),
+      on("view", ({ mode }) => {
+        pipelineTarget.view = mode;
+      }),
       on("glitch", ({ duration = 0.6, amount = 1 }) => {
         fx.glitchUntil = performance.now() + duration * 1000;
         fx.glitchAmount = amount;

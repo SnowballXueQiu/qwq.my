@@ -31,10 +31,12 @@ export type PipelineControls = {
   invert: number;
   bgInvert: number;
   glitch: number;
+  /** 0 the drawing; 1–8 a single G-buffer channel or composite stage. */
+  view?: number;
 };
 
 /** Mutable per-frame look; scenes write here, the pipeline eases toward it. */
-export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, glitch: 0 };
+export const pipelineTarget: PipelineControls = { invert: 0, bgInvert: 0, glitch: 0, view: 0 };
 
 /** Set while another canvas (the year-in-review player) owns the shared shader clock. */
 export const sitePipeline = { paused: false };
@@ -106,6 +108,7 @@ export function InkPipeline({
         uInvert: { value: 0 },
         uBgInvert: { value: 0 },
         uGlitch: { value: 0 },
+        uView: { value: 0 },
         uBoil: { value: 0.6 },
         uTime: sharedUniforms.uTime,
       },
@@ -188,6 +191,7 @@ export function InkPipeline({
       u.uInvert.value += (pipelineTarget.invert - u.uInvert.value) * k;
       u.uBgInvert.value += (pipelineTarget.bgInvert - u.uBgInvert.value) * k;
       u.uGlitch.value = pipelineTarget.glitch;
+      u.uView.value = pipelineTarget.view ?? 0;
       u.uBoil.value = reducedMotion ? 0 : 0.35;
       // Keep the CSS world in step with the shader's notion of light and dark.
       const site = useSite.getState();

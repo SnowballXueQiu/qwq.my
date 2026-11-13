@@ -45,6 +45,8 @@ export function SmoothScroll() {
     // On the home page, wheel and touch go beat by beat (see beats.ts).
     const lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.9, virtualScroll: beatScroll });
     setLenis(lenis);
+    // For poking at it from the console (and recording the blog's clips) in development.
+    if (process.env.NODE_ENV !== "production") (window as unknown as { __lenis: Lenis }).__lenis = lenis;
     const uninstallBeats = installBeats(lenis);
     lenis.on("scroll", (l: Lenis) => {
       scrollMotion.velocity = l.velocity;
