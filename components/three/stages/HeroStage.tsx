@@ -6,6 +6,7 @@ import { Group, PerspectiveCamera, Vector3 } from "three";
 import { EYE_X, EYE_Y, Mascot, type MascotHandle } from "../mascot/Mascot";
 import { hudState } from "../hudState";
 import { PaperSheet } from "../paper/PaperSheet";
+import { useSite } from "@/lib/store";
 import { frameState, mix } from "../frameState";
 import { COVER_FOV, HERO_DIST, PAPER_DIST, frustumAt, heroPlacement } from "../framing";
 
@@ -55,10 +56,12 @@ export function HeroStage() {
     let y = mix(hero.y, near.halfH * 0.12, leap);
     let z = mix(-HERO_DIST, -11, leap);
     let s = mix(hero.scale, hero.scale * 0.72, leap);
-    x = mix(x, corner.halfW * (portrait ? 0.62 : 0.82), park);
-    y = mix(y, -corner.halfH * (portrait ? 0.62 : 0.42), park);
+    // Reading on a phone, the corner companion stays small and out of the text's way.
+    const tucked = portrait && useSite.getState().reading;
+    x = mix(x, corner.halfW * (tucked ? 0.74 : portrait ? 0.62 : 0.82), park);
+    y = mix(y, -corner.halfH * (tucked ? 0.84 : portrait ? 0.62 : 0.42), park);
     z = mix(z, -9, park);
-    s = mix(s, hero.scale * (portrait ? 0.3 : 0.24), park);
+    s = mix(s, hero.scale * (tucked ? 0.18 : portrait ? 0.3 : 0.24), park);
     // Land exactly where it started: the last sheet mirrors the first.
     x = mix(x, hero.x, finale);
     y = mix(y, hero.y, finale);
