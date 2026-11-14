@@ -89,7 +89,8 @@ export function SceneClock({ lang }: { lang: Lang }) {
           <g key={k}>
             <rect x={px(tops[k])} y={52} width={px(tops[k] + len) - px(tops[k])} height={36} fill={k === i ? "#141414" : "#f1ede4"} stroke="#141414" />
             <text x={px(tops[k]) + 4} y={74} className={`font-mono text-[10px] ${k === i ? "fill-[#f1ede4]" : "fill-[#141414]"}`}>
-              {String(k + 1).padStart(2, "0")} {names[k]}
+              {/* Short sheets only have room for their number. */}
+              {String(k + 1).padStart(2, "0")} {px(tops[k] + len) - px(tops[k]) > 56 ? names[k] : ""}
             </text>
           </g>
         ))}

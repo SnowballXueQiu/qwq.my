@@ -73,7 +73,7 @@ export function DeployDiagram({ lang }: { lang: Lang }) {
     <svg viewBox="0 0 640 250" className="block w-full">
       <Defs />
       <Box x={14} y={84} w={120} h={70} title={tr(lang, "访客", "Visitor")} lines={["qwq.my", "www.qwq.my → 301"]} />
-      <Box x={176} y={60} w={150} h={118} accent title="Cloudflare" lines={[tr(lang, "DNS 只有 Cloudflare 的 IP", "DNS shows only CF IPs"), "CNAME → <id>.cfargotunnel", "HTTPS", tr(lang, "源站 IP 不外露", "origin IP never public")]} />
+      <Box x={176} y={60} w={150} h={118} accent title="Cloudflare" lines={[tr(lang, "DNS 只有 Cloudflare 的 IP", "DNS shows only CF IPs"), tr(lang, "CNAME → 隧道", "CNAME → the tunnel"), "HTTPS", tr(lang, "源站 IP 不外露", "origin IP never public")]} />
       {/* The server: dashed fence = no inbound ports. */}
       <rect x={362} y={18} width={264} height={214} fill="none" stroke="#141414" strokeDasharray="8 5" />
       <text x={372} y={36} className="fill-[#141414] font-mono text-[11px] font-bold">

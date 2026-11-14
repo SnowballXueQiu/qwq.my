@@ -44,7 +44,7 @@ s = i + (y - top) / height
 
 The camera, every scene's entrance and exit, the light/dark switch and which card is current all read this one number. The DOM and the 3D can't drift apart, and making a scene play longer only means making its sheet taller; the 3D side doesn't change at all.
 
-<Figure n="01" wide caption="The home page as the scene clock sees it, with the site's real sheet lengths. The red ticks are beats (more on those under scrolling) and the hatched stretch scrolls continuously. Drag the slider to see scroll position turn into s.">
+<Figure n="01" caption="The home page as the scene clock sees it, with the site's real sheet lengths. The red ticks are beats (more on those under scrolling) and the hatched stretch scrolls continuously. Drag the slider to see scroll position turn into s.">
   <SceneClock lang="en" />
 </Figure>
 
@@ -57,7 +57,7 @@ So rendering happens in two steps, a technique called deferred rendering:
 1. Draw the scene once, but instead of colours, write down what each pixel *is* into a few textures. Together they're called the **G-buffer**.
 2. Then a full-screen shader reads those textures. Now every pixel can look at any neighbour it likes, and the lines, dots and hatching are all drawn in this step.
 
-<Figure n="02" wide caption="The five steps every frame goes through. ③ is the heart of the whole site.">
+<Figure n="02" caption="The five steps every frame goes through. ③ is the heart of the whole site.">
   <PipelineDiagram lang="en" />
 </Figure>
 
@@ -75,7 +75,7 @@ gNormal = vec4(n * 0.5 + 0.5, uObjectId);
 
 Tone is **half-Lambert**. Plain Lambert lighting, `dot(n, l)`, falls below zero and goes flat black on the shadow side; halving it and adding a half keeps some modelling in the shadows, which is exactly what halftone needs. The light comes from the upper left, the conventional light of a drawing. Every material gets a number when it's created: its object id.
 
-<Figure n="03" wide caption="One real frame of the site, layer by layer. Drag the divider: the finished frame on the left, the chosen layer on the right. On the site, open the terminal (press `) and type gbuffer normal to see the whole world's normals live.">
+<Figure n="03" caption="One real frame of the site, layer by layer. Drag the divider: the finished frame on the left, the chosen layer on the right. On the site, open the terminal (press `) and type gbuffer normal to see the whole world's normals live.">
   <GBufferExplorer lang="en" />
 </Figure>
 
@@ -107,7 +107,7 @@ float edgeSample(vec2 uv, vec4 c0, vec4 n0, float d0) {
 
 It's a close cousin of the Sobel operator. Sobel convolves a weighted 3×3 kernel to estimate a gradient, which suits quantities that vary smoothly; taking the largest difference from any neighbour gives crisper lines, and object ids are categories ("same or not"), which have no gradient to take.
 
-<Figure n="04" wide caption="The same edge detection, blown up to single pixels. The scene is ray-cast pixel by pixel in JavaScript: a sphere, a turned cube and a floor. Each test draws its own way and can be switched off; point at a pixel to read its values.">
+<Figure n="04" caption="The same edge detection, blown up to single pixels. The scene is ray-cast pixel by pixel in JavaScript: a sphere, a turned cube and a floor. Each test draws its own way and can be switched off; point at a pixel to read its values.">
   <EdgeLab lang="en" />
 </Figure>
 
@@ -132,7 +132,7 @@ Darker still, hatching joins in: lines 4.5 pixels apart, a first layer at +45° 
 
 Dots and hatching are computed in **screen space** (in pixel coordinates, not on the object's surface), so their density stays the same however large an object gets, as if printed on the paper rather than painted on the object.
 
-<Figure n="05" wide caption="Tone becomes ink. Drag on the picture to move the light and watch the dots and hatching follow. The ramp below runs darkness 0→1; the three red lines are the three thresholds.">
+<Figure n="05" caption="Tone becomes ink. Drag on the picture to move the light and watch the dots and hatching follow. The ramp below runs darkness 0→1; the three red lines are the three thresholds.">
   <HalftoneLab lang="en" />
 </Figure>
 
@@ -199,7 +199,7 @@ Line by line:
 
 That `if` matters. The parts that haven't broken yet must not move by a single bit: even multiplying by an identity matrix and back would let floating-point error open hairline cracks between neighbouring shards.
 
-<Figure n="06" wide caption="The same rules in 2D: 170 seeds, the same distribution and the same vertex-shader maths, drawn in perspective. Drag uBreak, or press aDelay to colour shards by their distance from the crack; point at a shard to read its local.">
+<Figure n="06" caption="The same rules in 2D: 170 seeds, the same distribution and the same vertex-shader maths, drawn in perspective. Drag uBreak, or press aDelay to colour shards by their distance from the crack; point at a shard to read its local.">
   <TearLab lang="en" />
 </Figure>
 
@@ -217,7 +217,7 @@ velocity += ((target - value) * k - velocity * c) * dt;
 value += velocity * dt;
 ```
 
-<Figure n="07" wide caption="QwQ's seven faces, captured from the site's 3D scene.">
+<Figure n="07" caption="QwQ's seven faces, captured from the site's 3D scene.">
   <FaceGrid lang="en" />
 </Figure>
 
@@ -244,7 +244,7 @@ const h = Math.hypot(a, b);
 if (h > 3) { m[i] = (3 / h) * a * d[i]; m[i + 1] = (3 / h) * b * d[i]; }
 ```
 
-<Figure n="08" wide caption="The same keys, two curves. Drag the squares up and down. Red is where Catmull-Rom leaves the keys' range; the red dot is a camera riding the monotone curve, and on a hold its speed v stays 0.">
+<Figure n="08" caption="The same keys, two curves. Drag the squares up and down. Red is where Catmull-Rom leaves the keys' range; the red dot is a camera riding the monotone curve, and on a hold its speed v stays 0.">
   <SplineLab lang="en" />
 </Figure>
 
@@ -265,7 +265,7 @@ The top of the page, the toys, about, the map, every skill card and every projec
 3. **You have to push far enough.** Scrolling first builds up a "pull", and the page leans toward the next beat: by `room · (1 − e^(−0.5·pull/room))`, which follows your hand at first, then stiffens, never leaning more than 40% of the way to the next beat. Only once the pull reaches about a quarter of the screen (160 to 300 pixels, some three notches of a mouse wheel) does it glide over; stop short for 0.42 seconds and it springs back.
 4. **The glide has a fixed pace, however hard you pushed.** Its length depends on the distance, `0.55 + 0.5 × screens` seconds, clamped between 0.85 and 1.6, eased in and out. A gesture made mid-glide waits in line until the current beat lands.
 
-<Figure n="09" wide caption="Top: a real-shaped trackpad swipe (speeding up, coasting down, then a second push near the end). Each bar is one wheel event, coloured by how it was judged. Bottom: scroll or drag in the black box, which runs on the same rules.">
+<Figure n="09" caption="Top: a real-shaped trackpad swipe (speeding up, coasting down, then a second push near the end). Each bar is one wheel event, coloured by how it was judged. Bottom: scroll or drag in the black box, which runs on the same rules.">
   <BeatLab lang="en" />
 </Figure>
 
@@ -304,7 +304,7 @@ Panel text is typed in line by line. At first that was a GSAP ScrollTrigger: it 
 
 The tolerance is about 0.04 degrees (islands and the nine-dash line are kept finer), and the whole map ends up at 108 KB. Each province-level division is extruded on its own; the ones I've been to stand taller in vermilion, and every place I've been gets a pin. Phones show pins only, with no labels, so the map stays tidy as the list grows.
 
-<Figure n="12" wide caption="Douglas–Peucker simplifying a ragged coastline. Drag the tolerance to see the point count change; press watch it recurse to step through chords, farthest points and the tolerance band.">
+<Figure n="12" caption="Douglas–Peucker simplifying a ragged coastline. Drag the tolerance to see the point count change; press watch it recurse to step through chords, farthest points and the tolerance band.">
   <SimplifyLab lang="en" />
 </Figure>
 
@@ -344,7 +344,7 @@ The site runs on a server of my own, in Docker:
 - A three-stage build (dependencies, build, runtime) on `node:22-alpine`, with Next's `standalone` output (only the files needed at runtime); the final image is about 230 MB.
 - Two services in `docker compose`: `web` is the site and **publishes no ports to the host**; `tunnel` is cloudflared, which reaches `web:3000` over Docker's internal network.
 
-<Figure n="14" wide caption="The only way in is the Cloudflare Tunnel: the server dials out, so it needs no inbound port at all, and DNS only ever shows Cloudflare's IPs.">
+<Figure n="14" caption="The only way in is the Cloudflare Tunnel: the server dials out, so it needs no inbound port at all, and DNS only ever shows Cloudflare's IPs.">
   <DeployDiagram lang="en" />
 </Figure>
 
