@@ -1,13 +1,17 @@
 ---
 title: How qwq.my is built
 date: 2026-11-13
-summary: A drawing that tears open onto a 3D world you can play with. Every technical detail, from the rendering pipeline and the paper tear to the mascot, the camera, the scrolling, the map, the mini-game and the deployment.
+summary: A drawing that tears open onto a 3D world you can play with. The rendering pipeline, the paper tear, the mascot, the camera, the scrolling, the map, the mini-game and the deployment, each principle with a figure you can play with.
 tags: [Next.js, three.js, GLSL, Deployment]
 ---
 
 When you open qwq.my, the first thing you see is an off-white engineering drawing with a line-art QwQ on it. Scroll, and the line art grows depth, the sheet cracks open from the face outward, the pieces fly at the camera, and the camera passes through the hole into a dark 3D world. Every section after that is one scene of a music video. At the end the pieces fly back and become a sheet of paper again.
 
-This post takes the whole thing apart.
+<Figure n="00" caption="The opening, recorded from the site itself: the line art grows depth and the sheet cracks open from the face.">
+  <Clip src="/blog/how-qwq-my-is-built/tear.mp4" poster="/blog/how-qwq-my-is-built/tear.webp" label="A recording of the paper tearing" />
+</Figure>
+
+This post takes the whole thing apart. The figures are live: drag what can be dragged, and point at things to read their values. They use the same algorithms and numbers as the site, and a few are simply the site's code in miniature.
 
 ## The stack
 
@@ -22,153 +26,297 @@ This post takes the whole thing apart.
 | Also | d3-delaunay (the paper tear), zustand (state) |
 | Hosting | Docker + Cloudflare Tunnel |
 
-The project is a little over 11,000 lines of TypeScript and GLSL. There are three colours: paper `#F1EDE4`, ink `#141414` and vermilion `#E8402A`. The dark world is just paper and ink swapped.
+The project is a little over 11,000 lines of TypeScript and GLSL. There are three colours: paper `#F1EDE4`, ink `#141414` and vermilion `#E8402A`. The dark world isn't another palette; it's paper and ink swapped.
 
 ## The skeleton: one canvas, seven sheets, one scene clock
 
 At the bottom of the page is a full-screen `<Canvas>` where all the 3D is drawn. Text, panels and the HUD are plain DOM on top of it.
 
-The home page is seven "drawing sheets": hello, about, skills, projects, timeline, writing and contact. Each is a tall `<section>` whose content is `position: sticky`, so the taller the sheet, the longer its scene plays.
+The home page is seven "drawing sheets": hello, about, skills, projects, timeline, writing and contact. Each is a tall `<section>`, several screens high, and its content is `position: sticky; top: 0`, pinned to the screen while the sheet scrolls past. So the taller the sheet, the longer its scene plays: content in a sheet four screens tall stays on screen for three screens of scrolling, and the last screen pushes it out.
 
-The 3D side never looks at the scrollbar. It reads one number, the **scene time**:
+The 3D side never looks at the scrollbar. It reads one number, the **scene time** `s`:
 
 ```ts
-// The integer part is the sheet, the fraction is how far through it you are.
-// 0 = top of the page, 1 = "about" begins, 2.5 = halfway through skills.
-export function getSceneTime(): number
+// Sheet i starts at `top` and is `height` tall; scrolled to y:
+s = i + (y - top) / height
+// 0 = top of the page, 1 = "about" begins, 2.5 = halfway through skills
 ```
 
-The camera, every scene's entrance and exit, and the light/dark switch all key off this one number. The DOM and the 3D can't drift apart, and changing a sheet's length needs no change on the 3D side.
+The camera, every scene's entrance and exit, the light/dark switch and which card is current all read this one number. The DOM and the 3D can't drift apart, and making a scene play longer only means making its sheet taller; the 3D side doesn't change at all.
+
+<Figure n="01" wide caption="The home page as the scene clock sees it, with the site's real sheet lengths. The red ticks are beats (more on those under scrolling) and the hatched stretch scrolls continuously. Drag the slider to see scroll position turn into s.">
+  <SceneClock lang="en" />
+</Figure>
 
 ## Rendering: one material, one G-buffer, one pass that draws it
 
-Nearly every 3D object on the site uses the same material. It doesn't output a colour; it writes data into two render targets (WebGL2 MRT):
+The site wants to look drawn: inked outlines, with dark areas in halftone dots and hatching, as if printed on paper. The ink lines are the hard part. Whether a pixel sits on an outline depends on its **neighbours**: are they the same object, the same distance away? But an ordinary shader only ever sees the one pixel it's drawing.
+
+So rendering happens in two steps, a technique called deferred rendering:
+
+1. Draw the scene once, but instead of colours, write down what each pixel *is* into a few textures. Together they're called the **G-buffer**.
+2. Then a full-screen shader reads those textures. Now every pixel can look at any neighbour it likes, and the lines, dots and hatching are all drawn in this step.
+
+<Figure n="02" wide caption="The five steps every frame goes through. ③ is the heart of the whole site.">
+  <PipelineDiagram lang="en" />
+</Figure>
+
+Nearly every 3D object uses the same material. It doesn't output a colour; using WebGL2 multiple render targets (MRT), it writes into two textures at once:
 
 ```glsl
 layout(location = 0) out vec4 gColor;   // tone, accent or not, fill mode
 layout(location = 1) out vec4 gNormal;  // view-space normal + object id
 
+float halfLambert = dot(n, lightDir) * 0.5 + 0.5;
+float tone = clamp(pow(halfLambert, 1.35) + uToneBias, 0.0, 1.0);
 gColor  = vec4(tone, accent, uFill, 1.0);
 gNormal = vec4(n * 0.5 + 0.5, uObjectId);
 ```
 
-Tone is half-Lambert with the light from the upper left, the conventional light of a drawing. Every material gets its own object id when it is created.
+Tone is **half-Lambert**. Plain Lambert lighting, `dot(n, l)`, falls below zero and goes flat black on the shadow side; halving it and adding a half keeps some modelling in the shadows, which is exactly what halftone needs. The light comes from the upper left, the conventional light of a drawing. Every material gets a number when it's created: its object id.
 
-A full-screen composite pass then draws the G-buffer as a picture:
+<Figure n="03" wide caption="One real frame of the site, layer by layer. Drag the divider: the finished frame on the left, the chosen layer on the right. On the site, open the terminal (press `) and type gbuffer normal to see the whole world's normals live.">
+  <GBufferExplorer lang="en" />
+</Figure>
 
-- **Ink lines**: Sobel edge detection on depth, normals and object id. Depth breaks are silhouettes, normal jumps are creases, id changes are where two objects meet. The strongest of the three is the line, with a slow wobble so it reads as hand-drawn.
-- **Halftone and hatching**: tone sets how big the dots are and how many hatch layers stack up, all in screen space, so the dot density is the same whatever the object's size.
-- **Paper grain**: fixed, never re-seeded per frame.
-- **Paper ⇄ ink**: a `uInvert` uniform blends between 0 and 1, so the light and dark worlds are the same shader. One fill mode, `sheet`, means real paper and ignores the inversion, so the torn pages are still pages in the dark.
+### Ink lines: every pixel against its 8 neighbours
 
-After the composite comes a lens layer: chromatic aberration, CRT barrel distortion and scanlines, speed streaks from the vanishing point when you scroll fast, an ink shockwave when you click empty space, and a vignette.
+The composite shader does the same thing for every pixel: compare it with its neighbours in 8 directions, 1 CSS pixel away, and look for a break between them. There are four kinds of break:
 
-One hard rule: **no flashing**. Full-screen white flashes are rough for people with photosensitive epilepsy, so scene cuts only get a gentle push-in and a short band of glitch, never a full-frame flash. With "reduce motion" turned on in the OS, all of these effects are off.
+- **Silhouette**: one has something, the other nothing (`gColor.a` differs).
+- **Object id**: both have something, but not the same object.
+- **Crease**: the normals point far apart. `1 - dot(n, n0)` is 0 for parallel faces and 1 for perpendicular ones; a smooth step from 0.3 to 0.7 starts drawing at roughly 45°. That's how the cube gets its edges.
+- **Depth**: one is much farther than the other. This uses the **relative** difference `|d - d0| / min(d, d0)`, not the absolute one. On a distant floor neighbouring pixels are already far apart; with an absolute threshold the far floor would fill with lines while real breaks up close might not qualify. Dividing by distance treats near and far alike.
 
-### Sharpness
-
-Phone screens are 3x. A canvas rendered at 1x turns 3D type to mush. The canvas now picks its pixel ratio from a budget of about 3.2 million pixels, so phones get 2x and big monitors less. If a device can't keep up (drei's `PerformanceMonitor` reports a slowdown), it steps down once, by a quarter, so the canvas isn't reallocated over and over mid-scroll.
-
-The timeline signs are DOM placed in the 3D scene with CSS 3D transforms. WebKit rasterizes such layers at their layout size, so type laid out small and then scaled up by the transform goes soft. These elements are laid out at twice the size and shrunk back by the transform.
-
-## The opening: 170 shards, one draw call
-
-The opening sheet is really 170 shards fitted edge to edge. They come from a Voronoi diagram built with d3-delaunay. 45% of the seed points cluster around QwQ's face, so the crack starts there and the shards grow larger toward the edges.
-
-All the shards are merged into one `BufferGeometry` and drawn in a single call. Besides position and normal, each vertex carries:
-
-- `aCenter`: the centre of its shard;
-- `aRand`: random numbers that pick the spin axis and how far it flies;
-- `aDelay`: how far it is from the crack, 0 to 1.
-
-The vertex shader subtracts its delay from the global `uBreak` to know how far along its shard is:
+The strongest of the four is the pixel's ink. Silhouettes are also checked 1.8 pixels out, so outer contours come out a little heavier than inner lines, the way you press harder on an outline when drawing.
 
 ```glsl
-float local = uBreak - aDelay * 0.6;
-// Untouched shards keep their exact positions: any float round-trip
-// would open pinholes along the seams.
-if (local > 0.0) {
-  float lift = smoothstep(0.0, 0.12, local);
-  float t = clamp((local - 0.06) / 0.5, 0.0, 1.0);
-  float e = t * t;
-  vec3 axis = normalize(aRand - 0.5 + vec3(0.0, 0.0, 0.001));
-  mat3 R = rotateAxis(axis, e * (2.5 + aRand.x * 5.0));
-  pos = aCenter + R * (pos - aCenter);   // tumble about its own centre
-  nrm = R * nrm;
-  vec3 away = normalize(vec3(aCenter.xy * 0.25, 1.0));
-  pos += away * e * (16.0 + aRand.y * 18.0);  // fly toward the camera
+float edgeSample(vec2 uv, vec4 c0, vec4 n0, float d0) {
+  vec4 c = texture(tColor, uv);
+  vec4 n = texture(tNormal, uv);
+  float d = linearDepth(texture(tDepth, uv).r);
+  float both = c.a * c0.a;
+  float silhouette = abs(c.a - c0.a);
+  float idEdge = step(0.003, abs(n.a - n0.a)) * both;
+  float crease = (1.0 - dot(n.xyz * 2.0 - 1.0, n0.xyz * 2.0 - 1.0)) * both;
+  float depthEdge = abs(d - d0) / max(min(d, d0), 0.001) * both;
+  return max(max(silhouette, idEdge),
+             max(smoothstep(0.3, 0.7, crease), smoothstep(0.015, 0.04, depthEdge)));
 }
 ```
 
-That `if` matters: the parts that haven't broken yet must not move by a single bit, or floating-point error opens hairline cracks between neighbouring shards.
+It's a close cousin of the Sobel operator. Sobel convolves a weighted 3×3 kernel to estimate a gradient, which suits quantities that vary smoothly; taking the largest difference from any neighbour gives crisper lines, and object ids are categories ("same or not"), which have no gradient to take.
+
+<Figure n="04" wide caption="The same edge detection, blown up to single pixels. The scene is ray-cast pixel by pixel in JavaScript: a sphere, a turned cube and a floor. Each test draws its own way and can be switched off; point at a pixel to read its values.">
+  <EdgeLab lang="en" />
+</Figure>
+
+### Halftone and hatching: tone as an amount of ink
+
+Print has no grey ink; grey is faked with black dots of different sizes. From a distance, the eye reads the fraction of a small area covered in ink as a shade. The site's halftone works the same way:
+
+- Lay a 5×5-pixel grid over the screen, turned 45°. 45° is the traditional screen angle for black in print; a square grid is the easiest for the eye to spot.
+- Put a dot in the middle of each cell. The dot's **area** should follow darkness, and area goes with the radius squared, so the radius is the square root of darkness.
+- Below a darkness of 0.22, no dots at all: highlights stay clean paper.
+
+```glsl
+float halftone(vec2 sp, float darkness) {
+  vec2 p = rot(0.785398) * sp;           // turn 45°
+  vec2 g = fract(p / 5.0) - 0.5;         // position within a 5px cell
+  float r = sqrt(clamp((darkness - 0.22) / 0.78, 0.0, 1.0)) * 0.6;
+  return 1.0 - smoothstep(r - 0.12, r + 0.12, length(g));
+}
+```
+
+Darker still, hatching joins in: lines 4.5 pixels apart, a first layer at +45° from darkness 0.55, a second at −45° from 0.78, crossing into a mesh. Line width grows smoothly with darkness rather than popping in.
+
+Dots and hatching are computed in **screen space** (in pixel coordinates, not on the object's surface), so their density stays the same however large an object gets, as if printed on the paper rather than painted on the object.
+
+<Figure n="05" wide caption="Tone becomes ink. Drag on the picture to move the light and watch the dots and hatching follow. The ramp below runs darkness 0→1; the three red lines are the three thresholds.">
+  <HalftoneLab lang="en" />
+</Figure>
+
+### Paper, ink and the swap
+
+Every surface also has a fill mode:
+
+| Fill | How it's drawn |
+| --- | --- |
+| Shaded | The dots and hatching above |
+| Paper | Flat; tone says how much ink is printed on it |
+| Sheet | Like paper, but **ignores the swap** |
+| Ink | Solid ink |
+
+The light and dark worlds are the same shader: paper and ink colours blend through one `uInvert` uniform between 0 and 1, easing over about 0.8 seconds when it switches. Sheets sit out the swap, so the torn drawing stays a drawing in the dark.
+
+After the composite comes a lens layer: chromatic aberration, CRT barrel distortion and scanlines, speed streaks from the vanishing point when you scroll fast, an ink shockwave when you click empty space, and a vignette. The ink lines also wobble slightly and continuously, like a hand-drawn line. The first version was a 12-times-a-second "boil", which read as stutter; now it's smooth noise.
+
+One hard rule: **no flashing**. Full-screen white flashes are rough for people with photosensitive epilepsy, so scene cuts only get a gentle push-in and a short band of glitch, never a full-frame flash. With "reduce motion" on in the OS, all of these effects are off.
+
+### Sharpness
+
+Phone screens are 3x. A canvas rendered at 1x turns 3D type to mush. The canvas now picks its pixel ratio from a **pixel budget** of about 3.2 million pixels, so phones get 2x and big monitors less. If a device can't keep up (drei's `PerformanceMonitor` reports a slowdown), it steps down once, by a quarter, so the canvas isn't rebuilt over and over mid-scroll.
+
+The timeline signs are DOM placed in the 3D scene with CSS 3D transforms. WebKit rasterizes such an element into an image at its layout size and hands it to the GPU to transform; type laid out small and then scaled up goes soft. These elements are laid out at twice the size and shrunk back by the transform.
+
+## The opening: 170 shards, one draw call
+
+The opening sheet is really 170 shards fitted edge to edge.
+
+Their shapes come from a **Voronoi diagram**: scatter seed points on a plane, and each seed claims the region closer to it than to any other seed. The regions tile the plane exactly, with no gaps or overlaps, and their edges are irregular polygons, much like a material that has cracked. d3-delaunay computes it: first the Delaunay triangulation of the seeds, whose dual is the Voronoi diagram.
+
+The seeds aren't scattered evenly. 45% of them cluster around QwQ's face, at distances drawn as `sqrt(-2 ln u) · σ`, the radius distribution of a 2D normal distribution (the Rayleigh distribution); the rest spread evenly over the sheet. The shards come out fine near the crack and larger toward the edges.
+
+Each polygon is extruded a little into a thin plate with a front, a back and side walls. 170 plates as 170 objects would be 170 draw calls, each needing its transform updated every frame. Instead all the shards are **merged into one geometry**, and every vertex carries three extra values so the vertex shader can work out where its shard should be:
+
+- `aCenter`: the centre of its shard;
+- `aRand`: three random numbers that pick the spin axis, how far it spins and how far it flies;
+- `aDelay`: the distance from the shard's centre to the crack, divided by the largest such distance, plus a little noise: 0 to 1.
+
+The whole sheet has a single `uBreak`, rising from 0 to 1.7 with the scroll:
+
+```glsl
+float local = uBreak - aDelay * 0.6;      // how long this shard has been "on"
+if (local > 0.0) {                         // shards not yet reached don't move a bit
+  float lift = smoothstep(0.0, 0.12, local);
+  float t = clamp((local - 0.06) / 0.5, 0.0, 1.0);
+  float e = t * t;                         // slow, then fast
+  vec3 axis = normalize(aRand - 0.5 + vec3(0.0, 0.0, 0.001));
+  mat3 R = rotateAxis(axis, e * (2.5 + aRand.x * 5.0));
+  pos = aCenter + R * (pos - aCenter);     // tumble about its own centre
+  nrm = R * nrm;
+  vec3 away = normalize(vec3(aCenter.xy * 0.25, 1.0));
+  pos += away * e * (16.0 + aRand.y * 18.0);  // toward the camera, a little outward
+}
+```
+
+Line by line:
+
+- `local` is the key. Shards near the crack have a small `aDelay`, so they go positive first: the hole opens at the face and grows ring by ring.
+- `lift` raises the shards slightly apart first, and `e = t²` makes them tumble and fly slowly at first, then fast, as if punched through from behind.
+- The spin axis comes from the random numbers, so every shard tumbles its own way; `rotateAxis` is Rodrigues' formula for rotating about any axis.
+- The flight is mostly toward the camera (z), bent outward a little by where the shard sits, so the pieces burst out from the centre of the frame.
+
+That `if` matters. The parts that haven't broken yet must not move by a single bit: even multiplying by an identity matrix and back would let floating-point error open hairline cracks between neighbouring shards.
+
+<Figure n="06" wide caption="The same rules in 2D: 170 seeds, the same distribution and the same vertex-shader maths, drawn in perspective. Drag uBreak, or press aDelay to colour shards by their distance from the crack; point at a shard to read its local.">
+  <TearLab lang="en" />
+</Figure>
 
 Once the shards are gone, six desk toys pop out of the hole: a duck, keycaps, a mug, a paper plane, a floppy disk and a cube. Poke them, or press and drag to spin them. Typing Q, W, Q on the keycaps starts a party.
 
 ## QwQ: a mascot made of kaomoji
 
-QwQ's features are procedural geometry. Strokes are a `TubeGeometry` with spherical end caps, so each reads as one line drawn with a pen. Each eye is a ring with a tail (hence Q), with a pupil inside that follows your pointer.
+QwQ's features are all procedural geometry. A stroke is a tube swept along a curve (`TubeGeometry`) with a small sphere capping each end, so it reads as one line drawn with a pen. Each eye is a ring with a tail, hence Q, with a pupil inside that follows your pointer.
 
-Faces are kaomoji, and every part pops in and out on its own, with a little spring:
-
-| Face | When |
-| --- | --- |
-| `QwQ` | Most of the time |
-| `OwO` | The pointer is on its face |
-| `>w<` | It just got poked |
-| `QAQ` | Five pokes in three seconds, or the pointer left the window |
-| `@w@` | You shook the pointer too fast; the eyes become spinning spirals |
-| `-w-` | Eight seconds of nothing; z's start drifting up |
-| `^w^` | On the contact sheet, waving |
-
-`QAQ` pouts, raises its brows, looks up at you, and teardrops well up under its eyes one at a time, roll a little way down and fade. Phones had a catch: when a finger lifts, the browser reports that the pointer left the page, so QwQ thought you had gone and cried after every touch. Now only a mouse leaving counts.
-
-## The camera: keyframes and a spline that never overshoots
-
-The camera is a list of keyframes: at this scene time, stand here, look there, lean this much. The keyframes are joined by a **monotone cubic spline** (the Fritsch–Carlson method):
+Each face is a list of which parts show. Parts don't just appear or vanish when the face changes: a damped spring pulls their scale from 0 to 1 with a little overshoot, so they pop:
 
 ```ts
-// Two neighbouring keys with the same value (a stop): the tangents are zero,
-// so the camera really stands still.
-if (d[i] === 0) {
-  m[i] = 0;
-  m[i + 1] = 0;
-  continue;
-}
+// Every frame: the spring pulls toward the target, damping settles it
+velocity += ((target - value) * k - velocity * c) * dt;
+value += velocity * dt;
 ```
 
-A plain Catmull-Rom spline overshoots between two equal keys and comes back, so the camera wobbles exactly where it should hold still. A monotone spline never overshoots, and velocity stays continuous through every key.
+<Figure n="07" wide caption="QwQ's seven faces, captured from the site's 3D scene.">
+  <FaceGrid lang="en" />
+</Figure>
 
-On top of the keys, the director adds a hand-held feel: the pointer nudges the camera, the field of view widens as you scroll faster, and every cut gets a slow push-in. Phones get their own keyframes; on a phone, for example, the project screens turn nearly square-on and the camera backs off until the whole screen fits.
+A small "brain" picks the face by priority: the pointer left the window > cried from pokes > dizzy > poked > hovered > asleep > the scene's default. `QAQ` pouts, raises its brows, looks up at you, and teardrops well up under each eye in turn, roll a little way and fade.
+
+Phones had a catch. When a finger lifts, the browser reports that the pointer left the page, so QwQ thought you had gone and cried after every touch. Now only a mouse leaving the window counts.
+
+## The camera: keyframes, and a curve that never overshoots
+
+The camera is a list of keyframes: at this scene time, stand here, look there, lean this much. Between two keys you need a smooth path, and the usual tool is **cubic Hermite interpolation**: given the values and the tangents (the velocities) at both ends, join them with a cubic polynomial.
+
+The question is how to choose the tangents. The common **Catmull-Rom** spline sets each key's tangent to the slope between the key before and the key after. A camera stop is two keys with the same value (same place, stay a while), but their neighbours differ, so the tangents aren't zero, and the curve overshoots between the two equal keys and comes back: the camera wobbles exactly where it should hold still.
+
+The site uses a **Fritsch–Carlson monotone cubic**. It guarantees that wherever the keys are monotone, so is the curve, by correcting the tangents:
+
+1. If two neighbouring keys are equal (a stop), both tangents of that span are set to 0: the camera really stands still.
+2. If the slopes on either side point opposite ways (a peak or a valley), the tangent is set to 0: no overshooting the peak.
+3. The ratios `α`, `β` of the tangents to the span's average slope must satisfy `α² + β² ≤ 9`; past that, they're scaled back. This is a sufficient condition for no overshoot.
+
+```ts
+if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }   // a stop: stand still
+const a = m[i] / d[i], b = m[i + 1] / d[i];
+const h = Math.hypot(a, b);
+if (h > 3) { m[i] = (3 / h) * a * d[i]; m[i + 1] = (3 / h) * b * d[i]; }
+```
+
+<Figure n="08" wide caption="The same keys, two curves. Drag the squares up and down. Red is where Catmull-Rom leaves the keys' range; the red dot is a camera riding the monotone curve, and on a hold its speed v stays 0.">
+  <SplineLab lang="en" />
+</Figure>
+
+On top of the keys, the director layers a hand-held feel: the pointer nudges the camera, the field of view widens with scroll speed (up to 6° wider), and every cut gets a slow push-in. Phones get their own keyframes; on a phone, for example, the project screens turn nearly square-on and the camera backs off until the whole screen fits.
 
 Press "MAP" in the top right and the camera pulls up into the sky. The whole flight path and every set piece become a 3D map; click any scene to fly there.
 
 ## Scrolling: beat by beat, then one long ride
 
-This part changed the most. It started as plain smooth scrolling, but a few turns of the wheel or a hard fling on a phone sent the skills and projects flashing past. Now scrolling has two halves.
+This part changed the most. It started as plain smooth scrolling, and a few turns of the wheel or a hard fling on a phone sent the skills and projects flashing past before you could read them. Now scrolling has two halves.
 
-**The first half snaps to beats.** The top of the page, the toys, about, the map, every skill card and every project screen are each one beat. Lenis has a `virtualScroll` hook that sees wheel and touch input before Lenis does, and that's where I take over:
+### The first half: snapping to beats
 
-- Scrolling first pulls the page a little toward the next beat, against some resistance. Only once you've scrolled about a quarter of a screen (some three notches of a mouse wheel) does it glide over, with a fixed eased duration. Stop short and it springs back.
-- One gesture moves at most one beat. A long spin of the wheel or a trackpad's inertia tail is swallowed, but a fresh push near the end of the tail (the deltas die away, then surge) counts as a new gesture.
-- A gesture made mid-glide waits until the current beat lands.
-- On phones, `touchmove` is intercepted and the drag's distance and speed decide.
-- Arrow keys, Space and Page Up/Down also move one beat at a time.
+The top of the page, the toys, about, the map, every skill card and every project screen are each one beat. Lenis has a `virtualScroll` hook that sees wheel and touch input before Lenis does; on the home page, that's where I take over:
 
-**The second half is continuous.** From the first milestone on the timeline to the end of the page, scrolling is smooth and continuous, and the camera rides down the road without stopping at each milestone. One exception: a hard fling is caught at the writing shot instead of running straight to the end.
+1. **One gesture, one beat.** A gap of more than 180 ms between wheel events starts a new gesture. Once a gesture has moved the page one beat, the rest of it is swallowed: a few more turns of the wheel, or the long tail of shrinking events a trackpad keeps sending after a swipe.
+2. **How do you tell inertia from a second push?** Inertia deltas only ever shrink. If, after dropping below half its peak, the stream suddenly jumps to more than 2.5 times its lowest value, a finger pushed again: a new gesture.
+3. **You have to push far enough.** Scrolling first builds up a "pull", and the page leans toward the next beat: by `room · (1 − e^(−0.5·pull/room))`, which follows your hand at first, then stiffens, never leaning more than 40% of the way to the next beat. Only once the pull reaches about a quarter of the screen (160 to 300 pixels, some three notches of a mouse wheel) does it glide over; stop short for 0.42 seconds and it springs back.
+4. **The glide has a fixed pace, however hard you pushed.** Its length depends on the distance, `0.55 + 0.5 × screens` seconds, clamped between 0.85 and 1.6, eased in and out. A gesture made mid-glide waits in line until the current beat lands.
 
-There was a sticky-related trap, too. Panel text is typed in line by line. At first a GSAP ScrollTrigger fired it at precomputed offsets, but the content is pinned to the screen, the precomputed offsets disagreed with what was on screen, and after scrolling back and forth the about card came back empty. Now every scroll checks where the panel actually is: more than 15% on screen types it in; dropped entirely below the screen takes it back out.
+<Figure n="09" wide caption="Top: a real-shaped trackpad swipe (speeding up, coasting down, then a second push near the end). Each bar is one wheel event, coloured by how it was judged. Bottom: scroll or drag in the black box, which runs on the same rules.">
+  <BeatLab lang="en" />
+</Figure>
+
+Phones have no wheel events, so `touchmove` is intercepted to stop the browser's own scrolling, and the drag's distance and speed decide: past a tenth of the screen, or a real flick (faster than 0.5 pixels per millisecond and longer than 6% of the screen), turns one beat; anything less springs back. Arrow keys, Space and Page Up/Down also move one beat at a time.
+
+<Figure n="10" caption="Recorded from the site: the skills section, one card per gesture.">
+  <Clip src="/blog/how-qwq-my-is-built/beats.mp4" poster="/blog/how-qwq-my-is-built/beats.webp" label="A recording of beat snapping through the skills" />
+</Figure>
+
+### The second half: continuous
+
+The timeline is a road, and a road is for riding, not stop-start. So from the first milestone to the end of the page, scrolling is smooth and continuous: the wheel scrolls as far as you turn it, and on a phone the page follows your finger and coasts on when you let go, by how fast you flicked.
+
+The camera has no stops here either: one keyframe per milestone, evenly spaced, so steady scrolling gives a steady ride, the camera only turning its head as it passes each sign. Over the city it keeps drifting upward instead of freezing.
+
+One exception: a hard fling from the timeline is caught at the writing shot, easing to a stop instead of running straight to the end. Scrolling back to the start of the road also stops there; keep going and the beats take over again.
+
+<Figure n="11" caption="Recorded from the site: riding the timeline road into the GitHub city.">
+  <Clip src="/blog/how-qwq-my-is-built/ride.mp4" poster="/blog/how-qwq-my-is-built/ride.webp" label="A recording of the timeline road and the GitHub city" />
+</Figure>
+
+### A sticky trap
+
+Panel text is typed in line by line. At first that was a GSAP ScrollTrigger: it measures where each element sits on the page when the page loads, then plays the animation when you scroll past. But the panels live in sticky containers, whose position on screen changes as you scroll, so the measured positions disagreed with what was on screen, and after scrolling back and forth the "about" card came back empty. Now every scroll checks where the panel actually is on screen: more than 15% visible types it in; dropped entirely below the screen takes it back out.
 
 ## Scene by scene
 
-**About.** An introduction written as TypeScript, with `init(me);` jumping off the page as extruded 3D type. The 3D type is set in Archivo Condensed and JetBrains Mono, converted to typeface JSON. Chinese stays in the DOM with system fonts: CJK web fonts weigh megabytes, and Google Fonts is unreachable in mainland China.
+**About.** An introduction written as TypeScript, with `init(me);` jumping off the page as extruded 3D type. The 3D type is set in Archivo Condensed and JetBrains Mono, converted ahead of time to typeface JSON that three.js can read. Chinese stays in the DOM with system fonts: CJK web fonts weigh megabytes, and Google Fonts is unreachable in mainland China.
 
-**The footprints map.** The camera turns to look down on a map of China. The data comes from Alibaba Cloud's DataV GeoAtlas, simplified with Douglas–Peucker to about 0.04 degrees (islands and the nine-dash line are kept finer), down to 108 KB. Each province-level division is extruded on its own; the ones I've been to stand taller in vermilion, and every place I've been gets a pin. Phones show pins only, with no labels, so the map stays tidy as the list grows.
+**The footprints map.** The camera turns to look down on a map of China. The source data comes from Alibaba Cloud's DataV GeoAtlas, whose outlines are so dense that the file would be several megabytes. It's simplified with the **Douglas–Peucker algorithm**:
+
+1. Join the first and last points of a stretch of outline: a chord.
+2. Find the point in that stretch farthest from the chord.
+3. If it's farther than the tolerance, there's an important bend there: keep the point, split the stretch at it, and repeat on both halves.
+4. If not, every point in between can go.
+
+The tolerance is about 0.04 degrees (islands and the nine-dash line are kept finer), and the whole map ends up at 108 KB. Each province-level division is extruded on its own; the ones I've been to stand taller in vermilion, and every place I've been gets a pin. Phones show pins only, with no labels, so the map stays tidy as the list grows.
+
+<Figure n="12" wide caption="Douglas–Peucker simplifying a ragged coastline. Drag the tolerance to see the point count change; press watch it recurse to step through chords, farthest points and the tolerance band.">
+  <SimplifyLab lang="en" />
+</Figure>
+
+<Figure n="13" caption="Recorded from the site: the camera turns to the map and the provinces rise one by one.">
+  <Clip src="/blog/how-qwq-my-is-built/map.mp4" poster="/blog/how-qwq-my-is-built/map.webp" label="A recording of the footprints map" />
+</Figure>
 
 **Skills.** Each skill group is a station by the road; extruded words fly in and lock into place, and the bill of materials on the left highlights the current group.
 
 **Projects.** The camera weaves between giant screens. Each screen face is a shader with scanlines and a slowly rolling bright band; hovering adds noise bands.
 
-**Timeline.** A winding road with a sign at every milestone. A pelican on a bicycle rides 13 units ahead of the camera; its wheels turn by the distance the camera has travelled, and it turns around when you scroll back. At the end of the road is a GitHub city: each day of the last year's contributions is a tower. The camera starts at street level looking up, then cranes up until the year reads as the familiar contribution grid. The data needs no token: it's parsed from the contribution calendar on the public GitHub profile, with an eight-second timeout and a snapshot in the repo as the fallback.
+**Timeline.** A winding road with a sign at every milestone. A pelican on a bicycle rides 13 units ahead of the camera; its wheels turn by the distance the camera has travelled (angle = distance / wheel radius), and it turns around when you scroll back. At the end of the road is a GitHub city: each day of the last year's contributions is a tower, all drawn at once with instanced rendering. The camera starts at street level looking up, then cranes up until the year reads as the familiar contribution grid. The data needs no token: it's parsed from the contribution calendar on the public GitHub profile, with an eight-second timeout and a snapshot in the repo as the fallback.
 
 **Year in review.** The timeline's "play year in review" button opens a video written in Remotion: seven scenes at 30 fps, 1,070 frames, about 36 seconds. It renders live in the browser with `@remotion/player`; there's no pre-rendered video file.
 
@@ -176,25 +324,29 @@ There was a sticky-related trap, too. Panel text is typed in line by line. At fi
 
 ## Interactions and easter eggs
 
-- **Terminal**: press `` ` `` or `⌘K`. It has Tab completion and arrow-key history. Commands: `help`, `ls`, `cd`, `cat`, `now`, `contact`, `projects`, `open`, `blog`, `read`, `lab`, `whoami`, `neofetch`, `date`, `echo`, `history`, `lang`, `qwq`, `debug`, `clear` and `exit`. `sudo rm -rf /` "crashes" the whole site, which then boots up again.
+- **Terminal**: press `` ` `` or `⌘K`. It has Tab completion and arrow-key history. Commands: `help`, `ls`, `cd`, `cat`, `now`, `contact`, `projects`, `open`, `blog`, `read`, `lab`, `whoami`, `neofetch`, `date`, `echo`, `history`, `lang`, `qwq`, `gbuffer`, `debug`, `clear` and `exit`. `gbuffer` shows the layers from figure 03 across the whole live site; `sudo rm -rf /` "crashes" the site, which then boots up again.
 - **Debug mode**: low-poly bugs fly at the camera out of the depths; click to squash them. Sixty seconds, three lives, combos score extra, the best score lives in `localStorage`, and QwQ cheers or cries in the corner.
 - **Konami code**: ↑↑↓↓←→←→BA throws a party.
-- **The lab**: two GPU toys. One is ink fluid, a standard stable-fluids solver with 20 Jacobi iterations per frame for pressure; the other is Gray–Scott reaction–diffusion, which grows coral and spot patterns.
+- **The lab**: two GPU toys. One is ink fluid, a standard stable-fluids solver: every frame it advects, adds forces, then runs 20 Jacobi iterations for pressure to make the velocity field divergence-free. The other is Gray–Scott reaction–diffusion: two "chemicals" feed on and diffuse into each other, growing coral and spot patterns.
 - **Sound**: synthesised live with WebAudio, with no audio files at all: the paper tear, the whoosh on cuts, keycap clicks, the shockwave thump, the game's sounds, and an ambient drone whose filter opens with scroll speed. It's muted by default and remembers your choice.
 
 ## The Next.js 16 side
 
 - **Routing and languages**: every page lives under `/[locale]`. Next 16 renamed middleware to `proxy.ts`; mine does two things: it sends visitors to `/zh` or `/en` by `Accept-Language`, and it 301s `www.qwq.my` to the bare domain.
 - **Caching**: `cacheComponents` is on, and the functions that read posts and GitHub data are marked `"use cache"`. Most of the home page is static, with a little dynamic content streamed in (Partial Prerendering).
-- **Posts**: each post is a folder with a `zh.mdx`, an `en.mdx`, or both; a missing language falls back to the other. Code is highlighted on the server with Shiki, and tables come from GFM. There's an RSS feed (`/en/feed.xml`) and generated share images.
+- **Posts**: each post is a folder with a `zh.mdx`, an `en.mdx`, or both; a missing language falls back to the other. Code is highlighted on the server with Shiki, and the live figures in this post are React components written straight into the MDX. There's an RSS feed (`/en/feed.xml`) and generated share images.
 - **While you read**, the 3D world doesn't go away: the paper fills the screen and QwQ shrinks into a corner to read along.
 
 ## Deployment
 
 The site runs on a server of my own, in Docker:
 
-- A three-stage build (dependencies, build, runtime) on `node:22-alpine`, with Next's `standalone` output; the final image is about 230 MB.
+- A three-stage build (dependencies, build, runtime) on `node:22-alpine`, with Next's `standalone` output (only the files needed at runtime); the final image is about 230 MB.
 - Two services in `docker compose`: `web` is the site and **publishes no ports to the host**; `tunnel` is cloudflared, which reaches `web:3000` over Docker's internal network.
+
+<Figure n="14" wide caption="The only way in is the Cloudflare Tunnel: the server dials out, so it needs no inbound port at all, and DNS only ever shows Cloudflare's IPs.">
+  <DeployDiagram lang="en" />
+</Figure>
 
 ```yaml
 services:
@@ -209,7 +361,7 @@ services:
       TUNNEL_URL: http://web:3000
 ```
 
-The only way in is the Cloudflare Tunnel. The server dials out, so no inbound port is open, and DNS only ever shows Cloudflare's IPs, so the origin's IP stays private. The server can't reach GitHub, so deploying means syncing the code over and running `docker compose up -d --build`.
+The usual way is to open port 443 on the server and point the domain at its IP, so anyone can look the IP up and hit the server directly. A tunnel turns that around: cloudflared on the server opens a few long-lived connections to Cloudflare, and visitors' requests travel in along them. The server can't reach GitHub, so deploying means syncing the code over and running `docker compose up -d --build`.
 
 ## Finally
 
