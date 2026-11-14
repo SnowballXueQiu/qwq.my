@@ -281,3 +281,33 @@ html.game-open .hud {
   from { height: 3px; }
   to { height: 12px; }
 }
+
+/* Blog figures: drawn like plates in a set of drawings. Wide ones break out of the
+   text column up to 920px, never past the frame. */
+.prose-qwq .fig {
+  margin-top: 2.2em;
+  margin-bottom: 2.2em;
+}
+.prose-qwq .fig-wide {
+  margin-left: calc(50% - min(460px, 50vw - var(--sheet-pad)));
+  margin-right: calc(50% - min(460px, 50vw - var(--sheet-pad)));
+}
+.prose-qwq .fig ul > li {
+  padding-left: 0;
+}
+.prose-qwq .fig ul > li::before {
+  content: none;
+}
+.prose-qwq .fig input[type="range"] {
+  accent-color: var(--accent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .flow-dash {
+    animation: flow-dash 1.8s linear infinite;
+  }
+}
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}

@@ -1,5 +1,17 @@
 import type { MDXComponents } from "next-mdx-remote-client/rsc";
 import Link from "next/link";
+import { BeatLab } from "./figures/BeatLab";
+import { Clip } from "./figures/Clip";
+import { DeployDiagram, PipelineDiagram } from "./figures/Diagrams";
+import { EdgeLab } from "./figures/EdgeLab";
+import { FaceGrid } from "./figures/FaceGrid";
+import { Figure } from "./figures/Figure";
+import { GBufferExplorer } from "./figures/GBufferExplorer";
+import { HalftoneLab } from "./figures/HalftoneLab";
+import { SceneClock } from "./figures/SceneClock";
+import { SimplifyLab } from "./figures/SimplifyLab";
+import { SplineLab } from "./figures/SplineLab";
+import { TearLab } from "./figures/TearLab";
 
 /** Slug for heading anchors; keeps CJK characters. */
 const slugify = (text: string) =>
@@ -19,6 +31,20 @@ const textOf = (node: React.ReactNode): string =>
         : "";
 
 export const mdxComponents: MDXComponents = {
+  // Figures for the posts: plates, clips recorded from the site, and live labs.
+  Figure,
+  Clip,
+  GBufferExplorer,
+  FaceGrid,
+  SceneClock,
+  EdgeLab,
+  HalftoneLab,
+  TearLab,
+  SplineLab,
+  BeatLab,
+  SimplifyLab,
+  PipelineDiagram,
+  DeployDiagram,
   h2: ({ children }) => {
     const id = slugify(textOf(children));
     return (
