@@ -3,11 +3,12 @@
 import { useRef, useState } from "react";
 
 /**
- * A highlighted code block (from rehype-pretty-code) with a copy button. The button rides
- * in a sticky strip, so it stays at the block's top-right corner on screen until the whole
- * block has scrolled away.
+ * A highlighted code block (from rehype-pretty-code) under a header bar: the language on
+ * the left, a copy button on the right. The bar is sticky inside the block, so once the
+ * block's top scrolls under the site header the bar stays pinned there, and it leaves
+ * with the block.
  */
-export function CodeFigure({ children, ...props }: React.ComponentProps<"figure">) {
+export function CodeFigure({ lang, children, ...props }: React.ComponentProps<"figure"> & { lang?: string }) {
   const ref = useRef<HTMLElement>(null);
   const [copied, setCopied] = useState(false);
 
@@ -22,9 +23,20 @@ export function CodeFigure({ children, ...props }: React.ComponentProps<"figure"
 
   return (
     <figure ref={ref} {...props}>
-      <div className="code-copy">
+      <div className="code-head">
+        <span>{lang && lang !== "plaintext" ? lang : "text"}</span>
         <button type="button" onClick={copy} aria-label={copied ? "Copied" : "Copy code"} data-copied={copied || undefined}>
-          {copied ? "✓ COPIED" : "COPY"}
+          <svg aria-hidden viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+            {copied ? (
+              <path d="M3 8.5 6.5 12 13 4.5" />
+            ) : (
+              <>
+                <rect x="5.5" y="5.5" width="8" height="8" />
+                <path d="M10.5 5.5v-3h-8v8h3" />
+              </>
+            )}
+          </svg>
+          {copied ? "COPIED" : "COPY"}
         </button>
       </div>
       {children}

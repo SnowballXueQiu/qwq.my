@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { clearSheets, getSceneTime, measureSheets } from "@/lib/sceneClock";
-import { sheets } from "@/lib/sheets";
+import { sheets, type SheetId } from "@/lib/sheets";
+import { landOnSheet } from "./beats";
 import { useSite } from "@/lib/store";
 
 /**
@@ -21,6 +22,18 @@ export function SheetTriggers() {
 
     measureSheets();
     update();
+    // Came in with #sheet (a link from another page): land on that sheet's beat, after
+    // the browser's own jump to the anchor.
+    const hash = location.hash.slice(1) as SheetId;
+    let land = 0;
+    if (sheets.includes(hash)) {
+      land = requestAnimationFrame(() => {
+        land = requestAnimationFrame(() => {
+          landOnSheet(hash);
+          update();
+        });
+      });
+    }
     const observer = new ResizeObserver(() => {
       measureSheets();
       update();
@@ -30,6 +43,7 @@ export function SheetTriggers() {
     ScrollTrigger.addEventListener("refresh", measureSheets);
     window.addEventListener("scroll", update, { passive: true });
     return () => {
+      cancelAnimationFrame(land);
       observer.disconnect();
       ScrollTrigger.removeEventListener("refresh", measureSheets);
       window.removeEventListener("scroll", update);

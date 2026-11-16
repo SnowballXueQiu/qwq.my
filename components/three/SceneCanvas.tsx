@@ -25,13 +25,11 @@ import { WritingStage } from "./stages/WritingStage";
 export default function SceneCanvas({
   onReady,
   titles,
-  postCount,
   github,
   locale,
 }: {
   onReady?: () => void;
   titles: Record<SheetId, string>;
-  postCount: number;
   github: { total: number; weeks: { date: string; count: number }[][] };
   locale: Locale;
 }) {
@@ -66,7 +64,7 @@ export default function SceneCanvas({
       <SkillsStage />
       <ProjectsStage />
       <TimelineStage github={github} locale={locale} />
-      <WritingStage postCount={postCount} />
+      <WritingStage />
       <FinaleStage />
       <OverviewMap titles={titles} />
       <BugGame />

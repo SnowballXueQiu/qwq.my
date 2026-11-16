@@ -171,7 +171,7 @@ html.game-open main {
 /* Long-form reading: a calm column over the paper. */
 .prose-qwq {
   font-size: 1.0625rem;
-  line-height: 1.85;
+  line-height: 1.9;
 }
 .prose-qwq > * + * {
   margin-top: 1.1em;
@@ -215,6 +215,18 @@ html.game-open main {
 .prose-qwq ol {
   list-style: decimal-leading-zero;
   padding-left: 1.8em;
+}
+/* Room between list items, and between the paragraphs, code and formulas inside one. */
+.prose-qwq li + li {
+  margin-top: 0.45em;
+}
+.prose-qwq li > * + * {
+  margin-top: 0.75em;
+}
+/* Inline code and inline formulas sit in the line without crowding the lines around. */
+.prose-qwq p,
+.prose-qwq li {
+  line-height: 1.95;
 }
 .prose-qwq blockquote {
   border-left: 3px solid var(--accent);
@@ -337,35 +349,76 @@ html.game-open main {
   padding: 0.05em 0.35em;
   background: color-mix(in oklab, var(--paper) 85%, var(--ink));
 }
-.prose-qwq figure[data-rehype-pretty-code-figure] pre,
+/* Code: one dark block with a header bar (language, copy) over the code. */
+.prose-qwq figure[data-rehype-pretty-code-figure] {
+  --gutter: 4.4ch;
+  margin: 1.6em 0 1.9em;
+  border: 1px solid #141414;
+  background: #141414;
+  color: #f1ede4;
+  box-shadow: 6px 6px 0 var(--accent);
+}
 .prose-qwq pre {
   border: 1px solid #141414;
   background: #141414;
   color: #f1ede4;
-  padding: 1em 1.2em 1em 0.4em;
+  padding: 0.9em 1.2em 1em 0.4em;
   font-family: var(--font-mono);
   font-size: 0.86rem;
   line-height: 1.7;
-  box-shadow: 6px 6px 0 var(--accent);
   /* Wrap like an editor's word wrap instead of scrolling sideways. */
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   tab-size: 4;
 }
-.prose-qwq figure[data-rehype-pretty-code-figure] {
-  --gutter: 4.4ch;
+.prose-qwq figure[data-rehype-pretty-code-figure] pre {
+  border: 0;
 }
 @media (max-width: 640px) {
   .prose-qwq figure[data-rehype-pretty-code-figure] {
-    --gutter: 3.4ch;
+    --gutter: 3.8ch;
   }
-  .prose-qwq figure[data-rehype-pretty-code-figure] pre {
+  .prose-qwq pre {
     font-size: 0.8rem;
   }
 }
+/* The header bar sticks just under the site's header while its block is on screen. */
+.prose-qwq .code-head {
+  position: sticky;
+  top: calc(var(--frame-inset) + var(--frame-gutter) + 46.5px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.5rem 0.4rem 1rem;
+  background: #141414;
+  border-bottom: 1px solid color-mix(in oklab, #f1ede4 14%, #141414);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, #f1ede4 55%, #141414);
+}
+.prose-qwq .code-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2rem 0.45rem;
+  color: #f1ede4;
+  letter-spacing: 0.12em;
+  transition: color 0.15s;
+}
+.prose-qwq .code-head button svg {
+  width: 1.15em;
+  height: 1.15em;
+}
+.prose-qwq .code-head button:hover,
+.prose-qwq .code-head button[data-copied] {
+  color: var(--accent);
+}
 /* One grid row per line: the newlines between lines don't render as blank rows, and a
    long line wraps inside the column instead of widening it. */
-.prose-qwq pre > code[data-line-numbers],
 .prose-qwq pre > code {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -384,44 +437,12 @@ html.game-open main {
   position: absolute;
   top: 0;
   left: 0;
-  width: calc(var(--gutter) - 1.6ch);
+  width: calc(var(--gutter) - 1.4ch);
   text-align: right;
   text-indent: 0;
+  white-space: nowrap;
   color: color-mix(in oklab, #f1ede4 30%, #141414);
   user-select: none;
-}
-/* The copy button rides a sticky strip: at the block's top-right, then pinned under the
-   header while the block scrolls past, and gone with the block. */
-.prose-qwq .code-copy {
-  position: sticky;
-  top: calc(var(--sheet-pad) + 62px);
-  z-index: 2;
-  height: 2.6rem;
-  margin-bottom: -2.6rem;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 0.5rem 0.5rem 0 0;
-  pointer-events: none;
-}
-.prose-qwq .code-copy button {
-  pointer-events: auto;
-  border: 1px solid color-mix(in oklab, #f1ede4 35%, #141414);
-  background: #141414;
-  color: #f1ede4;
-  padding: 0.2rem 0.55rem;
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.12em;
-  line-height: 1.4;
-  transition:
-    background-color 0.15s,
-    border-color 0.15s;
-}
-.prose-qwq .code-copy button:hover,
-.prose-qwq .code-copy button[data-copied] {
-  background: var(--accent);
-  border-color: var(--accent);
 }
 .prose-qwq table {
   width: 100%;

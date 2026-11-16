@@ -76,7 +76,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         </a>
         <SmoothScroll />
         <SoundBridge />
-        <SceneLoader titles={dict.sheets} postCount={posts.length} github={githubScene} locale={locale} />
+        <SceneLoader titles={dict.sheets} github={githubScene} locale={locale} />
         <ToneSync />
         <Suspense fallback={null}>
           <RouteSync />

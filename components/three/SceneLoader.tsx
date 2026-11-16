@@ -22,12 +22,10 @@ const noop = () => () => {};
 
 export function SceneLoader({
   titles,
-  postCount,
   github,
   locale,
 }: {
   titles: Record<SheetId, string>;
-  postCount: number;
   github: { total: number; weeks: { date: string; count: number }[][] };
   locale: Locale;
 }) {
@@ -51,7 +49,6 @@ export function SceneLoader({
     >
       <SceneCanvas
         titles={titles}
-        postCount={postCount}
         github={github}
         locale={locale}
         onReady={() =>

@@ -30,25 +30,29 @@ const pagePrint = /* glsl */ `
   printed = max(body * 0.55, max(title, rule));
 `;
 
-/** A loose fan of pages, one per post, drifting like a stack someone just threw up in the air. */
-export function WritingStage({ postCount }: { postCount: number }) {
+/** How many pages: a stand-in for "the writing", not one per post. */
+const COUNT = 5;
+/** Depth between neighbouring pages. Every page stays parallel to the others (they only
+ *  turn within their own plane, plus a small shared wobble), so this gap keeps them from
+ *  ever passing through each other. */
+const LAYER = 0.42;
+
+/** A fanned hand of pages, drifting like a stack someone just threw up in the air. */
+export function WritingStage() {
   const fit = useThree((s) => fitScale(s.size.width / s.size.height));
-  const count = Math.min(Math.max(postCount, 4), 9);
   const pages = useMemo(
     () =>
-      Array.from({ length: count }, (_, i) => {
-        const t = count > 1 ? i / (count - 1) : 0.5;
-        const a = (t - 0.5) * 1.6;
+      Array.from({ length: COUNT }, (_, i) => {
+        const k = i - (COUNT - 1) / 2;
         return {
-          x: Math.sin(a) * 6,
-          y: -0.6 + Math.cos(i * 1.7) * 0.6,
-          z: -Math.cos(a) * 3,
-          ry: -a * 0.8,
-          rz: (i % 2 ? 1 : -1) * 0.12,
+          x: k * 2.45,
+          y: -0.4 - k * k * 0.16,
+          z: 1 - Math.abs(k) * LAYER,
+          rz: -k * 0.09,
           seed: i * 3.1,
         };
       }),
-    [count],
+    [],
   );
   const geometry = useMemo(() => new BoxGeometry(PAGE_W, PAGE_H, 0.04), []);
   const materials = useMemo(
@@ -73,13 +77,16 @@ export function WritingStage({ postCount }: { postCount: number }) {
     const p = withOverview(cue(frameState.s, 4.85, 5.2, 5.55, 5.8));
     g.visible = p > 0 && p < 2;
     const t = state.clock.elapsedTime;
+    const arrive = Math.min(Math.max(p, 0), 1);
+    const leave = Math.max(p - 1, 0);
+    // The whole hand sways and tips as one, so the pages stay parallel.
+    g.rotation.set(Math.sin(t * 0.5) * 0.05 + (1 - arrive) * 1.2, Math.sin(t * 0.3) * 0.18, 0);
     g.children.forEach((child, i) => {
       const page = pages[i];
       if (!page) return;
-      const arrive = Math.min(Math.max(p, 0), 1);
-      const leave = Math.max(p - 1, 0);
-      child.position.set(page.x * arrive, page.y + (1 - arrive) * -8 + leave * 6, page.z + leave * 12);
-      child.rotation.set(Math.sin(t * 0.8 + i) * 0.08 + (1 - arrive) * 1.2, page.ry + leave * (i - count / 2), page.rz + Math.sin(t * 0.6 + i * 2) * 0.05);
+      // Leaving, they spread apart before they turn, so they never cut into each other.
+      child.position.set(page.x * arrive * (1 + leave * 2), page.y + (1 - arrive) * -8 + leave * 6, page.z + leave * 12);
+      child.rotation.set(0, 0, page.rz + Math.sin(t * 0.6 + i * 2) * 0.04 + leave * (i - (COUNT - 1) / 2) * 0.6);
     });
   });
 

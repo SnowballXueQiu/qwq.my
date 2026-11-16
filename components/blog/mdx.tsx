@@ -1,5 +1,6 @@
 import type { MDXComponents } from "next-mdx-remote-client/rsc";
 import Link from "next/link";
+import { isValidElement } from "react";
 import { BeatLab } from "./figures/BeatLab";
 import { Clip } from "./figures/Clip";
 import { DeployDiagram, PipelineDiagram } from "./figures/Diagrams";
@@ -14,6 +15,14 @@ import { SplineLab } from "./figures/SplineLab";
 import { TearLab } from "./figures/TearLab";
 import { CodeFigure } from "./CodeFigure";
 import { Callout, Gallery, ProseImage } from "./Prose";
+
+/** The language rehype-pretty-code tagged a block's <pre> with. */
+const languageOf = (children: React.ReactNode) => {
+  const pre = (Array.isArray(children) ? children : [children]).find(
+    (c): c is React.ReactElement<{ "data-language"?: string }> => isValidElement(c) && "data-language" in (c.props as object),
+  );
+  return pre?.props["data-language"];
+};
 
 /** Slug for heading anchors; keeps CJK characters. */
 const slugify = (text: string) =>
@@ -53,7 +62,7 @@ export const mdxComponents: MDXComponents = {
   img: ({ src, alt }) => (typeof src === "string" ? <ProseImage src={src} alt={alt} /> : null),
   // Highlighted code blocks get line numbers (CSS) and a copy button.
   figure: (props) =>
-    "data-rehype-pretty-code-figure" in props ? <CodeFigure {...props} /> : <figure {...props} />,
+    "data-rehype-pretty-code-figure" in props ? <CodeFigure lang={languageOf(props.children)} {...props} /> : <figure {...props} />,
   h2: ({ children }) => {
     const id = slugify(textOf(children));
     return (

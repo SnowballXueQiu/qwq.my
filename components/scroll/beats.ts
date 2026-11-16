@@ -348,16 +348,34 @@ export function installBeats(lenis: Lenis) {
   };
 }
 
-/** Glides to where a sheet's story starts: its first beat, the writing shot, the end. */
+/** Where a sheet's story starts: its first beat, the writing shot, the end. */
+const sheetStart = (id: SheetId) => {
+  const i = sheets.indexOf(id);
+  return [...beatTimes(), ...FLOW.catches, FLOW.end].sort((a, b) => a - b).find((b) => b >= i) ?? i;
+};
+
+/** Glides to where a sheet's story starts. */
 export function scrollToSheet(id: SheetId) {
   const lenis = getLenis();
   if (!active(lenis)) {
     scrollToTarget(`#${id}`);
     return;
   }
-  const i = sheets.indexOf(id);
-  const s = [...beatTimes(), ...FLOW.catches, FLOW.end].sort((a, b) => a - b).find((b) => b >= i) ?? i;
   state.queued = 0;
   dropPull();
-  glide(lenis, toY(lenis, s));
+  glide(lenis, toY(lenis, sheetStart(id)));
+}
+
+/**
+ * Arriving from another page at /#sheet: the browser has jumped to the top of the
+ * section; put the page on the sheet's first beat instead, at once.
+ */
+export function landOnSheet(id: SheetId) {
+  const lenis = getLenis();
+  if (!active(lenis)) return;
+  // Lenis may still hold the previous page's height; measure this one first.
+  lenis.resize();
+  state.queued = 0;
+  dropPull();
+  lenis.scrollTo(toY(lenis, sheetStart(id)), { immediate: true, force: true });
 }

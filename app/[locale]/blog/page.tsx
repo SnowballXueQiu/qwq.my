@@ -44,7 +44,7 @@ export default async function BlogIndex() {
                       {post.lang !== locale && <span className="mt-1 block text-accent">{post.lang.toUpperCase()}</span>}
                         {post.aigc && (
                           <span className="mt-2 block">
-                            <AigcBadge label={dict.blog.aigc} note={dict.blog.aigcNote} align="right" />
+                            <AigcBadge label={dict.blog.aigc} note={dict.blog.aigcNote} compact />
                           </span>
                         )}
                     </td>
