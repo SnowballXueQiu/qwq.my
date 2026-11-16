@@ -12,6 +12,7 @@ import { SceneClock } from "./figures/SceneClock";
 import { SimplifyLab } from "./figures/SimplifyLab";
 import { SplineLab } from "./figures/SplineLab";
 import { TearLab } from "./figures/TearLab";
+import { Callout, Gallery } from "./Prose";
 
 /** Slug for heading anchors; keeps CJK characters. */
 const slugify = (text: string) =>
@@ -45,6 +46,11 @@ export const mdxComponents: MDXComponents = {
   SimplifyLab,
   PipelineDiagram,
   DeployDiagram,
+  // Plain posts: photo sets and boxed asides.
+  Gallery,
+  Callout,
+  // eslint-disable-next-line @next/next/no-img-element
+  img: ({ src, alt }) => <img src={typeof src === "string" ? src : undefined} alt={alt ?? ""} loading="lazy" decoding="async" />,
   h2: ({ children }) => {
     const id = slugify(textOf(children));
     return (
@@ -58,8 +64,9 @@ export const mdxComponents: MDXComponents = {
       </h2>
     );
   },
+  // Pages go through the router; files (images, downloads) and other sites open on their own.
   a: ({ href = "", children }) =>
-    href.startsWith("/") || href.startsWith("#") ? (
+    (href.startsWith("/") && !/\.\w+$/.test(href)) || href.startsWith("#") ? (
       <Link href={href}>{children}</Link>
     ) : (
       <a href={href} target="_blank" rel="noreferrer">

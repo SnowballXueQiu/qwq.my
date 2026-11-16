@@ -137,7 +137,8 @@ export default async function Home() {
               {dict.writing.heading}
             </h2>
             <ol className="mt-3 divide-y divide-rule border-y border-rule">
-              {posts.map((post) => (
+              {/* The newest few; the rest are one click away on the index. */}
+              {posts.slice(0, 6).map((post) => (
                 <li data-line key={post.slug}>
                   <Link
                     href={`/${locale}/blog/${post.slug}`}

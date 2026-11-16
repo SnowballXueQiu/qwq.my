@@ -219,9 +219,50 @@ html.game-open main {
 .prose-qwq blockquote {
   border-left: 3px solid var(--accent);
   padding: 0.2em 0 0.2em 1em;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 700;
+  color: var(--ink-soft);
+}
+.prose-qwq blockquote > * + * {
+  margin-top: 0.8em;
+}
+.prose-qwq mark {
+  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  color: inherit;
+  padding: 0 0.15em;
+}
+.prose-qwq p > img,
+.prose-qwq p > a > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--ink);
+}
+.prose-qwq hr {
+  border: 0;
+  border-top: 1px dashed var(--rule);
+  margin: 2.2em 0;
+}
+.prose-qwq details {
+  border: 1px solid var(--ink);
+  padding: 0.6em 1em;
+}
+.prose-qwq summary {
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.prose-qwq details[open] > summary {
+  margin-bottom: 0.8em;
+}
+.prose-qwq .callout > div > * + * {
+  margin-top: 0.6em;
+}
+/* Wide formulas scroll on their own instead of pushing the page sideways. */
+.prose-qwq .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2em 0;
 }
 .prose-qwq :not(pre) > code {
   font-family: var(--font-mono);

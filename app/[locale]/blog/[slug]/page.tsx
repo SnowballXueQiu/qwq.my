@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { MDXRemote, type MDXRemoteOptions } from "next-mdx-remote-client/rsc";
+import rehypeKatex from "rehype-katex";
 import rehypePrettyCode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import "katex/dist/katex.min.css";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
 import { getPost, listPosts } from "@/lib/posts";
@@ -12,8 +15,12 @@ import { mdxComponents } from "@/components/blog/mdx";
 import { ReadingCompanion } from "@/components/blog/ReadingCompanion";
 
 const mdxOptions: MDXRemoteOptions["mdxOptions"] = {
-  remarkPlugins: [remarkGfm],
-  rehypePlugins: [[rehypePrettyCode, { theme: "vesper", keepBackground: false }]],
+  remarkPlugins: [remarkGfm, remarkMath],
+  // KaTeX: some posts write Chinese inside formulas, which strict mode would warn about.
+  rehypePlugins: [
+    [rehypeKatex, { strict: false }],
+    [rehypePrettyCode, { theme: "vesper", keepBackground: false }],
+  ],
 };
 
 /** Compiled once per source: MDX and Shiki do request-independent work that shouldn't rerun. */
