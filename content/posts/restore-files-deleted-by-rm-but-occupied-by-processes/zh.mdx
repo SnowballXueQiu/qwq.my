@@ -1,0 +1,119 @@
+---
+title: "恢复被 rm 删除但被进程占用的文件"
+date: 2024-07-13
+summary: "Termius 把 cd 补全成了 rm -rf。文件还被进程占着的话，可以从 /proc 里把它捞回来。"
+tags: [技术]
+---
+
+```
+发生在上个月一件非常不幸运的事情, 在我兴高采烈地
+准备为我的 Minecraft 服务器编写一个菜单系统的时候, 
+不知为何, Termius 就将原本想写的 'cd ./server'
+自动补全为 'rm -rf ./server',
+但最后还是有惊无险的恢复了 95% 以上的数据.
+```
+
+---
+
+## 适用范围
+
+- **文件仍然在缓存中运行**, 这也意味着在恢复期间, 你不能结束该进程或关机.
+
+## 步骤
+
+0. 误删除文件, 但该文件被进程占用.
+
+   ```bash
+   $ rm test.sh
+   ```
+
+1. 使用 lsof 命令列出已被删除但仍被进程占用的文件
+
+   ```bash
+   $ lsof | grep -i delete | grep speed
+   sh  6567  root  4r  REG  253,0  865  /home/test.sh(deleted)
+   ```
+
+   - 其中, 第一项 `sh` 为进程名, 第二项 `6567` 为进程号
+
+2. 进入进程目录
+
+   ```bash
+   $ cd /proc/6567/fd
+   $ ls -la
+   lr-x------. 1 root root 64 July 13 02:10 4 -> /home/test.sh (deleted)
+   ```
+
+   - 其中, 第九项 `4` 为文件描述符
+
+3. 恢复
+
+   ```bash
+   $ cat 4 > /home/test.sh
+   ```
+
+---
+
+## 恢复一个文件夹
+
+- 若同时被删除的是一个文件夹, 则像这样的手动恢复太过于繁琐, 特别是在小文件繁多的时候非常棘手, 那么, 我们不妨使用一个小程序来进行批量的恢复.
+
+- 在此之前, 您需要把 步骤 1 中所有需要恢复的文件导出为一个 log 文件, 这里并不过多赘述.
+
+    ```rust
+    use std::fs;
+    use std::io::Read;
+
+    fn main() {
+        let mut log_file = fs::File::open("/home/deleted_files.log").unwrap(); // 填写您待恢复的文件列表路径
+        let mut logs = String::new();
+        log_file.read_to_string(&mut logs).unwrap();
+        let mut command = String::new();
+        let mut paths = Vec::new();
+
+        let logs = logs.split("\n");
+
+        for log in logs {
+            let log = log.split_whitespace().collect::<Vec<&str>>();
+
+            if log.len() < 12 {
+                continue;
+            }
+
+            let number = log[8]; // 8 为文件描述符所处列数, 根据文件实际情况进行修改
+            let path = log[10]; //  10 为文件原始路径所在列数, 根据文件实际情况进行修改
+
+            if !path.starts_with("/home") { // 填写您恢复至的目标文件夹
+                continue;
+            }
+
+            println!("{}: {}", number, path);
+            command.push_str(format!("cat {} > ~/recovery{}\n", number, path).as_str());
+
+            let path = path.split("/").collect::<Vec<&str>>();
+            let path = path[..path.len() - 1].join("/");
+            let path = format!("~/recovery{}", path);
+
+            if !paths.contains(&path) {
+                paths.push(path);
+            }
+        }
+
+        let mut complete_cmd = String::new();
+
+        for path in paths {
+            complete_cmd.push_str(format!("mkdir -p {}\n", path).as_str());
+        }
+
+        println!("{}", complete_cmd);
+        complete_cmd.push_str(&command);
+
+        fs::write("recovery.sh", complete_cmd).unwrap();
+    }
+    ```
+
+- 最后运行生成好的 `recovery.sh` 即可恢复全部文件.
+
+---
+
+**注意**: 对于 Minecraft 服务器来说, 玩家数据是无法直接恢复的, 且本方法不能保证百分百找回全部被删除的文件, 还请各位及时做好文件备份, 不要让后悔成为误删的结果!

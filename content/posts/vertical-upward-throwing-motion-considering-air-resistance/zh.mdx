@@ -1,0 +1,145 @@
+---
+title: "考虑空气阻力的竖直上抛运动"
+date: 2024-07-11
+summary: "考虑空气阻力时，竖直上抛的小球最高能到多高？从牛顿第二定律一路积分到 H 的表达式。"
+tags: [数学]
+---
+
+## 背景知识
+- 竖直上抛运动: 指物体以某一初速度竖直向上抛出(不考虑空气阻力), 只在重力作用下所做的运动.
+
+- 若研究在竖直上抛运动中, 一小球所能达到的最高位置的距离 $ H $ 时, 则有一般思路:
+
+$$
+若初速度为 v_0, 重力加速度为 g, 则有 H = \frac{v_0^2}{2g} 
+$$
+
+- 那么, 如果将这个问题改变一下, 若考虑空气阻力对竖直上抛运动的影响, 那么结果会是如何呢?
+
+## 问题
+
+### 已知条件
+
+- 已知空气阻力的关系式 $ f = \frac{1}{2} c \rho S v^2 $, 其中 $ C $ 为空气阻力系数, $ \rho $ 为空气密度, $ S $ 物体迎风面积, $ v $ 为物体与空气的相对运动速度, 小球的质量为 $ m $, 重力加速度为 $ g $.
+
+- 设 $ H $ 为小球所能达到的最高位置的距离.
+
+- 不考虑 $ c, \rho, S $ 对本题目的影响, 且小球直径 $ d \ll H $.
+
+## 解答
+
+- 设水平向下为小球运动的正方向, 根据牛顿第二定律 $ F = ma $, 则有 $ ma = mg + \frac{1}{2} c \rho S v^2 $,
+
+- 令 $ \lambda = \frac{1}{2} c \rho S $, 即 $ ma = mg + \lambda v^2 $,
+
+$$
+\begin{align}
+
+    \because a &= \dot{v} = \frac{dv}{dt} \\
+    \therefore m \frac{dv}{dt} &= mg + \lambda v^2 \\
+    \implies \frac{dv}{dt} &= g + \frac{\lambda}{m} v^2 \\
+
+\end{align}
+$$
+
+- 令 $ \frac{\lambda}{m} = \mu $,
+
+$$
+\begin{align}
+
+    \therefore \frac{dv}{dt} &= g + \mu v^2 \\
+    \implies \frac{dv}{g + \mu v^2} &= dt \\
+    \implies \int
+    \frac{dv}{g + \mu v^2}
+    &= 
+    \int
+    dt + C \\
+    \implies \frac{1}{g} \int
+    \frac{dv}{1 + \frac{\mu}{g}v^2}
+    &=
+    t + C \\
+    \implies \frac{1}{g} \int
+    \frac{\frac{\sqrt{g}}{\sqrt{\mu}}d(\frac{\sqrt{\mu}}{\sqrt{g}}v)}{1 + (\frac{\sqrt{\mu}}{\sqrt{g}}v)^2}
+    &=
+    t + C \\
+    \implies \frac{1}{g}\frac{\sqrt{g}}{\sqrt{\mu}}\arctan(\sqrt{\frac{\mu}{g}}v) &= t + C \\
+    \implies \sqrt{\frac{1}{\mu g}}\arctan(\sqrt{\frac{\mu}{g}}v) &= t + C (*)
+
+\end{align}
+$$
+
+- 当 $ t = 0 $ 时, $ v = -v_0 $, 有:
+
+$$
+\begin{align}
+
+    C &= -\sqrt{\frac{1}{\mu g}}\arctan(\sqrt{\frac{\mu}{g}}v_0) (**)
+
+\end{align}
+$$
+
+- 当 $ v = 0 $ 时, 有:
+
+$$
+\begin{align}
+
+    t &= \sqrt{\frac{1}{\mu g}}\arctan(\sqrt{\frac{\mu}{g}}v_0)
+
+\end{align}
+$$
+
+- 若欲将 $ (*) $ 转换为 $ v $ 与 $ t $ 之间的显式表达式, 则需:
+
+$$
+\begin{align}
+
+    将 (*) 变换, 得: \arctan(\sqrt{\frac{\mu}{g}}v) &= \sqrt{\mu g} (t + C) \\
+    \implies \sqrt{\frac{\mu}{g}}v &= \tan[\sqrt{\mu g} (t + C)] \\
+    \implies v &= \sqrt{\frac{g}{\mu}}\tan[\sqrt{\mu g} (t + C)]
+
+\end{align}
+$$
+
+- 又 $ \because v = \dot{x} = \frac{dx}{dt} $, 有:
+
+$$
+\begin{align}
+
+    \frac{dx}{dt} &= \sqrt{\frac{g}{\mu}}\tan[\sqrt{\mu g} (t + C)] \\
+    \implies \int
+    \frac{dx}{dt}dt &=
+    \sqrt{\frac{g}{\mu}} \int
+    \tan[\sqrt{\mu g} (t + C)]dt + C' \\
+    \implies x &= \sqrt{\frac{g}{\mu}} \int
+    \frac{\sin[\sqrt{\mu g} (t + C)]}{\cos[\sqrt{\mu g} (t + C)]}dt + C' \\
+    \implies x &= -\sqrt{\frac{g}{\mu}} \int
+    \frac{dcos[\sqrt{\mu g} (t + C)]}{\sqrt{\mu g} (t + C)} + C' \\
+    \implies x &= -\frac{1}{\mu} \ln{|\cos[\sqrt{\mu g}(t + C)]|} + C'
+
+\end{align}
+$$
+
+- 由 $ H = x_{|t = \sqrt{\frac{1}{\mu g}}\arctan(\sqrt{\frac{\mu}{g}}v_0)} - x_{|t = 0}$,
+
+- 注意到, 其中 $ t + C = 0 $, 则,
+
+$$
+\begin{align}
+
+    H = 0 - C' - [-\frac{1}{\mu} \ln{|\cos(C\sqrt{\mu g})|} + C'] \\
+    \implies H = \frac{1}{\mu} \ln{|\cos(C\sqrt{\mu g})|} + C' (***)
+
+\end{align}
+$$
+
+- 将 $ (**), \lambda = \mu m = \frac{1}{2}c \rho S v^2 $, 代入 $ (***) $ 并整理, 得:
+
+$$
+\begin{align}
+
+    H &= \frac{2m}{c \rho S}\ln{|\cos[\arctan(\frac{c \rho S v_0}{2mg})]|}
+
+\end{align}
+$$
+
+- 上式即为所求.

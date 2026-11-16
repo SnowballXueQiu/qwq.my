@@ -1,0 +1,101 @@
+---
+title: "不要过多的在意你的服务器核心与 JDK 发行版"
+date: 2024-07-13
+summary: "选什么核心、用哪个 JDK，其实无关紧要。真正的服主需要着眼于服务器的内容、平衡、社群、玩家。"
+tags: [Minecraft]
+---
+
+近期在苦力怕论坛服务器插件板块群 (群号 332359582) 被询问最多的问题莫过于：我要选什么服务器核心？Folia 可以吗？我是用 Oracle 还是 Zulu？性能报告分析用 Spark 还是 Timing？等等诸如此类的实际上其实是无关紧要的问题。
+
+在看到这些提问之后，我意识到一个问题，随着我的世界开服成本的逐渐降低，有着越来越多的萌新也想要尝试开服，想着开一个服务器火爆全网，正因如此，他们想要把服务器做得更好，但是也正因如此，他们将关注点放在了错误的地方上。真正的服主需要着眼于服务器的内容、平衡、社群、玩家，那么接下来我就要向你解释，为什么不要过多的关注其他的内容。
+
+## 服务端的选择
+
+目前市面上的 Java 服务端主要分为以下几类：
+
+| 类型         | 名称                                             | 适用范围                                     |
+| ------------ | ------------------------------------------------ | -------------------------------------------- |
+| 原版服务端   | Vanilla                                          | 我的世界官方服务端，不能加载插件或模组       |
+| 纯插件服务端 | Bukkit、Spigot、Paper、PurPur、Pufferfish、Folia | 只可以加载服务器插件的服务端，不可以加载模组 |
+| 纯模组服务端 | Forge、Fabric、SpongeForge                       | 只可以加载模组的服务端，不可以加载服务端插件 |
+| 混合服务端   | CatServer、Mohist、Banner、Arclight              | 可同时加载服务端插件与模组                   |
+
+其中，争议最多的话题就是，我是否应该使用 Folia？这个问题的提出，显然是受到了它以多线程所著名的影响，但是，让我们来重新阅读一下 [Folia 官网](https://papermc.io/software/folia) 对其服务端的定位：
+
+
+```text
+Folia is designed to address the constant bottleneck of the Minecraft server running on a single thread causing performance issues. It is by no means a drop-in replacement for Paper.
+---------
+Folia 旨在解决 Minecraft 服务器在单个线程上运行导致性能瓶颈的问题。它绝不是 Paper 的替代品。
+```
+
+再细细品味一下这句话，你还认为你真的需要 Folia 吗？“它绝不是 Paper 的替代品。”简明扼要地指出了其与 Paper 服务端是不同的，具体来说，从游玩体验、插件适配、稳定性上来说与 Paper 服务端都相差很大，并且它破坏了很多原版特性，难道你真的愿意为了所谓的极致性能去放弃上述所有内容吗？
+
+让我们再来看看 Folia 官方所推荐的配置：
+
+```text
+What hardware will Folia run best on?
+Ideally, at least 16 cores (not threads).
+---------
+Folia 在什么硬件上运行得最好？
+理想情况下，至少有16个内核（不是线程）。
+```
+
+所以敢问你的服务器硬件配置真的达到了推荐配置吗？你又如何保证在低于推荐配置的情况下性能仍然比传统 Paper 服务端好？
+
+## JDK 发行版的选择
+
+`JDK (Java Development Kit)，Java 开发套件，是提供开发者使用的套件，JDK 内 包含了 JRE (Java Runtime Environment)，而 JVM (Java Virturl Machine) 是 JRE 的一部分，所有 Java 程序都基于 JVM 运行。`
+
+目前，在  Minecraft 服务器中较为主流的 JDK 发行版包括：OpenJDK、Azul Zulu、GraalVM、Oracle JDK等。
+
+其中，我以 OpenJDK 与 Azul Zulu 这两个争议最多的发行版为例子进行测试，测试脚本如下：
+
+<details>
+<summary>点击预览</summary>
+
+```bash
+#! /bin/bash
+
+JVM_OPENJDK=openjdk-17.0.2
+JVM_ZULU=zulu17.34.19-ca-jdk17.0.3-linux_x64
+
+sudo rm -rf /home/server/jdks/test/logs*
+
+for JVM_NAME in $JVM_OPENJDK $JVM_TEMURIN $JVM_SEMERU $JVM_ZULU $JVM_ZING; do
+
+    echo '========================================'
+    echo "Start testing $JVM_NAME"
+    echo '========================================'
+
+    sudo rm -rf /home/server/jdks/test/world
+
+    mkdir logs
+    sudo nice -n -20 /home/server/jdks/$JVM_NAME/bin/java \
+              -Xmx6G -Xms6G -Xlog:gc:logs/gc.log -Xlog:gc* \
+              -jar server.jar nogui | tee logs/full.log
+
+    chmod 777 -R /home/server/jdks/test/logs
+    mv -v /home/server/jdks/test/logs /home/server/jdks/test/logs-$JVM_NAME
+
+    echo '========================================'
+    echo "Finish testing $JVM_NAME"
+    echo '========================================'
+
+done
+```
+
+</details>
+
+测试结果如下：
+
+|JDK|Chunky 用时|平均暂停时间 /ms|平均 GC 间隔 /s|
+|:---:|:---:|:---:|:---:|
+|OpenJDK|9'01''|50.6|8|
+|Azul Zulu|9'15''|53.4|7|
+
+不难看出，平时这两组争议最多的发行版，最终测试结果也相差无几，在实际使用与体验中，很难察觉其中的不同。
+
+## 总结
+
+综上所述，不要过多关注你的服务器核心与 JDK 发行版等这类问题上，而应把更多的精力放在游戏内容的丰富和优化上。毕竟，玩家们真正关心的是游戏的趣味性与体验，而不是你选择了哪个技术方案。希望你能把更多的时间投入到服务器的内容建设上，让你的玩家们在你的服务器中收获更多的乐趣和回忆。
