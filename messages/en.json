@@ -97,7 +97,9 @@
     "fallback": "This post isn't available in English yet; here is the original.",
     "more": "More posts",
     "older": "Older",
-    "newer": "Newer"
+    "newer": "Newer",
+    "aigc": "AIGC",
+    "aigcNote": "Written by AI (Claude) from this site's source code; the numbers, parameters and code in it are taken from that source."
   },
   "video": {
     "title": "2026 in review",

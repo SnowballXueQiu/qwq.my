@@ -229,11 +229,68 @@ html.game-open main {
   color: inherit;
   padding: 0 0.15em;
 }
-.prose-qwq p > img,
-.prose-qwq p > a > img {
+/* A photo: as wide as the column at most, and never taller than most of a screen. */
+.prose-qwq .prose-img {
+  display: block;
+  text-align: center;
+}
+.prose-qwq .prose-img button {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+}
+.prose-qwq .prose-img img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(72vh, 640px);
+  border: 1px solid var(--ink);
+  background: var(--rule-faint);
+}
+.prose-qwq .prose-img-caption,
+.prose-qwq .gallery-caption {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.prose-qwq .prose-img-caption {
+  display: block;
+  margin-top: 0.4em;
+}
+/* Justified rows (see Gallery in components/blog/Prose.tsx). */
+.prose-qwq .gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.prose-qwq .gallery-item {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--ink);
+  background: var(--rule-faint);
+  overflow: hidden;
+}
+.prose-qwq .gallery-item img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.prose-qwq .gallery-item:hover img {
+  transform: scale(1.03);
+}
+.prose-qwq .gallery-caption {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 0 0.4em;
   border: 1px solid var(--ink);
 }
 .prose-qwq hr {
@@ -258,11 +315,20 @@ html.game-open main {
 .prose-qwq .callout > div > * + * {
   margin-top: 0.6em;
 }
-/* Wide formulas scroll on their own instead of pushing the page sideways. */
+/* KaTeX's default 1.21em towers over CJK text; bring formulas back to the line's size. */
+.prose-qwq .katex {
+  font-size: 1.08em;
+}
+/* Wide formulas scroll on their own (no visible bar) instead of pushing the page sideways. */
 .prose-qwq .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.2em 0;
+  scrollbar-width: none;
+  padding: 0.35em 0;
+  margin: 1.4em 0;
+}
+.prose-qwq .katex-display::-webkit-scrollbar {
+  display: none;
 }
 .prose-qwq :not(pre) > code {
   font-family: var(--font-mono);
@@ -273,15 +339,89 @@ html.game-open main {
 }
 .prose-qwq figure[data-rehype-pretty-code-figure] pre,
 .prose-qwq pre {
-  overflow-x: auto;
   border: 1px solid #141414;
   background: #141414;
   color: #f1ede4;
-  padding: 1em 1.2em;
+  padding: 1em 1.2em 1em 0.4em;
   font-family: var(--font-mono);
   font-size: 0.86rem;
   line-height: 1.7;
   box-shadow: 6px 6px 0 var(--accent);
+  /* Wrap like an editor's word wrap instead of scrolling sideways. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+}
+.prose-qwq figure[data-rehype-pretty-code-figure] {
+  --gutter: 4.4ch;
+}
+@media (max-width: 640px) {
+  .prose-qwq figure[data-rehype-pretty-code-figure] {
+    --gutter: 3.4ch;
+  }
+  .prose-qwq figure[data-rehype-pretty-code-figure] pre {
+    font-size: 0.8rem;
+  }
+}
+/* One grid row per line: the newlines between lines don't render as blank rows, and a
+   long line wraps inside the column instead of widening it. */
+.prose-qwq pre > code[data-line-numbers],
+.prose-qwq pre > code {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  counter-reset: line;
+}
+/* A wrapped line continues under its own first character (indent comes from the
+   highlighter, in columns); the line number sits in the gutter to the left. */
+.prose-qwq pre [data-line] {
+  position: relative;
+  padding-left: calc(var(--gutter) + var(--indent, 0ch));
+  text-indent: calc(-1 * var(--indent, 0ch));
+}
+.prose-qwq pre [data-line]::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--gutter) - 1.6ch);
+  text-align: right;
+  text-indent: 0;
+  color: color-mix(in oklab, #f1ede4 30%, #141414);
+  user-select: none;
+}
+/* The copy button rides a sticky strip: at the block's top-right, then pinned under the
+   header while the block scrolls past, and gone with the block. */
+.prose-qwq .code-copy {
+  position: sticky;
+  top: calc(var(--sheet-pad) + 62px);
+  z-index: 2;
+  height: 2.6rem;
+  margin-bottom: -2.6rem;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0.5rem 0.5rem 0 0;
+  pointer-events: none;
+}
+.prose-qwq .code-copy button {
+  pointer-events: auto;
+  border: 1px solid color-mix(in oklab, #f1ede4 35%, #141414);
+  background: #141414;
+  color: #f1ede4;
+  padding: 0.2rem 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+.prose-qwq .code-copy button:hover,
+.prose-qwq .code-copy button[data-copied] {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .prose-qwq table {
   width: 100%;
@@ -345,5 +485,58 @@ html.game-open .hud {
 @keyframes flow-dash {
   to {
     stroke-dashoffset: -20;
+  }
+}
+
+/* Page changes (components/ui/PageTransition.tsx): the old sheet lifts away, the next is
+   drawn on from the top edge down. Only the page moves; the scene and frame (root) hold
+   still. A wipe, not a flash. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+/* The drawing frame and title block stay put, above the page. */
+::view-transition-group(frame) {
+  z-index: 50;
+  animation: none;
+}
+::view-transition-old(frame) {
+  display: none;
+}
+::view-transition-new(frame) {
+  animation: none;
+}
+::view-transition-old(.sheet-out) {
+  animation: 170ms cubic-bezier(0.4, 0, 1, 1) both sheet-lift;
+}
+::view-transition-new(.sheet-in) {
+  animation: 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 110ms both sheet-draw;
+}
+@keyframes sheet-lift {
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+@keyframes sheet-draw {
+  from {
+    opacity: 0.2;
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation: none !important;
   }
 }

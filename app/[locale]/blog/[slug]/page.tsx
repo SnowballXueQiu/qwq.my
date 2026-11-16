@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { MDXRemote, type MDXRemoteOptions } from "next-mdx-remote-client/rsc";
 import rehypeKatex from "rehype-katex";
-import rehypePrettyCode from "rehype-pretty-code";
+import rehypePrettyCode, { type LineElement, type Options as PrettyCodeOptions } from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import "katex/dist/katex.min.css";
@@ -12,14 +12,34 @@ import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
 import { getPost, listPosts } from "@/lib/posts";
 import { mdxComponents } from "@/components/blog/mdx";
+import { AigcBadge } from "@/components/blog/AigcBadge";
 import { ReadingCompanion } from "@/components/blog/ReadingCompanion";
+import { PageTransition } from "@/components/ui/PageTransition";
+
+type HastNode = { type: string; value?: string; children?: HastNode[] };
+const textOf = (n: HastNode): string => n.value ?? (n.children ?? []).map(textOf).join("");
+
+/**
+ * Code wraps instead of scrolling, the way an editor's word wrap does: a wrapped line
+ * continues at its own indentation. Each line carries its indent (in columns) for the CSS.
+ */
+const prettyCode: PrettyCodeOptions = {
+  theme: "vesper",
+  keepBackground: false,
+  defaultLang: { block: "plaintext" },
+  onVisitLine(line: LineElement) {
+    const lead = /^[ \t]*/.exec(textOf(line as HastNode))![0];
+    const columns = [...lead].reduce((n, c) => (c === "\t" ? n + 4 - (n % 4) : n + 1), 0);
+    if (columns) line.properties.style = `--indent:${columns}ch`;
+  },
+};
 
 const mdxOptions: MDXRemoteOptions["mdxOptions"] = {
   remarkPlugins: [remarkGfm, remarkMath],
   // KaTeX: some posts write Chinese inside formulas, which strict mode would warn about.
   rehypePlugins: [
     [rehypeKatex, { strict: false }],
-    [rehypePrettyCode, { theme: "vesper", keepBackground: false }],
+    [rehypePrettyCode, prettyCode],
   ],
 };
 
@@ -62,39 +82,45 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
   const newer = posts[index - 1];
   const older = posts[index + 1];
 
+  // Keyed by post: going from one post to the next is a page change too.
   return (
-    <main id="main" className="relative z-10 min-h-svh" style={{ padding: "calc(var(--sheet-pad) + 56px) var(--sheet-pad) 160px" }}>
-      <ReadingCompanion />
-      <article lang={post.meta.lang === "zh" ? "zh-CN" : "en"} className="mx-auto max-w-[680px]">
-        <Link href={`/${locale}/blog`} className="label text-ink-soft hover:text-accent">
-          ← {dict.blog.back}
-        </Link>
-        <p className="label mt-8 text-accent">
-          DWG · BLOG-{String(posts.length - index).padStart(3, "0")} · {post.meta.date}
-        </p>
-        <h1 className="font-display mt-3 text-[clamp(2.4rem,6vw,4.4rem)] font-black leading-[0.95] tracking-[-0.03em]">
-          {post.meta.title}
-        </h1>
-        <p className="label mt-4 text-ink-soft">{post.meta.tags.join(" · ")}</p>
-        {post.meta.lang !== locale && (
-          <p className="mt-6 border-l-2 border-accent bg-paper/80 py-2 pl-3 text-sm text-ink-soft">{dict.blog.fallback}</p>
-        )}
-        <div className="prose-qwq mt-10">
-          <PostBody source={post.source} />
-        </div>
-        <nav className="mt-16 grid gap-px border border-ink bg-ink sm:grid-cols-2" aria-label={dict.blog.more}>
-          {[older, newer].map((p, i) =>
-            p ? (
-              <Link key={p.slug} href={`/${locale}/blog/${p.slug}`} className={`bg-paper p-4 hover:text-accent ${i ? "sm:text-right" : ""}`}>
-                <span className="label block text-ink-soft">{i ? dict.blog.newer : dict.blog.older}</span>
-                <span className="mt-1 block font-semibold">{p.title}</span>
-              </Link>
-            ) : (
-              <span key={i} className="bg-paper p-4" />
-            ),
+    <PageTransition key={slug}>
+      <main id="main" className="relative z-10 min-h-svh" style={{ padding: "calc(var(--sheet-pad) + 56px) var(--sheet-pad) 160px" }}>
+        <ReadingCompanion />
+        <article lang={post.meta.lang === "zh" ? "zh-CN" : "en"} className="mx-auto max-w-[680px]">
+          <Link href={`/${locale}/blog`} className="label text-ink-soft hover:text-accent">
+            ← {dict.blog.back}
+          </Link>
+          <p className="label mt-8 text-accent">
+            DWG · BLOG-{String(posts.length - index).padStart(3, "0")} · {post.meta.date}
+          </p>
+          <h1 className="font-display mt-3 text-[clamp(2.4rem,6vw,4.4rem)] font-black leading-[0.95] tracking-[-0.03em]">
+            {post.meta.title}
+          </h1>
+          <p className="label mt-4 flex flex-wrap items-center gap-3 text-ink-soft">
+              <span>{post.meta.tags.join(" · ")}</span>
+              {post.meta.aigc && <AigcBadge label={dict.blog.aigc} note={dict.blog.aigcNote} />}
+            </p>
+          {post.meta.lang !== locale && (
+            <p className="mt-6 border-l-2 border-accent bg-paper/80 py-2 pl-3 text-sm text-ink-soft">{dict.blog.fallback}</p>
           )}
-        </nav>
-      </article>
-    </main>
+          <div className="prose-qwq mt-10">
+            <PostBody source={post.source} />
+          </div>
+          <nav className="mt-16 grid gap-px border border-ink bg-ink sm:grid-cols-2" aria-label={dict.blog.more}>
+            {[older, newer].map((p, i) =>
+              p ? (
+                <Link key={p.slug} href={`/${locale}/blog/${p.slug}`} className={`bg-paper p-4 hover:text-accent ${i ? "sm:text-right" : ""}`}>
+                  <span className="label block text-ink-soft">{i ? dict.blog.newer : dict.blog.older}</span>
+                  <span className="mt-1 block font-semibold">{p.title}</span>
+                </Link>
+              ) : (
+                <span key={i} className="bg-paper p-4" />
+              ),
+            )}
+          </nav>
+        </article>
+      </main>
+    </PageTransition>
   );
 }

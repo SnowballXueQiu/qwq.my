@@ -12,7 +12,8 @@ import { SceneClock } from "./figures/SceneClock";
 import { SimplifyLab } from "./figures/SimplifyLab";
 import { SplineLab } from "./figures/SplineLab";
 import { TearLab } from "./figures/TearLab";
-import { Callout, Gallery } from "./Prose";
+import { CodeFigure } from "./CodeFigure";
+import { Callout, Gallery, ProseImage } from "./Prose";
 
 /** Slug for heading anchors; keeps CJK characters. */
 const slugify = (text: string) =>
@@ -49,8 +50,10 @@ export const mdxComponents: MDXComponents = {
   // Plain posts: photo sets and boxed asides.
   Gallery,
   Callout,
-  // eslint-disable-next-line @next/next/no-img-element
-  img: ({ src, alt }) => <img src={typeof src === "string" ? src : undefined} alt={alt ?? ""} loading="lazy" decoding="async" />,
+  img: ({ src, alt }) => (typeof src === "string" ? <ProseImage src={src} alt={alt} /> : null),
+  // Highlighted code blocks get line numbers (CSS) and a copy button.
+  figure: (props) =>
+    "data-rehype-pretty-code-figure" in props ? <CodeFigure {...props} /> : <figure {...props} />,
   h2: ({ children }) => {
     const id = slugify(textOf(children));
     return (

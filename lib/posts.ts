@@ -7,7 +7,7 @@ import type { PostMeta } from "./postTypes";
 
 export type { PostMeta };
 
-type Frontmatter = { title?: string; date?: string | Date; summary?: string; tags?: string[] };
+type Frontmatter = { title?: string; date?: string | Date; summary?: string; tags?: string[]; aigc?: boolean };
 
 const ROOT = path.join(process.cwd(), "content", "posts");
 
@@ -24,7 +24,7 @@ async function readSource(slug: string, locale: Locale) {
 
 function toMeta(slug: string, lang: Locale, fm: Frontmatter): PostMeta {
   const date = fm.date instanceof Date ? fm.date.toISOString().slice(0, 10) : String(fm.date ?? "");
-  return { slug, lang, date, title: fm.title ?? slug, summary: fm.summary ?? "", tags: fm.tags ?? [] };
+  return { slug, lang, date, title: fm.title ?? slug, summary: fm.summary ?? "", tags: fm.tags ?? [], aigc: fm.aigc === true };
 }
 
 export async function listPosts(locale: Locale): Promise<PostMeta[]> {

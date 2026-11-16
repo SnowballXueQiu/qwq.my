@@ -61,7 +61,8 @@ export function SheetFrame({
   author: string;
 }) {
   return (
-    <div className="pointer-events-none fixed inset-0 z-40 text-ink">
+    // Named so page changes leave it in place, above the sheet being drawn in.
+    <div className="pointer-events-none fixed inset-0 z-40 text-ink" style={{ viewTransitionName: "frame" }}>
       <div className="absolute border border-ink" style={{ inset: "var(--frame-inset)" }} />
       <ZoneStrip side="top" />
       <ZoneStrip side="bottom" />

@@ -16,6 +16,8 @@ export type FxEvents = {
   sound: { name: string; intensity?: number };
   /** Show one G-buffer channel or composite stage (0 = the drawing). */
   view: { mode: number };
+  /** The route changed: the scroll jump that comes with it isn't motion to react to. */
+  navigate: Record<string, never>;
   /** A bug was squashed at a screen position. */
   hit: { x: number; y: number; points: number; combo: number };
 };

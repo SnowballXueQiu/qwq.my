@@ -141,7 +141,7 @@ export function Director() {
       pos: new Vector3(),
       target: new Vector3(),
       // Effects requested from outside the canvas, as wall-clock deadlines.
-      fx: { glitchUntil: 0, glitchAmount: 0, menu: false, partyUntil: 0 },
+      fx: { glitchUntil: 0, glitchAmount: 0, menu: false, partyUntil: 0, quietUntil: 0 },
     }),
     [],
   );
@@ -157,6 +157,11 @@ export function Director() {
       }),
       on("view", ({ mode }) => {
         pipelineTarget.view = mode;
+      }),
+      // A page change jumps the scroll (and the scene clock with it). That's a cut to a new
+      // page, not a dash through this one: no speed lines, no glitch, no whoosh.
+      on("navigate", () => {
+        fx.quietUntil = performance.now() + 800;
       }),
       on("glitch", ({ duration = 0.6, amount = 1 }) => {
         fx.glitchUntil = performance.now() + duration * 1000;
@@ -184,8 +189,9 @@ export function Director() {
     frameState.cameraZ = pos.z;
 
     // Speed: Lenis velocity, smoothed, as a 0–1 magnitude.
-    const v = calm ? 0 : getScrollVelocity();
-    frameState.velocity += (v - frameState.velocity) * Math.min(delta * 4, 1);
+    const quiet = performance.now() < fx.quietUntil;
+    const v = calm || quiet ? 0 : getScrollVelocity();
+    frameState.velocity = quiet ? 0 : frameState.velocity + (v - frameState.velocity) * Math.min(delta * 4, 1);
     frameState.speed = Math.min(Math.abs(frameState.velocity) / 40, 1);
     const sinceCut = state.clock.elapsedTime - cut.at;
     frameState.sinceCut = sinceCut;
@@ -279,7 +285,8 @@ export function Director() {
     // The sheet starts to give way.
     if (cut.last >= 0 && cut.last < 0.32 && s >= 0.32) play("tear");
     setAmbientSpeed(frameState.speed);
-    cut.last = s;
+    // While a page change settles, don't count the jump as crossing any cuts.
+    cut.last = quiet ? -1 : s;
     const since = now - cut.at;
     const wall = performance.now();
     // No strobing for people who asked the OS for less motion.

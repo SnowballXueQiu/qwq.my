@@ -97,7 +97,9 @@
     "fallback": "这篇文章还没有中文版，下面是原文。",
     "more": "更多文章",
     "older": "上一篇",
-    "newer": "下一篇"
+    "newer": "下一篇",
+    "aigc": "AIGC",
+    "aigcNote": "本文由 AI（Claude）根据本站源码撰写，文中的数值、参数和代码都取自源码。"
   },
   "video": {
     "title": "2026 年度回顾",
