@@ -56,10 +56,12 @@ export function SheetFrame({
   locale,
   dict,
   author,
+  posts,
 }: {
   locale: Locale;
   dict: Dictionary;
   author: string;
+  posts: { slug: string; title: string }[];
 }) {
   return (
     // Named so page changes leave it in place, above the sheet being drawn in.
@@ -101,7 +103,7 @@ export function SheetFrame({
 
         <div className="flex justify-end">
           <Suspense fallback={null}>
-            <TitleBlock locale={locale} author={author} labels={dict.titleBlock} titles={dict.sheets} />
+            <TitleBlock locale={locale} author={author} labels={dict.titleBlock} titles={dict.sheets} posts={posts} labLabel={dict.lab.nav} />
           </Suspense>
         </div>
       </div>

@@ -15,24 +15,49 @@ type Labels = {
   progress: string;
 };
 
-/** The drawing's title block: who drew it, which sheet you're on, how far along. */
+type Named = { number: string; title: string; dwg: string; sheet: string; long?: boolean };
+
+/**
+ * The drawing's title block: who drew it, which sheet you're on, how far along. On the
+ * home page that's one of its sheets; elsewhere it names the page: the blog (sheet 06,
+ * where the home page lists the writing), a post by its BLOG number, or the lab.
+ */
 export function TitleBlock({
   locale,
   author,
   labels,
   titles,
+  posts,
+  labLabel,
 }: {
   locale: Locale;
   author: string;
   labels: Labels;
   titles: Record<SheetId, string>;
+  /** Newest first, as the blog lists them. */
+  posts: { slug: string; title: string }[];
+  labLabel: string;
 }) {
-  const isHome = usePathname() === `/${locale}`;
+  const [, section, slug] = usePathname().slice(locale.length + 1).split("/");
   const sheet = useSite((s) => s.sheet);
   const percent = useSite((s) => Math.round(s.progress * 100));
-  const id = isHome ? sheets[sheet] : null;
-  const title = id ? titles[id] : "—";
-  const number = id ? sheetNumber(id) : "--";
+  const ofSheets = String(sheets.length).padStart(2, "0");
+
+  let named: Named = { number: "--", title: "—", dwg: "QWQ---00", sheet: `--/${ofSheets}` };
+  const post = section === "blog" && slug !== "tag" ? posts.findIndex((p) => p.slug === slug) : -1;
+  if (section === undefined) {
+    const n = sheetNumber(sheets[sheet]);
+    named = { number: n, title: titles[sheets[sheet]], dwg: `QWQ-${n}00`, sheet: `${n}/${ofSheets}` };
+  } else if (post >= 0) {
+    const n = String(posts.length - post).padStart(3, "0");
+    named = { number: n, title: posts[post].title, dwg: `BLOG-${n}`, sheet: `${n}/${String(posts.length).padStart(3, "0")}`, long: true };
+  } else if (section === "blog") {
+    const n = sheetNumber("writing");
+    named = { number: n, title: titles.writing, dwg: `QWQ-${n}00`, sheet: `${n}/${ofSheets}` };
+  } else if (section === "lab") {
+    named = { number: "LB", title: labLabel, dwg: "QWQ-LAB", sheet: `--/${ofSheets}` };
+  }
+  const { number, title } = named;
 
   const cell = "border-ink px-2 py-1";
   return (
@@ -47,7 +72,7 @@ export function TitleBlock({
         </div>
         <div className={`${cell} border-r`}>
           <div className="label text-ink-soft">{labels.dwgNo}</div>
-          <div className="font-mono text-xs">QWQ-{number}00</div>
+          <div className="font-mono text-xs">{named.dwg}</div>
         </div>
         <div className={cell}>
           <div className="label text-ink-soft">{labels.rev}</div>
@@ -59,7 +84,11 @@ export function TitleBlock({
           <span className="font-mono text-xs text-accent">{number}</span>
           <ScrambleText
             text={title}
-            className="font-display text-2xl font-extrabold leading-none tracking-tight"
+            className={
+              named.long
+                ? "font-display line-clamp-2 text-[15px] font-bold leading-tight"
+                : "font-display text-2xl font-extrabold leading-none tracking-tight"
+            }
           />
         </div>
         <div className={cell}>
@@ -69,7 +98,7 @@ export function TitleBlock({
       </div>
       <div className="flex items-center gap-3 px-2 py-1.5">
         <span className="label text-ink-soft">
-          {labels.sheet} {number}/{String(sheets.length).padStart(2, "0")}
+          {labels.sheet} {named.sheet}
         </span>
         <span className="relative h-1.5 flex-1 border border-ink">
           <span

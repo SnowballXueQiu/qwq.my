@@ -82,7 +82,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
           <RouteSync />
         </Suspense>
         <Hud toyHint={dict.hero.toys} />
-        <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} />
+        <SheetFrame locale={locale} dict={dict} author={profile.name[locale]} posts={posts.map(({ slug, title }) => ({ slug, title }))} />
         <MvTimeline titles={dict.sheets} />
         {children}
         <Terminal locale={locale} posts={posts} />
