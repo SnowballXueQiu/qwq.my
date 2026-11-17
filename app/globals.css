@@ -549,6 +549,24 @@ html.game-open .hud {
   opacity: 0.6;
 }
 
+/* AI summary (components/blog/AiSummary.tsx): types itself out once, a word at a time,
+   after the sheet has started drawing in. */
+.ai-summary {
+  font-size: 0.95rem;
+  line-height: 1.85;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ai-summary > span {
+    animation: summary-word 0.24s ease-out both;
+    animation-delay: calc(420ms + var(--i) * var(--step));
+  }
+}
+@keyframes summary-word {
+  from {
+    opacity: 0;
+  }
+}
+
 /* The page scrollbar is our own (components/ui/ScrollRail.tsx), drawn into the frame's
    right margin; the browser's is hidden, so pages also keep one width scrolling or not. */
 html {

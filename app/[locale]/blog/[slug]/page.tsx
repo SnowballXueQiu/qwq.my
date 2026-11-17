@@ -13,6 +13,7 @@ import { locales } from "@/lib/i18n";
 import { getPost, listPosts } from "@/lib/posts";
 import { mdxComponents } from "@/components/blog/mdx";
 import { AigcBadge } from "@/components/blog/AigcBadge";
+import { AiSummary } from "@/components/blog/AiSummary";
 import { ReadingCompanion } from "@/components/blog/ReadingCompanion";
 import { TagList } from "@/components/blog/Tags";
 import { PageTransition } from "@/components/ui/PageTransition";
@@ -104,6 +105,9 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
           </div>
           {post.meta.lang !== locale && (
             <p className="mt-6 border-l-2 border-accent bg-paper/80 py-2 pl-3 text-sm text-ink-soft">{dict.blog.fallback}</p>
+          )}
+          {post.aiSummary && (
+            <AiSummary text={post.aiSummary.text} lang={post.aiSummary.lang} label={dict.blog.summary} note={dict.blog.summaryNote} />
           )}
           <div className="prose-qwq mt-10">
             <PostBody source={post.source} />

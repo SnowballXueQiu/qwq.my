@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "text": {
+      "zh": "从递推式 aₙ₊₁ = p·aₙ + qⁿ 出发，先用待定系数法构造等比数列 bₙ = aₙ + qⁿ / (p − q)，求出通项 aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q)。再追问这种「变换系数」的做法背后是什么：借复数和 2×2 矩阵的对应引出线性变换，把递推写成状态向量乘矩阵 sₙ₊₁ = A·sₙ，由 Aⁿ⁻¹ 算出同一个通项。",
+      "en": "Starting from the recurrence aₙ₊₁ = p·aₙ + qⁿ, the method of undetermined coefficients builds the geometric sequence bₙ = aₙ + qⁿ / (p − q) and gives aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q). The post then asks what this juggling of coefficients really is: by writing complex numbers as 2×2 matrices it arrives at linear maps, rewrites the recurrence as a state vector times a matrix, sₙ₊₁ = A·sₙ, and gets the same formula out of Aⁿ⁻¹."
+    },
+    "source": {
+      "chars": 3408,
+      "minhash": "Z1xfAA+2CADY81oAAvdqAFobLwB7aCgAjR5NABkkQgA4tGwAATlnAPRaGADJvwwAP70AAD+hDABPlhoAUb5aAI+EOQCM1gsADDkaAJZTDAB7rVUAdFQvACg3JACnbiYAIn8kAO90MQAmpTYAQe4fACrVVwDiB0IAFYByABVlAQAHXRkASyCSANA7SwBYrzcAL+0WAOWlQAA3XAEAo50DADzNJwDpkAAA8dNuAPEYXQC65ywAtvQ6AH6XBQDCh0sArhMZAPdbQQBLQY4AlvQkAER4GgDdv1EAi3MUAPBBJQB3ygcA7G9EAINBHADeiDsAf8kFAL3nXAA1qR4A9u+HAB3cAQA7lAQAbbINALAGCACZZaAASAIkADKaCABjeyYAOY0uAJ6kAwBzzkEA7z4vAPQpJQC7JgYA1DEPAE+IEgADDx4Ag8J4ALcgAwDUXg0Atr80AHlkOABTagcA9ekzAJ8qBAAOEi4AKW4KAKs7CwDILCoAYLsTAOfxFgBd+AkAzXVHANWuCADBpAcA/6gAAJJ9DACCWAgATLJaAIgQBAAIHAgA2g4yAHf/MAAfgwoAnd17AFidKQBj7AgASMNIAGPzNwCO3QAAQFkPANtEXwD6qkgARIQGAGszXADu+F8ARP0SACM2JACRtBsAK8oRAFNAaQBPqxQASfQdADdyGQA="
+    }
+  }
+}

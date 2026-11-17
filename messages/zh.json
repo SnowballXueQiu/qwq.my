@@ -101,7 +101,9 @@
     "aigc": "AIGC",
     "aigcNote": "本文使用 AI 工具辅助编写，作者已校验，确认内容无误。",
     "tags": "标签",
-    "all": "全部"
+    "all": "全部",
+    "summary": "AI 摘要",
+    "summaryNote": "由 AI 读完全文后写成"
   },
   "video": {
     "title": "2026 年度回顾",

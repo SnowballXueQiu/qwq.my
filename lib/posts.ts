@@ -55,10 +55,32 @@ export async function listTags(locale: Locale): Promise<{ id: TagId; count: numb
     .filter((t) => t.count > 0);
 }
 
+/**
+ * The AI summary of a post, if it has one (content/posts/<slug>/summary.json; kept current
+ * with `pnpm summaries`). Entries are keyed by the language of the text that was read, and
+ * hold the summary in each language it was written in.
+ */
+async function readSummary(slug: string, lang: Locale, locale: Locale) {
+  try {
+    const file: Partial<Record<Locale, { text?: Partial<Record<Locale, string>> }>> = JSON.parse(
+      await readFile(path.join(ROOT, slug, "summary.json"), "utf8"),
+    );
+    const text = file[lang]?.text;
+    const shown = text?.[locale] ? locale : text?.[lang] ? lang : null;
+    return shown ? { text: text![shown]!, lang: shown } : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getPost(slug: string, locale: Locale) {
   "use cache";
   const found = await readSource(slug, locale);
   if (!found) return null;
   const { frontmatter, strippedSource } = getFrontmatter<Frontmatter>(found.source);
-  return { meta: toMeta(slug, found.lang, frontmatter), source: strippedSource };
+  return {
+    meta: toMeta(slug, found.lang, frontmatter),
+    source: strippedSource,
+    aiSummary: await readSummary(slug, found.lang, locale),
+  };
 }

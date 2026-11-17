@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "text": {
+      "zh": "Termius 把 cd 补全成了 rm -rf，好在被删的文件还被进程占着。只要进程不退出，就能用 lsof 找出标着 (deleted) 的文件和进程号，再到 /proc/<pid>/fd 里按文件描述符把它 cat 回来。文件多的时候，作者写了一个 Rust 小程序，从 lsof 的输出批量生成恢复脚本。这次救回了九成五以上的数据，但这招不保证全部找回，备份才是正道。",
+      "en": "Termius autocompleted a cd into rm -rf, but the deleted files were still held open by a running process. As long as that process lives, lsof lists the files marked (deleted) with their process IDs, and each can be copied back out of /proc/<pid>/fd by its file descriptor. For whole folders the author wrote a small Rust program that turns lsof's output into a recovery script. Over 95% of the data came back, but nothing is guaranteed: keep backups."
+    },
+    "source": {
+      "chars": 1589,
+      "minhash": "zc0ZAK7qDwCN3QEAYf0/AJ1JlwChx0cAMzgLALZCCwDKvhABGYEIAGCvHwAZb5QA6yZhAMyjJwCWD0YAgpsrAHOoegANcmYAqx4QABPINQCw+kIAGSEeAAMqKACPpksANFwnAHtrJADIR0MAeS4TAFuOfQBHoSUALJYwAKGTAwDLrmIA8IBGAOp9LgDpuCcAHPAuALCLIgCjIpsARWEWANVxCgB1FXEA8Z0gAEzLswBH8CQACK8QAFJCGgAsARgAYuAJABOPAgDqYHUAuT1HAPS4tAB2rR0A3k/JAJDYFwBCjFQAIQEzAEuZmQDndRQA0q9EANTxSgDRjiMAknALAG02NwD7sCYAdsQHAMBaWQBYNyQATa5OAGONtwDJMAYAoScXANYQMAC7OQsAr5NOAI8ywACYJkIAmgQRAHF6AwAqQwIAByc6ADUlQwBmwlQAipU6AGKCMQCQ9QYAPhYKAKx2JwCFFhgAtwIRANSDDQC4wn8AYYCgAIfQHADAXAwA6HxbAEbaVgCIIgEA5d0BAEpJhwC9+GcAJSRxAAQ5SwCGrwAA6JgEAAHMLQBL7QkAOA6xALlfCQCCUVYAYcuAABMxFgB4sRsAxRxOAOdtCQAwswkAno8hAGT8DgATFwAATqwFANTOVQBV9RYA3t9GAN9aRAAMgh0AVlwOAC25CQE="
+    }
+  }
+}

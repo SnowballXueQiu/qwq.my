@@ -1,0 +1,20 @@
+{
+  "zh": {
+    "text": {
+      "zh": "拆解 qwq.my 是怎么做出来的。首页是七张图纸，DOM 和 3D 只读同一个「场景时间」，所以永远对得上。所有物体先写进 G-buffer，再由一个全屏 pass 画出墨线、网点和排线，暗场就是纸和墨对调。开场的纸是 170 块 Voronoi 碎片，合在一次绘制调用里；镜头用单调三次样条插值，停靠时不会晃；滚动前半段逐拍吸附，后半段连续到底。最后用 Docker 加 Cloudflare Tunnel 部署，不向外暴露任何端口。"
+    },
+    "source": {
+      "chars": 10707,
+      "minhash": "Y1gJAAVuEwCS6AMAuJYBAK8UAgD8GAkA5o0CAFKeCADZNQkAoJIKAOdEAQD3SQoA80cMANYfBQCfYgEA9h4AAHBIAgBFmw8AtTsOAO6BAABbxQQAGn0YALLTBwD4ZAkAfW4EAKPMDQBV2QcA+jEBAFEfBADyPwEAzvEHAHPtCwAUaAQAz5oAAME9GAAZBwIA9j4CAMf2AgAxeAAAtzkBAAdlDQDthQIAmZ8CAHcEBwDplgYA6McHAEfpDgA0ZhUAbL4BAC+FFgA9jQwAdcMSAAneAgD2XAMANrcgAHHRDgANLQEA8NYHAE1xBQD5dBAAHhUaAAJvBACOWgoAedoEAMjlDQAOvAwA7zQGAIUrBgAKrgoAEL8KABP+AADIVgIAIioCABIwAgBcqQ4ANcAcACjdBQCdywAA0x0FAPbqFAC0YgAAtrwFAHfcAQB3IQAA6ogOAK16EQCsLAAAd4EFAGwJAgB86QMAfwsIAKbnEQAx1AAACfwGAG/fAQBGSgUA87sAAAbFBwAidQYAj4UAALpiAQArUgkAEZsCAILcAwDqlQIAhu4DAB/3AwAsPwYAoUQCAG0pAABPYwMA028AAPXsDQCOdQkAOz4IAPonAQAt4QAAbbEBAD7hAQATFwAA950NALkZBQAtFAIAincCAG8XAgDkeQcADSUFAMHQBAA="
+    }
+  },
+  "en": {
+    "text": {
+      "en": "A walk through how qwq.my is made. The home page is seven sheets, and the DOM and the 3D scene both read one number, the scene time, so they never drift apart. Everything renders into a G-buffer and one full-screen pass draws the ink lines, halftone and hatching; the dark world is the same palette with paper and ink swapped. The opening sheet is 170 Voronoi shards in a single draw call, the camera follows a monotone cubic spline so it never overshoots a hold, and scrolling goes beat by beat before it turns continuous. The site ships with Docker behind a Cloudflare Tunnel, with no ports open."
+    },
+    "source": {
+      "chars": 24584,
+      "minhash": "jQUBAI/TAACS6AMAF0kCAPHrEgCfkwMAJHwKADahAgDZNQkAt5EEAOBTAwBLzhoAqL4KADmGDgCIzwAA9h4AAO+qBwDL8wAA3ikMAAAACgBbxQQAE/oSANFMAgAj2QAAAIEBAHPCBwDjNgkAcF4LAEPnAgDdbQIAgEAaAB/8BQDEWRMAz5oAAKU4BwCTKgAAtzgFADrHCQCytQYAtzkBAJTxDgDthQIAmZ8CABkuBQDplgYA4IQLAGDeCwDvwRIAqMMAABOPAgAcCQIA6gUAANP4CwDeQAQAr8UAALfbAAD2aAoA/bEBAB0hBADTSwMA6gsAAMg8DwDyngQAa/gFAAZZEQAOVwgA7zQGAIu2AQDy9RgAFloJABP+AADIVgIA2RoLAIQ7AACCRAcAKyAAADh1CADa9woAoOALAIYHDQB48QYA2xMCAO4/BwC3IQIAvOMLABpxDACsLAAAGS4CAJd+BQDC3AEAw6IDADzBGwByJQQAn20HAG/fAQCxPxgAIq8DADQjEwCc4wIAtwcLAOjlBAC3AAAAO5ALAChRBQDTCgkAr7QBAO09EADHHQcAjE4IAG0pAAAAmQEAvGYEAFvxAwDOaQEAVZMCAEVYAAAwswkAtWMBALvdBAATFwAAXdQDAIT+EQBJqAQAincCADUxAQA5lhUA39MGAEjeDQA="
+    }
+  }
+}

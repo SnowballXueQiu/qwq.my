@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "text": {
+      "zh": "给竖直上抛加上与速度平方成正比的空气阻力 f = ½cρSv²，求小球能到达的最大高度。取向下为正方向，由牛顿第二定律分离变量，先积分出速度、再积分出位移，得到 H = (m / cρS) · ln(1 + cρS·v₀² / 2mg)。阻力趋于零时它退回 v₀² / 2g；有阻力时，小球总是飞不到这个高度。",
+      "en": "Adds air drag proportional to the square of the speed, f = ½cρSv², to a ball thrown straight up, and asks how high it gets. Taking down as positive, Newton's second law is separated and integrated, first for the velocity and then for the position, giving H = (m / cρS) · ln(1 + cρS·v₀² / 2mg). As the drag goes to zero this returns to v₀² / 2g; with drag, the ball always falls short of it."
+    },
+    "source": {
+      "chars": 2336,
+      "minhash": "rcsEACtWjABI5ggARAEEAIOTtACrai0AAOMrALc3EgCv2QIAphEUAMtgXwCclisAQN8CAD+hDABlnCsAQFgIABZRogCdtwkAKlAIAM1HVgAFGxgAH7AmAPiBHgC7ngkALEMlACP6BQC0Ug8AGE1FAI92dgAoHQgA8Y4RAH4LLQAEnCYAPC0AAOZCQwAJTCAAeNsSANkbVgBYvZYAlpwZANaaKABcgG8A5DYmAJWRhwC65ywAgfgTAKN1AgBD4GUBmo8bADAnAQA84ncAhb6NAKP5DQDkVXEATV4EAFu7YQACBUwADBlfABGlWwDbdb8ABi2CAGnkHgA07RsAncA9ANhjBAD8ogQAyMsYAIIiEgAMQ1QAvFAgABvGIADWCWIAOY0uAJUfwgDZ10cADDMkACU+MgCn0E4ADTVEAIxnFgBow+AAW29ZAKldSgAa6WwAmqdAAMHdFQD61AUATp29AAk1VQAJvSIATpMtAMvoZgAQ8ScAVADkACFgUACyMswA+qkBANBaAgCDgHEAeG0HAOhyLAArUgkAF+dsAL+nJwDk2kMBKX88ALPQggCRq1YAt5sWAGpjAwDabCYABLcOAAmGGgBT/EAAwPwNAAaKaADkBQMAShxeAB5XZQDLQzYAJYFuACfEKQAI9SEAxi4ZADhCCwCgTT0AXb2xAKDsBgA="
+    }
+  }
+}

@@ -7,3 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Post summaries
+
+Each post can carry an AI summary in `content/posts/<slug>/summary.json`, written by the agent working on the repo (no API call). After editing posts, run `pnpm summaries`: it compares every post with the text its summary was written from. Rewrite only what it flags (`STALE`, `MISSING`, `RECHECK`), in every language the entry has, then run `pnpm summaries stamp <slug>`. Small edits keep their summary. Posts that aren't articles (a paragraph, a few photos, lyrical prose) get `{ "skip": "why" }` instead.

@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "text": {
+      "zh": "用打工的比喻讲中心法则：DNA 只负责存储，把信息转录给 mRNA，核糖体再按三个碱基一组翻译成氨基酸，串成干活的蛋白质。接着讲循环神经网络 RNN：隐藏状态把上一步的记忆和这一步的输入合在一起，用来预测下一个词。最后把两者并排对比：都是一条「存储 → 传递 → 执行」的流水线，中间漏了信息，两边都会出错。",
+      "en": "Explains the central dogma as office politics: DNA only stores, so it has mRNA transcribe it, and ribosomes translate the message three bases at a time into amino acids that become working proteins. It then explains recurrent neural networks, whose hidden state mixes the last step's memory with the current input to predict the next word, and sets the two side by side: both are a store → relay → act pipeline, and both go wrong when information is lost along the way."
+    },
+    "source": {
+      "chars": 2274,
+      "minhash": "1oJtAH69GwCWuQkAB8sSAOYsCgA5UhcAXDMgAGWoHgDKVw8AQ80EAKsUBQDJvwwAhJoUAEsqHwD3uQUAy04hAKOgEQBC2QAAEjZ6AC9QAwCTDwQAf6VHAAioDgAsWQYAXhQNAPBiBQBT9QoAeU8IAP4EJQBGDRwATfMeAEB4IwDVPxoAhKwmAHaHPAA35Q0AGX0JAD3IMgCSKx4AMiAkAJL2BADogAMASIgEAPFRXAAQwQEAYmcjAD4CJACClA4AYnEGAGVTAwAJDREAlJwKAAD6NQDA0TQAUKgZAKE7BADJ8QAAYZU7AEeSGACTbAMA4hIGAMbvGgB5fwkAohwkACaBCgDAZSAAKK0aAC9EDAC+My0AXqtSABTYnAC/CwgAR+0GADtJCgByFzQAUW1ZAOOiJABS6gYAU8gCAAIxBQA7bgUAgJgFAEU4AwC3pgsAli4CACCzSwCyWDkAVSQYAGl7IQANP2AAM0mHAIq8BwDmTAEAri0KABu1EAC1VQMA/4oBACoGCQBWOywAEOMEAJ58HQBbjy0AwDMNAIxMJwAGFwYANOkIAD6nUgAUyWgAvJEJABEEKQDO3wwAkzEMAKw+GwCz4hEAdhsAAA3nAQBV4Q0AqQsUAAseZADt3DYAbiEjAC+fBwAh7wAA5cMBAEuLDwCsHzcAH8wYAOYoBAA="
+    }
+  }
+}

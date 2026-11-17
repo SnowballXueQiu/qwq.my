@@ -1,0 +1,12 @@
+{
+  "zh": {
+    "text": {
+      "zh": "10.24 程序员日看到一张「代码猜诗词」的图，作者把十段代码逐一解回诗句，并说明代码怎么对上诗意、诗句出自哪里。比如 cutWater(getKnife())(water++) 是「抽刀断水水更流」，hold ? fish : palm 是「鱼与熊掌不可兼得」，视野不到一千就 building.level++ 的是「欲穷千里目，更上一层楼」。",
+      "en": "On Programmers' Day, October 24, the author found a puzzle that hides lines of Chinese poetry in code, and decodes all ten, explaining how each snippet maps onto its line and where the line comes from. cutWater(getKnife())(water++) is Li Bai's “draw a knife to cut the water, and it flows on”; hold ? fish : palm is Mencius's “you can't have both the fish and the bear's paw”; raising building.level while the view is under 1000 is “climb one more floor to see a thousand li”."
+    },
+    "source": {
+      "chars": 2491,
+      "minhash": "veU5AM9LJAAIYAQAsoYGALvQGADOZC0AmbYEAC+yQADtTRgA/l0NAOBTAwBqEhUA03iYAPB/AQBJqBoA9h4AAH4cOgCa+wAALnceALWDIAA93zsAMEgXAGkCAwCC+hIAVJMhAO89DwDI+wUAyLwUAFKjJQBJwJ8AJyx4AO79FQDabmAAz5oAANAJWgA8wQEAf8cvAIhFIQDF8E4AsZJYAJrNEgB1FXEA3LgbACWKAQChaBkAcGZYAGtVCgCyIxsATsMOAFK5AgCr8yUAJEMEAL6YVAAqcQIAJ6VjAFvBJQAdiBMA6NkdABQ5hgBgzAMAk6sEABhQLQCIYiQAsXArALYIKgDvXyMA7zQGACeIIABVIxEAMyU2ADoIAwACdBQAanImAGUCCwD9CwcAtQSOAL7yIAATwsEAypYBAOlESgABpUMA3OgtAHphCACDtyAA6/Y0AGMbFwBMYwAAdtE9AHIYCQDZZiYAbi8BAKSOBwDSRhgAmtlYAEOwGADAXAwAIq8DAGA7AwB0jEkAUFoPAOjlBADbQRgAdMRXADUrEABzbiwA4cUeAFqLLwBdRwsAHwdQAFqOGgA+yEEAUKURANFBSQBBBwEAsIgdAJ8xAwAwswkA2lsYAAe1PgDUTgIAjpUJAEiPEQCptC4AA6oXAIXDHQDC5gkAELdHAHNIJQA="
+    }
+  }
+}
