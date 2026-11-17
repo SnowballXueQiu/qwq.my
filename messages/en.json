@@ -103,7 +103,13 @@
     "tags": "Tags",
     "all": "All",
     "summary": "AI summary",
-    "contents": "On this page"
+    "contents": "On this page",
+    "viewsOne": "{n} view",
+    "viewsOther": "{n} views",
+    "likesOne": "{n} like",
+    "likesOther": "{n} likes",
+    "like": "Like",
+    "liked": "Liked"
   },
   "video": {
     "title": "2026 in review",

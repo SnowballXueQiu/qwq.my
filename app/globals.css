@@ -577,6 +577,75 @@ html.game-open .hud {
   }
 }
 
+/* The like at the end of a post (components/blog/PostReactions.tsx): a stamp, inked red
+   once pressed. The heart pops on a like; nothing flashes. */
+.like-stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  padding: 0.6em 1.1em;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background-color 0.15s,
+    transform 0.15s;
+}
+.like-stamp:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.like-stamp:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.like-stamp[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+}
+.like-stamp[aria-pressed="true"]:hover:not(:disabled) {
+  color: var(--paper);
+}
+.like-stamp:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.like-heart {
+  width: 1.3em;
+  height: 1.3em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.like-stamp[aria-pressed="true"] .like-heart {
+  fill: currentColor;
+}
+.like-count {
+  border-left: 1px solid currentColor;
+  padding-left: 0.75em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .like-pop {
+    animation: like-pop 0.42s cubic-bezier(0.2, 0.7, 0.2, 1.4) both;
+  }
+}
+@keyframes like-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  55% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* A post on a wide screen (app/[locale]/blog/[slug]/page.tsx): the post list on the left
    and the contents on the right, pinned below the HUD readouts while the column scrolls.
    Narrower screens get the column alone. */

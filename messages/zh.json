@@ -103,7 +103,13 @@
     "tags": "标签",
     "all": "全部",
     "summary": "AI 摘要",
-    "contents": "本文目录"
+    "contents": "本文目录",
+    "viewsOne": "{n} 次阅读",
+    "viewsOther": "{n} 次阅读",
+    "likesOne": "{n} 个赞",
+    "likesOther": "{n} 个赞",
+    "like": "点赞",
+    "liked": "已赞"
   },
   "video": {
     "title": "2026 年度回顾",

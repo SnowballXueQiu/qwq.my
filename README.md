@@ -29,6 +29,14 @@ pnpm lint
 
 颜色在 `app/globals.css` 和 `lib/tokens.ts` 里，两处保持一致。
 
+## 浏览量和点赞
+
+存在 SQLite 里（Drizzle ORM + better-sqlite3）：本地是 `data/qwq.db`（不进 git），生产环境是 Docker 卷 `data`，换镜像、重新部署都不会丢。
+
+- 同一个访客一天只算一次浏览；点赞可以取消。访客靠一个随机 id 的 cookie（`qwq_vid`）区分，不记录 IP。
+- 计数在请求时读取，页面的其余部分仍然是预渲染的。
+- 改表结构：改 `lib/db/schema.ts`，再 `pnpm drizzle-kit generate --name <改了什么>`，把生成的 `drizzle/` 迁移一起提交；网站第一次打开数据库时会自己执行未跑过的迁移。
+
 ## 彩蛋和交互
 
 - **终端**：按 `` ` `` 或 ⌘K，或者点右上角的 `>_`。可以试试 `help`、`neofetch`、`qwq OwO`、`debug`，以及 `sudo rm -rf /`。
@@ -51,7 +59,7 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-更新：把代码同步到服务器后再执行一次 `docker compose up -d --build`。
+更新：把代码同步到服务器后再执行一次 `docker compose up -d --build`。同步时别带上本地的 `data/`；线上数据在卷里，备份用 `docker compose cp web:/app/data ./backup`。
 
 ## 年度回顾视频（Remotion）
 

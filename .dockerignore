@@ -10,3 +10,4 @@ node_modules
 public/video
 Dockerfile
 docker-compose.yml
+data

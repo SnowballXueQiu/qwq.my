@@ -16,6 +16,7 @@ import { mdxComponents } from "@/components/blog/mdx";
 import { AigcBadge } from "@/components/blog/AigcBadge";
 import { AiSummary } from "@/components/blog/AiSummary";
 import { PostIndex } from "@/components/blog/PostIndex";
+import { CountsFallback, LikeFallback, LikeSlot, PostCountsSlot } from "@/components/blog/PostStats";
 import { PostToc } from "@/components/blog/PostToc";
 import { ReadingCompanion } from "@/components/blog/ReadingCompanion";
 import { TagList } from "@/components/blog/Tags";
@@ -97,6 +98,8 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
   const index = posts.findIndex((p) => p.slug === slug);
   const newer = posts[index - 1];
   const older = posts[index + 1];
+  const { viewsOne, viewsOther, likesOne, likesOther, like, liked } = dict.blog;
+  const counts = { slug, locale, labels: { viewsOne, viewsOther, likesOne, likesOther, like, liked } };
 
   // Keyed by post: going from one post to the next is a page change too.
   return (
@@ -110,7 +113,10 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
               ← {dict.blog.back}
             </Link>
             <p className="label mt-8 text-accent">
-              DWG · BLOG-{String(posts.length - index).padStart(3, "0")} · {post.meta.date}
+              DWG · BLOG-{String(posts.length - index).padStart(3, "0")} · {post.meta.date} ·{" "}
+              <Suspense fallback={<CountsFallback {...counts} />}>
+                <PostCountsSlot {...counts} />
+              </Suspense>
             </p>
             <h1 className="font-display mt-3 text-[clamp(2.4rem,6vw,4.4rem)] font-black leading-[0.95] tracking-[-0.03em]">
               {post.meta.title}
@@ -126,7 +132,12 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
               <AiSummary text={post.aiSummary.text} lang={post.aiSummary.lang} label={dict.blog.summary} />
             )}
             <div className="prose-qwq mt-10">{body.content}</div>
-            <nav className="mt-16 grid gap-px border border-ink bg-ink sm:grid-cols-2" aria-label={dict.blog.more}>
+            <div className="mt-16 flex justify-center">
+              <Suspense fallback={<LikeFallback {...counts} />}>
+                <LikeSlot {...counts} />
+              </Suspense>
+            </div>
+            <nav className="mt-10 grid gap-px border border-ink bg-ink sm:grid-cols-2" aria-label={dict.blog.more}>
               {[older, newer].map((p, i) =>
                 p ? (
                   <Link key={p.slug} href={`/${locale}/blog/${p.slug}`} className={`bg-paper p-4 hover:text-accent ${i ? "sm:text-right" : ""}`}>

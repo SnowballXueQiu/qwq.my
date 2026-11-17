@@ -12,6 +12,9 @@ services:
     environment:
       # Optional: lifts GitHub's anonymous rate limit for the live contribution data.
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    volumes:
+      # View counts and likes: a named volume, so rebuilds and redeploys keep them.
+      - data:/app/data
 
   tunnel:
     image: cloudflare/cloudflared:latest
@@ -29,3 +32,6 @@ services:
       TUNNEL_TRANSPORT_PROTOCOL: http2
     volumes:
       - ${TUNNEL_CREDENTIALS:?set TUNNEL_CREDENTIALS in .env}:/etc/cloudflared/credentials.json:ro
+
+volumes:
+  data:
