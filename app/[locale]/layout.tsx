@@ -6,6 +6,7 @@ import { getDictionary, getLocale } from "@/lib/dictionaries";
 import { locales } from "@/lib/i18n";
 import { getGithub } from "@/lib/github";
 import { listPosts } from "@/lib/posts";
+import { tags } from "@/content/tags";
 import { SmoothScroll } from "@/components/scroll/SmoothScroll";
 import { SceneLoader } from "@/components/three/SceneLoader";
 import { Hud } from "@/components/hud/Hud";
@@ -75,7 +76,18 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <SmoothScroll />
         <SoundBridge />
         <Suspense fallback={null}>
-          <GithubScene titles={dict.sheets} locale={locale} />
+          <GithubScene
+            titles={dict.sheets}
+            locale={locale}
+            writing={posts.slice(0, 5).map((p, i) => ({
+              href: `/${locale}/blog/${p.slug}`,
+              no: posts.length - i,
+              title: p.title,
+              date: p.date,
+              summary: p.summary,
+              tags: p.tags.map((t) => tags[t][locale]),
+            }))}
+          />
         </Suspense>
         <ToneSync />
         <Suspense fallback={null}>

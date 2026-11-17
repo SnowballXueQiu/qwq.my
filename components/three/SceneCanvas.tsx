@@ -20,18 +20,20 @@ import { OverviewMap } from "./stages/OverviewMap";
 import { ProjectsStage } from "./stages/ProjectsStage";
 import { SkillsStage } from "./stages/SkillsStage";
 import { TimelineStage } from "./stages/TimelineStage";
-import { WritingStage } from "./stages/WritingStage";
+import { WritingStage, type WritingPage } from "./stages/WritingStage";
 
 export default function SceneCanvas({
   onReady,
   titles,
   github,
   locale,
+  writing,
 }: {
   onReady?: () => void;
   titles: Record<SheetId, string>;
   github: { total: number; weeks: { date: string; count: number }[][] };
   locale: Locale;
+  writing: WritingPage[];
 }) {
   // As sharp as the screen allows within a pixel budget: a phone gets 2x (its screen is small,
   // and at 1x–1.5x a 3x display turns the type to mush); a big monitor less. Slow devices
@@ -64,7 +66,7 @@ export default function SceneCanvas({
       <SkillsStage />
       <ProjectsStage />
       <TimelineStage github={github} locale={locale} />
-      <WritingStage />
+      <WritingStage pages={writing} />
       <FinaleStage />
       <OverviewMap titles={titles} />
       <BugGame />

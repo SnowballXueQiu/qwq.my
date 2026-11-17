@@ -18,6 +18,8 @@ export type FxEvents = {
   view: { mode: number };
   /** The route changed: the scroll jump that comes with it isn't motion to react to. */
   navigate: Record<string, never>;
+  /** The 3D scene asks to open a page; the router lives in the DOM tree. */
+  go: { href: string };
   /** A bug was squashed at a screen position. */
   hit: { x: number; y: number; points: number; combo: number };
 };

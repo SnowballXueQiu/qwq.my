@@ -6,6 +6,7 @@ import { QwQLogo } from "@/components/ui/QwQLogo";
 import { emit } from "@/lib/fx";
 import type { Locale } from "@/lib/i18n";
 import type { SheetId } from "@/lib/sheets";
+import type { WritingPage } from "./stages/WritingStage";
 
 const SceneCanvas = dynamic(() => import("./SceneCanvas"), { ssr: false });
 
@@ -24,10 +25,13 @@ export function SceneLoader({
   titles,
   github,
   locale,
+  writing,
 }: {
   titles: Record<SheetId, string>;
   github: { total: number; weeks: { date: string; count: number }[][] };
   locale: Locale;
+  /** The newest posts, for the pages in the writing scene. */
+  writing: WritingPage[];
 }) {
   const [ready, setReady] = useState(false);
   // null on the server, then whether this browser can run the scene at all.
@@ -51,6 +55,7 @@ export function SceneLoader({
         titles={titles}
         github={github}
         locale={locale}
+        writing={writing}
         onReady={() =>
           requestAnimationFrame(() => {
             setReady(true);
