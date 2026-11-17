@@ -2,6 +2,7 @@ import "server-only";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { getFrontmatter } from "next-mdx-remote-client/utils";
+import { isTag, tagIds, type TagId } from "@/content/tags";
 import { locales, type Locale } from "./i18n";
 import type { PostMeta } from "./postTypes";
 
@@ -24,7 +25,11 @@ async function readSource(slug: string, locale: Locale) {
 
 function toMeta(slug: string, lang: Locale, fm: Frontmatter): PostMeta {
   const date = fm.date instanceof Date ? fm.date.toISOString().slice(0, 10) : String(fm.date ?? "");
-  return { slug, lang, date, title: fm.title ?? slug, summary: fm.summary ?? "", tags: fm.tags ?? [], aigc: fm.aigc === true };
+  const tags = (fm.tags ?? []).map(String);
+  // Tags come from content/tags.ts only; a typo or a new one made up in a post stops the build.
+  const unknown = tags.filter((t) => !isTag(t));
+  if (unknown.length) throw new Error(`${slug}/${lang}.mdx: unknown tag ${unknown.join(", ")} (add it to content/tags.ts)`);
+  return { slug, lang, date, title: fm.title ?? slug, summary: fm.summary ?? "", tags: tags as TagId[], aigc: fm.aigc === true };
 }
 
 export async function listPosts(locale: Locale): Promise<PostMeta[]> {
@@ -39,6 +44,15 @@ export async function listPosts(locale: Locale): Promise<PostMeta[]> {
     }),
   );
   return posts.filter((p): p is PostMeta => p !== null).sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** Tags in use, in content/tags.ts order, with how many posts carry each. */
+export async function listTags(locale: Locale): Promise<{ id: TagId; count: number }[]> {
+  "use cache";
+  const posts = await listPosts(locale);
+  return tagIds
+    .map((id) => ({ id, count: posts.filter((p) => p.tags.includes(id)).length }))
+    .filter((t) => t.count > 0);
 }
 
 export async function getPost(slug: string, locale: Locale) {

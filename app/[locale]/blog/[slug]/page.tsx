@@ -14,6 +14,7 @@ import { getPost, listPosts } from "@/lib/posts";
 import { mdxComponents } from "@/components/blog/mdx";
 import { AigcBadge } from "@/components/blog/AigcBadge";
 import { ReadingCompanion } from "@/components/blog/ReadingCompanion";
+import { TagList } from "@/components/blog/Tags";
 import { PageTransition } from "@/components/ui/PageTransition";
 
 type HastNode = { type: string; value?: string; children?: HastNode[] };
@@ -97,10 +98,10 @@ async function Post({ params }: { params: PageProps<"/[locale]/blog/[slug]">["pa
           <h1 className="font-display mt-3 text-[clamp(2.4rem,6vw,4.4rem)] font-black leading-[0.95] tracking-[-0.03em]">
             {post.meta.title}
           </h1>
-          <p className="label mt-4 flex flex-wrap items-center gap-3 text-ink-soft">
-              <span>{post.meta.tags.join(" · ")}</span>
-              {post.meta.aigc && <AigcBadge label={dict.blog.aigc} note={dict.blog.aigcNote} />}
-            </p>
+          <div className="mt-5 flex flex-wrap items-center gap-1.5">
+            <TagList ids={post.meta.tags} locale={locale} />
+            {post.meta.aigc && <AigcBadge label={dict.blog.aigc} note={dict.blog.aigcNote} />}
+          </div>
           {post.meta.lang !== locale && (
             <p className="mt-6 border-l-2 border-accent bg-paper/80 py-2 pl-3 text-sm text-ink-soft">{dict.blog.fallback}</p>
           )}

@@ -509,6 +509,46 @@ html.game-open .hud {
   }
 }
 
+/* Tags (components/blog/Tags.tsx): small stamped chips, "#数学". The one being shown is inked. */
+.tag-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3em;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  padding: 1px 7px 2px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.tag-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.tag-chip[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.tag-hash {
+  color: var(--accent);
+}
+.tag-count {
+  margin-left: 0.15em;
+  font-size: 9px;
+  color: var(--ink-soft);
+}
+.tag-chip[aria-current="page"] .tag-count {
+  color: inherit;
+  opacity: 0.6;
+}
+
 /* Page changes (components/ui/PageTransition.tsx): the old sheet lifts away, the next is
    drawn on from the top edge down. Only the page moves; the scene and frame (root) hold
    still. A wipe, not a flash. */
@@ -535,6 +575,28 @@ html.game-open .hud {
 }
 ::view-transition-new(.sheet-in) {
   animation: 520ms cubic-bezier(0.2, 0.7, 0.2, 1) 110ms both sheet-draw;
+}
+/* Picking a tag on the blog index: only the list under the tag bar is redrawn. */
+::view-transition-old(.list-out) {
+  animation: 120ms ease-in both list-out;
+}
+::view-transition-new(.list-in) {
+  animation: 380ms cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both list-in;
+}
+@keyframes list-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes list-in {
+  from {
+    opacity: 0.3;
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
 }
 @keyframes sheet-lift {
   to {

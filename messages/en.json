@@ -99,7 +99,9 @@
     "older": "Older",
     "newer": "Newer",
     "aigc": "AIGC",
-    "aigcNote": "Written with AI tools; the author has checked it and confirms it is accurate."
+    "aigcNote": "Written with AI tools; the author has checked it and confirms it is accurate.",
+    "tags": "Tags",
+    "all": "All"
   },
   "video": {
     "title": "2026 in review",

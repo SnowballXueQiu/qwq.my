@@ -1,6 +1,7 @@
 import { hasLocale } from "@/lib/i18n";
 import { listPosts } from "@/lib/posts";
 import { profile } from "@/content/profile";
+import { tags } from "@/content/tags";
 
 const SITE = "https://qwq.my";
 const escape = (s: string) => s.replace(/[<>&'"]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -18,7 +19,7 @@ export async function GET(_: Request, { params }: RouteContext<"/[locale]/feed.x
       <guid>${SITE}/${locale}/blog/${p.slug}</guid>
       <pubDate>${new Date(p.date).toUTCString()}</pubDate>
       <description>${escape(p.summary)}</description>
-    </item>`,
+${p.tags.map((t) => `      <category>${escape(tags[t][locale])}</category>\n`).join("")}    </item>`,
     )
     .join("\n");
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
