@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense, type ComponentProps } from "react";
 import Link from "next/link";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
@@ -23,7 +24,6 @@ export default async function Home() {
   const locale = await getLocale();
   const dict = await getDictionary();
   const posts = await listPosts(locale);
-  const github = await getGithub();
   const s = dict.sheets;
 
   return (
@@ -124,12 +124,13 @@ export default async function Home() {
         </SheetSection>
 
         <SheetSection id="timeline" title={s.timeline} length={SHEET_LENGTH.timeline} sticky>
-          <TimelineReadout
-            events={timeline}
-            locale={locale}
-            github={github}
-            labels={{ play: dict.video.play, contributions: dict.timeline.contributions, repos: dict.timeline.repos }}
-          />
+          <Suspense fallback={null}>
+            <Timeline
+              events={timeline}
+              locale={locale}
+              labels={{ play: dict.video.play, contributions: dict.timeline.contributions, repos: dict.timeline.repos }}
+            />
+          </Suspense>
         </SheetSection>
 
         <SheetSection id="writing" title={s.writing} length={SHEET_LENGTH.writing} sticky>
@@ -178,4 +179,9 @@ export default async function Home() {
       </main>
     </PageTransition>
   );
+}
+
+/** Behind <Suspense> for the same reason as the frame's GitHub parts (see the layout). */
+async function Timeline(props: Omit<ComponentProps<typeof TimelineReadout>, "github">) {
+  return <TimelineReadout {...props} github={await getGithub()} />;
 }

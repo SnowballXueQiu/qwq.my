@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, type ComponentProps } from "react";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { profile } from "@/content/profile";
 import { getDictionary, getLocale } from "@/lib/dictionaries";
@@ -58,8 +58,6 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
   const locale = await getLocale();
   const dict = await getDictionary();
   const posts = await listPosts(locale);
-  const github = await getGithub();
-  const githubScene = { total: github.total, weeks: github.weeks.map((w) => w.map(({ date, count }) => ({ date, count }))) };
   const videoFile = `/video/year-in-review-2026${locale === "en" ? "-en" : ""}.mp4`;
   const videoUrl = existsSync(path.join(process.cwd(), "public", videoFile)) ? videoFile : null;
 
@@ -76,7 +74,9 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         </a>
         <SmoothScroll />
         <SoundBridge />
-        <SceneLoader titles={dict.sheets} github={githubScene} locale={locale} />
+        <Suspense fallback={null}>
+          <GithubScene titles={dict.sheets} locale={locale} />
+        </Suspense>
         <ToneSync />
         <Suspense fallback={null}>
           <RouteSync />
@@ -87,7 +87,9 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         {children}
         <Terminal locale={locale} posts={posts} />
         <GameHUD labels={dict.game} />
-        <YearInReviewModal locale={locale} videoUrl={videoUrl} labels={dict.video} data={buildYearData(github)} />
+        <Suspense fallback={null}>
+          <YearInReview locale={locale} videoUrl={videoUrl} labels={dict.video} />
+        </Suspense>
         <CrashOverlay />
         <Lightbox closeLabel={dict.controls.close} />
         <BootScreen />
@@ -95,4 +97,17 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
       </body>
     </html>
   );
+}
+
+// The parts of the frame that show GitHub data sit behind <Suspense>: the data is
+// cached and lands in the prerendered page, but a cold cache (a fresh dev server, say)
+// mustn't hold up the whole page while it fetches.
+
+async function GithubScene(props: Omit<ComponentProps<typeof SceneLoader>, "github">) {
+  const { total, weeks } = await getGithub();
+  return <SceneLoader {...props} github={{ total, weeks: weeks.map((w) => w.map(({ date, count }) => ({ date, count }))) }} />;
+}
+
+async function YearInReview(props: Omit<ComponentProps<typeof YearInReviewModal>, "data">) {
+  return <YearInReviewModal {...props} data={buildYearData(await getGithub())} />;
 }
