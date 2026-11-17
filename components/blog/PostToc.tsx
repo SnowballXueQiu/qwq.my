@@ -7,6 +7,23 @@ import type { TocItem } from "@/lib/toc";
 /** Where a heading counts as reached: a little below the top of the frame. */
 const LINE = 140;
 
+const NUMERALS = "一二三四五六七八九";
+
+/**
+ * A heading that carries its own number ("1. …", "一、…") gives it to the number column
+ * instead of showing it twice. Chinese numerals up to 九十九 are read as numbers.
+ */
+function ownNumber(text: string): { n: number; rest: string } | null {
+  const digits = /^(\d{1,2})[.．、)）]\s*(?!\d)(.+)$/.exec(text);
+  if (digits) return { n: Number(digits[1]), rest: digits[2] };
+  const han = /^([一二三四五六七八九十]{1,3})[、.．]\s*(.+)$/.exec(text);
+  if (!han) return null;
+  const [tens, ones] = han[1].includes("十") ? han[1].split("十") : ["", han[1]];
+  const value = (h: string) => NUMERALS.indexOf(h) + 1;
+  const n = (han[1].includes("十") ? (tens ? value(tens) : 1) * 10 : 0) + (ones ? value(ones) : 0);
+  return n > 0 && n < 100 ? { n, rest: han[2] } : null;
+}
+
 /**
  * The post's contents, beside the column on wide screens. It shows the top two heading
  * levels the post uses (a post may start at h3), marks the section being read, and fills
@@ -16,7 +33,13 @@ export function PostToc({ items, label }: { items: TocItem[]; label: string }) {
   const levels = [...new Set(items.map((it) => it.depth))].sort().slice(0, 2);
   const shown = items
     .filter((it) => levels.includes(it.depth))
-    .map((it, i, all) => ({ ...it, sub: it.depth !== levels[0], no: all.slice(0, i + 1).filter((x) => x.depth === levels[0]).length }));
+    .map((it, i, all) => {
+      const sub = it.depth !== levels[0];
+      const own = ownNumber(it.text);
+      const count = all.slice(0, i + 1).filter((x) => x.depth === levels[0]).length;
+      const no = own ? String(own.n).padStart(sub ? 1 : 2, "0") : sub ? "·" : String(count).padStart(2, "0");
+      return { ...it, sub, no, text: own?.rest ?? it.text };
+    });
   const ids = shown.map((it) => it.id).join(" ");
   const [active, setActive] = useState<string | null>(null);
   const list = useRef<HTMLOListElement>(null);
@@ -100,7 +123,7 @@ export function PostToc({ items, label }: { items: TocItem[]; label: string }) {
                 aria-current={active === it.id ? "location" : undefined}
                 className={`side-link ${it.sub ? "side-link-sub" : ""}`}
               >
-                <span className="side-no">{it.sub ? "·" : String(it.no).padStart(2, "0")}</span>
+                <span className="side-no">{it.no}</span>
                 <span>{it.text}</span>
               </a>
             </li>
