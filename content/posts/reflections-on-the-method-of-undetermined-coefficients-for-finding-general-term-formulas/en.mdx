@@ -1,0 +1,192 @@
+---
+title: "Thoughts Prompted by the Method of Undetermined Coefficients for General Terms"
+date: 2024-10-25
+summary: "When you find a sequence's general term from its recurrence, why does the method of undetermined coefficients work?"
+tags: [math]
+---
+
+## 1. Background
+
+### 1. Recurrences and general terms of sequences
+
+In mathematics, a sequence is an ordered collection of numbers, usually written $a_1, a_2, a_3, \ldots$. A sequence can be defined by a recurrence, for example $a_{n+1} = pa_n + q^n$. A recurrence gives the relationship between neighbouring terms. A general term, by contrast, is a direct expression for any term of the sequence, usually written $a_n$.
+
+### 2. A first look at matrices
+
+A matrix is a data structure in the form of a table, often used to represent linear transformations. The basic matrix operations are addition, scalar multiplication and matrix multiplication. Adding two matrices of the same size adds the entries in matching positions; scalar multiplication multiplies every entry by the same scalar; matrix multiplication multiplies two matrices to give a new one. For sequence problems, we can turn the coefficients into a matrix and use matrix multiplication to simplify the recurrence, and from there find the general term.
+
+## 2. The problem
+
+Suppose we have a sequence with the recurrence $a_{n+1} = pa_n + q^n$ and initial value $a_1$. We want its general term.
+
+### The usual method
+
+We use the method of undetermined coefficients. Given the recurrence
+
+$$
+a_{n+1} = pa_n + q^n
+$$
+
+our goal is to find a form
+
+$$
+a_{n+1} + xq^{n+1} = p\left(a_n + xq^n\right)
+$$
+
+so that comparing the two sides pins down $x$, which in turn leads to the general term.
+
+First, substitute the original recurrence into the left-hand side:
+
+$$
+a_{n+1} + xq^{n+1} = pa_n + q^n + xq^{n+1}
+$$
+
+Next, we want this to match the right-hand side, $p\left(a_n + xq^n\right) = pa_n + pxq^n$. Comparing the terms on both sides gives
+
+$$
+\begin{aligned}
+q^n + xq^{n+1} &= pxq^n \\
+q^n(1 + xq) &= pxq^n \\
+1 + xq &= px
+\end{aligned}
+$$
+
+that is (this requires $p \neq q$)
+
+$$
+x = \frac{1}{p - q}
+$$
+
+So once we have such an $x$, we can build a new sequence $b_n = a_n + xq^n$, which satisfies the simpler recurrence $b_{n+1} = pb_n$.
+
+Finally, we can find the general term of $b_n$, and then get that of the original sequence from $a_n = b_n - xq^n$. Concretely,
+
+$$
+b_n = a_n + \frac{q^n}{p-q}
+$$
+
+Since $b_{n+1} = pb_n$, this is a geometric sequence with ratio $p$ and first term $b_1 = a_1 + \dfrac{q}{p-q}$, so
+
+$$
+b_n = b_1 \cdot p^{n-1} = \left(a_1 + \frac{q}{p-q}\right) p^{n-1}
+$$
+
+This gives the general term of $a_n$:
+
+$$
+\boxed{a_n = \left(a_1 + \frac{q}{p-q}\right) p^{n-1} - \frac{q^n}{p-q}}
+$$
+
+## 3. Going further
+
+Throughout the solution, what we keep transforming is the coefficients. Is this kind of transformation tied to some mathematical tool?
+
+In fact, linear operations on complex numbers and vectors have similar properties. For example, a complex number can be represented as a two-dimensional vector, and operations such as vector addition and scalar multiplication can all be expressed with matrices.
+
+### Linear operations on complex numbers and vectors
+
+A complex number can be seen as a special case of a two-dimensional vector, with the real part as the vector's x component and the imaginary part as its y component. Adding and multiplying complex numbers resemble linear combinations in a vector space.
+
+Linear operations in a vector space include vector addition, scalar multiplication and linear combinations of vectors. These operations can be represented with matrices, and matrix multiplication provides a way to carry out such transformations.
+
+### An example
+
+Suppose we have two complex numbers $z_1 = a + bi$ and $z_2 = c + di$, where $a, b, c, d$ are all real.
+
+#### Addition
+
+Adding complex numbers can be written as
+
+$$
+z_1 + z_2 = (a + bi) + (c + di) = (a + c) + (b + d)i
+$$
+
+and we can represent the same operation with matrices:
+
+$$
+\begin{pmatrix} a & b \\ -b & a \end{pmatrix} + \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a+c & b+d \\ -(b+d) & a+c \end{pmatrix}
+$$
+
+#### Subtraction
+
+Subtracting complex numbers can be written as
+
+$$
+z_1 - z_2 = (a + bi) - (c + di) = (a - c) + (b - d)i
+$$
+
+and likewise, with matrices:
+
+$$
+\begin{pmatrix} a & b \\ -b & a \end{pmatrix} - \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a-c & b-d \\ -(b-d) & a-c \end{pmatrix}
+$$
+
+## 4. Solving the original problem with matrices
+
+Let's solve the original problem again, this time with matrices. Define the state vector $\mathbf{s}_n$ and build the matrix $A$:
+
+$$
+\mathbf{s}_n = \begin{pmatrix} a_n \\ q^n \end{pmatrix}, \qquad A = \begin{pmatrix} p & 1 \\ 0 & q \end{pmatrix}
+$$
+
+so that $\mathbf{s}_{n+1} = A\,\mathbf{s}_n$, and hence $\mathbf{s}_n = A^{n-1}\mathbf{s}_1$. The problem becomes computing the matrix power $A^{n-1}$.
+
+Since $A$ is upper triangular, its powers are upper triangular too, with powers of $p$ and $q$ on the diagonal:
+
+$$
+A^{n-1} = \begin{pmatrix} p^{n-1} & * \\ 0 & q^{n-1} \end{pmatrix}
+$$
+
+To find the top-right entry, work out the first few powers:
+
+$$
+A^2 = \begin{pmatrix} p^2 & p + q \\ 0 & q^2 \end{pmatrix}, \qquad A^3 = \begin{pmatrix} p^3 & p^2 + pq + q^2 \\ 0 & q^3 \end{pmatrix}
+$$
+
+In general (this can be proved by induction),
+
+$$
+A^{n-1} = \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ 0 & q^{n-1} \end{pmatrix}
+$$
+
+The initial value is $a_1$, so the initial state vector is $\mathbf{s}_1 = \begin{pmatrix} a_1 \\ q \end{pmatrix}$. Substituting $A^{n-1}$:
+
+$$
+\begin{aligned}
+\mathbf{s}_n &= \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ 0 & q^{n-1} \end{pmatrix} \begin{pmatrix} a_1 \\ q \end{pmatrix} \\
+&= \begin{pmatrix} a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ q^n \end{pmatrix}
+\end{aligned}
+$$
+
+Taking the first component:
+
+$$
+a_n = a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k
+$$
+
+Notice that the sum in it is the sum of a geometric series:
+
+$$
+\begin{aligned}
+\sum_{k=0}^{n-2} p^{n-2-k}q^k &= p^{n-2} \sum_{k=0}^{n-2} \left(\frac{q}{p}\right)^k \\
+&= p^{n-2} \cdot \frac{1 - \left(\frac{q}{p}\right)^{n-1}}{1 - \frac{q}{p}} \\
+&= \frac{p^{n-1}}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right)
+\end{aligned}
+$$
+
+Therefore
+
+$$
+\begin{aligned}
+a_n &= a_1 p^{n-1} + \frac{q\,p^{n-1}}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right) \\
+&= a_1 p^{n-1} + \frac{q\,p^{n-1}}{p-q} - \frac{q^n}{p-q}
+\end{aligned}
+$$
+
+Factoring out the common term gives the same result as the method of undetermined coefficients:
+
+$$
+\boxed{a_n = \left(a_1 + \frac{q}{p-q}\right) p^{n-1} - \frac{q^n}{p-q}}
+$$
+
+So the matrix method offers a new way of looking at recurrences.

@@ -1,0 +1,96 @@
+---
+title: "Don't Worry So Much About Your Server Core and JDK Distribution"
+date: 2024-07-13
+summary: "Which server core you pick and which JDK you run barely matter. A real server owner focuses on content, balance, community and players."
+tags: [minecraft, server, essay]
+---
+
+Lately, the questions asked most often in the QQ group of Klpbbs's server plugins board (group number 332359582) are things like: which server core should I choose? Is Folia OK? Should I use Oracle or Zulu? Spark or Timings for performance reports? And other questions like these that, in practice, hardly matter.
+
+Seeing these questions made me realise something. As running a Minecraft server gets cheaper and cheaper, more and more newcomers want to try it, dreaming of a server that blows up across the internet. Because of that, they want to make their server as good as possible; and because of that, they put their attention in the wrong places. A real server owner needs to focus on the server's content, balance, community and players, so let me explain why you shouldn't pay too much attention to the rest.
+
+## Choosing a server
+
+The Java servers on the market today fall into these groups:
+
+| Type         | Names                                            | What it runs                                  |
+| ------------ | ------------------------------------------------ | --------------------------------------------- |
+| Vanilla      | Vanilla                                          | Mojang's official server; no plugins or mods  |
+| Plugins only | Bukkit, Spigot, Paper, Purpur, Pufferfish, Folia | Server plugins only, no mods                  |
+| Mods only    | Forge, Fabric, SpongeForge                       | Mods only, no server plugins                  |
+| Hybrid       | CatServer, Mohist, Banner, Arclight              | Server plugins and mods together              |
+
+The most debated question among these is: should I use Folia? It obviously comes from Folia's reputation for multithreading. But let's reread how the [Folia website](https://papermc.io/software/folia) describes its own server:
+
+
+```text
+Folia is designed to address the constant bottleneck of the Minecraft server running on a single thread causing performance issues. It is by no means a drop-in replacement for Paper.
+```
+
+Read that sentence again carefully: do you still think you really need Folia? "It is by no means a drop-in replacement for Paper" says plainly that it's a different thing from Paper. Specifically, it differs a lot from Paper in gameplay experience, plugin compatibility and stability, and it breaks many vanilla behaviours. Are you really willing to give all of that up for so-called peak performance?
+
+Now let's look at the hardware Folia recommends:
+
+```text
+What hardware will Folia run best on?
+Ideally, at least 16 cores (not threads).
+```
+
+So may I ask: does your server's hardware actually meet the recommendation? And below it, how would you make sure performance is still better than a traditional Paper server?
+
+## Choosing a JDK distribution
+
+> The JDK (Java Development Kit) is the kit developers use. The JDK includes the JRE (Java Runtime Environment), and the JVM (Java Virtual Machine) is part of the JRE; every Java program runs on a JVM.
+
+The mainstream JDK distributions for Minecraft servers today include OpenJDK, Azul Zulu, GraalVM, Oracle JDK and others.
+
+I tested the two most debated of them, OpenJDK and Azul Zulu, with this script:
+
+<details>
+<summary>Show the script</summary>
+
+```bash
+#! /bin/bash
+
+JVM_OPENJDK=openjdk-17.0.2
+JVM_ZULU=zulu17.34.19-ca-jdk17.0.3-linux_x64
+
+sudo rm -rf /home/server/jdks/test/logs*
+
+for JVM_NAME in $JVM_OPENJDK $JVM_TEMURIN $JVM_SEMERU $JVM_ZULU $JVM_ZING; do
+
+    echo '========================================'
+    echo "Start testing $JVM_NAME"
+    echo '========================================'
+
+    sudo rm -rf /home/server/jdks/test/world
+
+    mkdir logs
+    sudo nice -n -20 /home/server/jdks/$JVM_NAME/bin/java \
+              -Xmx6G -Xms6G -Xlog:gc:logs/gc.log -Xlog:gc* \
+              -jar server.jar nogui | tee logs/full.log
+
+    chmod 777 -R /home/server/jdks/test/logs
+    mv -v /home/server/jdks/test/logs /home/server/jdks/test/logs-$JVM_NAME
+
+    echo '========================================'
+    echo "Finish testing $JVM_NAME"
+    echo '========================================'
+
+done
+```
+
+</details>
+
+The results:
+
+|JDK|Chunky time|Avg. pause /ms|Avg. GC interval /s|
+|:---:|:---:|:---:|:---:|
+|OpenJDK|9'01''|50.6|8|
+|Azul Zulu|9'15''|53.4|7|
+
+It's easy to see that the two distributions people argue about most ended up almost identical in testing; in real use, you'd hardly notice any difference.
+
+## Summary
+
+In short, don't spend too much attention on your server core, JDK distribution and questions like these; put more of your energy into enriching and polishing the game content. After all, what players really care about is how fun the game is and how it feels to play, not which technical option you picked. I hope you'll put more of your time into building your server's content, so your players get more fun and more memories out of it.

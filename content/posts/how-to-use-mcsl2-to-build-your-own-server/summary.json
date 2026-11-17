@@ -1,12 +1,20 @@
 {
   "zh": {
     "text": {
-      "zh": "一步步用 MCSL 2 开服器在 Windows 上搭 Minecraft 服务器：下载解压、新建服务器（以 Purpur 1.21.1、内存 1–4 GB、Java 21 为例）、启动并同意 EULA，再用 127.0.0.1:25565 连进去。文中附有核心版本与 Java 版本的对照表，最后介绍怎样用 Sakura Frp 之类的内网穿透让朋友也能加入。",
+      "zh": "一步步用 MCSL 2 开服器在 Windows 上搭 Minecraft 服务器：下载解压、新建服务器（以 Purpur 1.21.1、内存 1–4 GB、Java 21 为例）、启动并同意 EULA，再用 127.0.0.1:25565 连进去。文中附有核心版本与 Java 版本的对照表，最后介绍怎样用 Sakura Frp 之类的内网穿透让朋友也能加入。"
+    },
+    "source": {
+      "chars": 1284,
+      "minhash": "ntMPAH6uXQCqqA4AZP8DAA/0HADOxxoAYXJNAOyTDwB/zjYAWhJDALWDagBr9ioAUDBGAOtTSwDisigAA3WoABMaCgBjXwsAnPaRAbx4AQCJPhEAOTkdAEYhEwAC97UAy7VZALMRTQCkJxQAZZAPAMXcNQCRrw4ANwwaAKR8sABWpygA+ltbAF3pTgC3OSYAQB9EACrJNADzKggABd0EAK+GDwCou0YA1w0UAIIxJgAu72oAxBY3AHVwDgBmPZQAbsZRAGc/AAC7ThAA+ZEGADoxAgB2rR0AlP8PAJZvKgB+jCcABzEKAKcfIwANWR0ACrbAAOt7OgCFRFkAFMBDAMS+CwBLQxgAQ/kEAFeAjACP/jAAfcMgAN8uHwCrIgYA+AlOAFiaNwCKql8AIhKLAA3LAwByyTsAsBcTAOSyIwBwRUAACoReAKdQeAAd5ycAvzNQABkcVABAyEAA3EAfACebMQAD13UAPVJ8AEbkXwC2CAkAlA4lAKgPKQDy9hoAIr5HAGz2JQA5QEkAJWg/ANqTUwCB3CkAmKwOAMxeDADyagIAJjhQAIvBBAApBxYAkoIcAK7SmAAIVRUAf0dFAB8tEgCmlAgA/2MFADaYHACkE2gAbp0pAIc/FgCLPx8AnZYnADt2LADIMjoALT8HAD6VNQCum10A9z0HANt9gAA="
+    }
+  },
+  "en": {
+    "text": {
       "en": "A step-by-step guide to running a Minecraft server on Windows with the MCSL 2 launcher: download and unzip it, create a server (the example uses Purpur 1.21.1, 1–4 GB of memory and Java 21), start it, accept the EULA and join at 127.0.0.1:25565. It includes a table of which Java version each Minecraft version needs, and ends with tunnelling services such as Sakura Frp so that friends can join too."
     },
     "source": {
-      "chars": 1173,
-      "minhash": "ntMPAH6uXQA/nFMAZP8DAA/0HAAtXHYAYXJNAOyTDwB/zjYAWhJDALWDagBr9ioAUDBGAOtTSwDisigAA3WoABMaCgBjXwsAnPaRAbx4AQCJPhEAOTkdAEYhEwAC97UAy7VZALMRTQD8kVgAZZAPAMRNTQCRrw4AnzwqAKR8sABWpygA+ltbAF3pTgC3OSYAQB9EACrJNADzKggABd0EAK+GDwCou0YA1w0UAIIxJgAu72oAC1ZXAHVwDgAJRxUBbsZRAGc/AAAKA1kB+ZEGADoxAgB2rR0AlP8PAJZvKgACnEEABzEKAKcfIwANWR0ACrbAAOt7OgCFRFkAmdNaADh17gBLQxgAQ/kEAFeAjACP/jAAfcMgAN8uHwCrIgYA+AlOAFiaNwCZqUsAIhKLAA3LAwByyTsAsBcTAOSyIwBwRUAACoReAKdQeAAaqc0AfaB7ABkcVACENOEA3EAfACebMQAD13UAPVJ8AEbkXwC2CAkAlA4lAKgPKQDy9hoAIr5HAGz2JQA5QEkA6evIANqTUwCB3CkAmKwOAMxeDAASBgcAJjhQAIvBBAApBxYAkoIcAK7SmAAIVRUAf0dFAB8tEgCmlAgA/2MFADaYHACkE2gAbp0pAIc/FgCLPx8AnZYnADt2LADIMjoALT8HAD6VNQCSBjcBTFkKACTWjAA="
+      "chars": 2953,
+      "minhash": "9VgQALGjCQDBVWkAIS0HAA/0HAC7IRYAhgMvAGI1OwDgzQcAFxALAOBTAwArZRwAy7MbANUxXgCIzwAAHG1JAMfRGADjawUA3ikMALx4AQDP8wsAGgAgAEYhEwBLHSAAAIEBAJXeGQCljCAAZNcZAGiCBgCRrw4AnzwqAD2HKQB61RcAg/FXAAHMGgCV9TEAtzgFADrHCQBBuQYABd0EAP7JFQBdiXUAu7UtAAPQAwAu72oAi+YtAHVwDgC+LBsAyBYGAOiaOgAIPgcA+ZEGAO9+AAB2rR0AJF9qALfbAABx/gIAytlHAE1xBQASzRUAgi8ZAK4kLgCFRFkAsAAkAHp6MwBmAQEAK1lHADZiMQDV+ywAkJ4JAJQkCgCrIgYAAD0dAHYcJwBBUzEAUO8AAKquHQAJCgkAmgQRAI2BJgByjgUA2xMCABczPAD+QBYAmsEEABkcVAAZJBkA3EAfAOvyMQCE4xYAGDQZAALsDAAd/GEA7wNkAAw5ZQCxPxgAIq8DADtNGwBseCsAWTwYAOjlBADxwRYAmO0VAER0MwBsqgsA9noIAGtgEwA80E0AyhEnADoeDQAAmQEAvGYEAB8tEgBZAAkAQdsYAF1PSAAm7FgAPV8zAM1nDgATFwAA8KcOAHQADQCXdiUArRsEAEfFGQB0xWAAAHFhAOoaDgA="
     }
   }
 }

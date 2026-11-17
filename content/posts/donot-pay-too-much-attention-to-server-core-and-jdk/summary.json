@@ -1,12 +1,20 @@
 {
   "zh": {
     "text": {
-      "zh": "开服新手最常问用哪个服务端核心、哪个 JDK，作者认为这些都不是重点。文章先把服务端分成原版、纯插件、纯模组、混合四类，引 Folia 官方的话说明它不是 Paper 的替代品，而且要 16 核以上才发挥得出来；再实测 OpenJDK 和 Azul Zulu，跑图用时和 GC 停顿都相差无几。结论是把精力放在服务器的内容、平衡和玩家社群上。",
-      "en": "New Minecraft server owners keep asking which server software and which JDK to use; the author argues it barely matters. The post sorts servers into vanilla, plugin, mod and hybrid, quotes Folia's own site that it is no drop-in replacement for Paper and wants 16 or more cores, and benchmarks OpenJDK against Azul Zulu: chunk generation time and GC pauses come out almost the same. The advice is to spend the effort on content, balance and the community instead."
+      "zh": "开服新手最常问用哪个服务端核心、哪个 JDK，作者认为这些都不是重点。文章先把服务端分成原版、纯插件、纯模组、混合四类，引 Folia 官方的话说明它不是 Paper 的替代品，而且要 16 核以上才发挥得出来；再实测 OpenJDK 和 Azul Zulu，跑图用时和 GC 停顿都相差无几。结论是把精力放在服务器的内容、平衡和玩家社群上。"
     },
     "source": {
       "chars": 2439,
       "minhash": "R2FQAJFsDAAtdQQAJtcyAMUDCwAEQpQAxtEDALPScgCNGxYAJdB0ALnlEACzbgsA1MdiAIKPEgCzJhUAQ8gxADPsFQAjCSIA8pcaALx4AQBsElsAqQQaANnzKQBQNwMANFwnAOAXTACNrCEA5GsmADebfgApjG8Am9sJANiECwCCcSMAOmlAACsCBgBTCxoALENMAFSMPgAPnkwAR8xGAOK5NQB7RxUA2ncGAH/GFwCI7RMACK8QAFKlAQAm+2wAWG1iAOS4DQCefjIAdcMSAFbXEwD30AEAu5YOANEnHQDRUx4AwUwBAE1xBQBhGxMATEkoAHjPEwBsMBQA8tgIAHp6MwCgSg4AIsAJAJxlLgBH7CwAgtEvAPowCQBjmRoAqScMAAtVQgCCRAcAr50gAHUtGwAhWzUAsBcTAAldCgBs5ykAClIjALtVKABLWCIA+5AKAPepWQApyBoAMu0ZAEW4QQAjAKIAnfkeAK+AFAAJdkIA7icHAIDgGgBRTwwA1UwKAANlAgD6OAYAec44ACIEQwDFHhMAtR8VAMhrCQCGrwAA4aEuAIfTbgDHHQcA/OEcADXTAgDawEQAYKCDALnYFgA4qjAALRoGAHU0AgCiEwwAU79hAM1nDgATFwAAMF4qAD5gIABYbDgArRsEAM+tCAAbSBAAVlwOALYlFgA="
+    }
+  },
+  "en": {
+    "text": {
+      "en": "New Minecraft server owners keep asking which server software and which JDK to use; the author argues it barely matters. The post sorts servers into vanilla, plugin, mod and hybrid, quotes Folia's own site that it is no drop-in replacement for Paper and wants 16 or more cores, and benchmarks OpenJDK against Azul Zulu: chunk generation time and GC pauses come out almost the same. The advice is to spend the effort on content, balance and the community instead."
+    },
+    "source": {
+      "chars": 4067,
+      "minhash": "R2FQAJFsDAAChxAAJtcyAAe4LwC7IRYAqOshAEr4DADgzQcALHsGAARvVwBp5CYAiEYYADmGDgCaGQwAPm4RAId5KgCtwQIA8pcaALx4AQCd4gUAYiILAKENFADD0gkANFwnAE9tPQCNrCEAHPkzAEJvhgDdbQIAxkEgAHFeOwAw9BYAzdMOAKU4BwCTKgAA61ElAIhFIQBBuQYAPvoPAFDxKQAlyTAA2ncGAK9eTACI7RMACK8QAFKlAQAvlUcAHzJNABOPAgACMTsAdcMSAFZZAAD30AEAFfgHABy3CQDI3BQAwUwBAE1xBQDTKB4ATEkoAHjPEwDyngQAa/gFAOIbAQCgSg4ArzoVAIUrBgBH7CwADPsZAJQkCgA3yocAAD0dADutHQBphQQA5w4EALxZFwAm3ygADiQHAAldCgB48QYA2xMCABqZCwBjpQ0A+5AKAMTZNQD2tQkAMu0ZANrrMwDC3AEAn/ZlAD08HAATNDEA7icHANqAGgBocxkAIq8DAEe2MAD6OAYA5d0BANlVDwDFHhMAtR8VAChRBQCGrwAAnN8YAAx6IwDHHQcA4xQhADXTAgAAmQEAUKURAE/wEACQRCAALRoGAO1bHgDkrQ0AtWMBAM1nDgATFwAALr0gAGHiCQC/xCgArRsEAEfFGQAbSBAAGu0FAOoaDgA="
     }
   }
 }

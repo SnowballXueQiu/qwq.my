@@ -1,12 +1,20 @@
 {
   "zh": {
     "text": {
-      "zh": "作者随手写的整活项目 sb.h 意外出圈：先在小红书被评论区围攻，接着被 X 上的 hsn、雲鳩转发，还上了开源中国的公众号。作者对谩骂一笑置之，对开源中国只追热点有些失望，总结说：骂归骂，项目火了是真的。",
-      "en": "sb.h, a joke project the author threw together, unexpectedly went viral: piled on in the comments on Xiaohongshu, reposted on X by hsn and 雲鳩, and picked up by OSChina's WeChat account. The author laughs off the abuse, is a little disappointed that OSChina only chases what's trending, and sums it up: they may be cursing it, but the project really did take off."
+      "zh": "作者随手写的整活项目 sb.h 意外出圈：先在小红书被评论区围攻，接着被 X 上的 hsn、雲鳩转发，还上了开源中国的公众号。作者对谩骂一笑置之，对开源中国只追热点有些失望，总结说：骂归骂，项目火了是真的。"
     },
     "source": {
       "chars": 685,
       "minhash": "wNsEAB6BCAEYyP8A/89PAIf9VgBVPDAA5ykwADz8DAAHOk8Av5gBAE2YggAsRQIAZyqEAPyWGQAYHaEAb3++AHqRSwBoCFAAYNjyAHIaRQDIkSIA0E1/AOU1nAAlgUcA1tDCABKGBgC9iCwATSsoAArIAADAWD4AoKMdAKk5GgBE7F8ADGNFAVqMnwDPfTIA/j11AArQgwB9pUgBWm52AAw5EADGSH8AV7xYAMpImADtvWgAVyOlAE+WIAAArUcBj4QYAVMsIwBSbQwAijwcAHuSFQDfbw0AhjgKAAD7ZwCa48EAUwfnAFziDADmtwoAeQo/AAr73wC0fzkAiBKJAFfYTgC2H00AGP8/AHzQUgBshYEAn9xEAEttIgBmVnUAe2g2AGclegAY+bYANGklAETuAgAShgkAQyR/ADo1EAC0qzsAJZpmAIDXGAC6IR0A3dzyACXrBgBn0BEA800GALWanADWqb4AU8NEABBFEgAOYrcBe5OgAPy0DgCEyb4A4nW6AEfyhgDmmB8AvDUhAIqtzAC9ogsAZgYOAJw0JQB11rQAnANMAMWHbgCKITwAi1GfAHlDjgDw7GAAN+MjAAqlSgChQcUAYGEqAKlsGQBMbBsAvhIqAM7X5gAlinkAxLwgAPeXOQBw0VsA72GzAF7UmwBCRzoA+EIYAOpRTgA="
+    }
+  },
+  "en": {
+    "text": {
+      "en": "sb.h, a joke project the author threw together, unexpectedly went viral: piled on in the comments on Xiaohongshu, reposted on X by hsn and 雲鳩, and picked up by OSChina's WeChat account. The author laughs off the abuse, is a little disappointed that OSChina only chases what's trending, and sums it up: they may be cursing it, but the project really did take off."
+    },
+    "source": {
+      "chars": 2045,
+      "minhash": "jQUBADcyDAAeoSEAYXwTAAe4LwA02mgAcd8EAIuFFQDgzQcA16IkAExWHQBp5CYAVIsUANcyLAACtQEAa2YLAM8xOQDL8wAAgSQbAPGJbABMBBUAGgAgAIBXXABPDwsAH8UzABECMwBXaAYAibozAMSIFADdbQIAEI45AHFeOwCzfr8AzdMOAKU4BwDpuCcA61ElAIhFIQBBuQYAq/8UAOHYNQDthQIA1K0xAJj6FwAIfyQAty5VAFaDDwDvwRIAtQRnAJVaCABioj4A6gUAANP4CwCqbBUAI3AGALfbAAB3uh0AcLAhAE1xBQDTKB4AS2kHAIgtVAArDC4AlOtBAEKDFgAOVwgAbXhYAIUrBgAUTCsAkJ4JAFc9SQBQxkkA2RoLAPJ9EACCRAcA5w4EAPQpJQAKCwEA7pplAE2OPQCUNToByQIQAMnJSQBzCwIAjoMTAGLXUwCv7gcAx7oyAevyMQATIQ0AJyAMAIgVdwCRy0EAa9kNANqAGgCBhQcAIq8DAC5AZQCHABIA3AJAACjZHQCG/h0ARRlaAIrsQQBsqgsAnN8YAGtgEwAR/CsAG6QQADQWFAAAmQEAXpoJAFvxAwDrUSoA1f8PAF1PSADkrQ0AtWMBACRJGADkFEQAyAQWAK49ggCxBDwA7RsPAIebFAAX0wEAgOh5ALYlFgA="
     }
   }
 }

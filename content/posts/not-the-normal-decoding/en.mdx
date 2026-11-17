@@ -1,0 +1,181 @@
+---
+title: "Decoding, Differently"
+date: 2024-10-24
+summary: "On Programmers' Day (10.24) I came across a \"guess the poem from the code\" picture and tried to decode each snippet back into its line of classical Chinese poetry."
+tags: [code]
+---
+
+Today is **10.24**, Programmers' Day in China, and I happened to come across a really fun picture:
+
+![Image 1](/blog/not-the-normal-decoding/01.webp)
+
+It shows a "guess the poem from the code" activity, where programmers' code logic stands in for lines of classical Chinese poetry. I found it great fun, so I had a go at answering:
+
+## 1. `item && !people`
+
+```javascript
+if (item && !people) {
+    everything = false;
+}
+
+if (tears.setFlowing()) {
+    try {
+        Speakerskr = newSpeaker();
+    } catch (IOException e) { }
+}
+```
+
+**Answer**: 物是人非事事休，欲语泪先流
+
+*Things remain, but the people are gone, and all is at an end; I would speak, but the tears come first.*
+
+**Explanation**: In the code, `item && !people` means "the things are here, but the people aren't", which is 物是人非, "things remain, but the people are gone"; and `tears.setFlowing()` is the tears that "come first".
+
+**Source**: Li Qingzhao, *Wuling Chun: Late Spring*
+
+## 2. `cutWater(getKnife())`
+
+```javascript
+cutWater(getKnife())(water++);
+reduceWorry(toast)(worry++);
+```
+
+**Answer**: 抽刀断水水更流，举杯消愁愁更愁
+
+*Draw a blade to cut the water, and the water only flows on; raise a cup to drown your sorrow, and the sorrow only grows.*
+
+**Explanation**: `cutWater` is "cutting the water with a blade", while `water++` shows the water still flowing; `reduceWorry` tries to "drown the sorrow", but `worry++` shows the sorrow growing anyway.
+
+**Source**: Li Bai, *Farewell to My Uncle Yun, the Collator, at Xie Tiao's Pavilion in Xuanzhou*
+
+## 3. `Seeking++`
+
+```javascript
+Seeking++;
+Loneliness++;
+(Misery++) + (Sadness++);
+```
+
+**Answer**: 寻寻觅觅，冷冷清清，凄凄惨惨戚戚
+
+*Searching, seeking; cold and cheerless; wretched, miserable, grieving.*
+
+**Explanation**: By incrementing "Seeking", "Loneliness", "Misery" and "Sadness", this code conveys desolation and loneliness.
+
+**Source**: Li Qingzhao, *Shengsheng Man: Searching, Seeking*
+
+## 4. `FALSE == true`
+
+```javascript
+if(FALSE == true) TRUE = false;
+if(NULL == exist) exist = NULL;
+```
+
+**Answer**: 假作真时真亦假，无为有处有还无
+
+*When the false is taken for true, the true becomes false; where nothing is taken for something, something becomes nothing.*
+
+**Explanation**: This code plays with true and false (`FALSE == true`) and with existence (`NULL == exist`): when the false is taken for true, the true becomes false too; and where there seems to be something, there is in fact nothing.
+
+**Source**: Cao Xueqin, *Dream of the Red Chamber*
+
+## 5. `tomorrow.hasNext()`
+
+```javascript
+while(tomorrow.hasNext()) {
+    howMany(tomorrow);
+    tomorrow.next();
+}
+this.wait(WHOLE_LIFE);
+return (null == everything)? null: null;
+```
+
+**Answer**: 明日复明日，明日何其多，我生待明日，万事成蹉跎
+
+*Tomorrow, and tomorrow again: how many tomorrows there are! If I spend my life waiting for tomorrow, everything will slip away.*
+
+**Explanation**: The code loops endlessly over "tomorrow", the never-ending wait of "tomorrow, and tomorrow again". The program waits a whole lifetime (`this.wait(WHOLE_LIFE)`) and finally returns a meaningless result (`return null`): waiting for tomorrow only lets everything come to nothing.
+
+**Source**: Qian Fu, *Song of Tomorrow*
+
+## 6. `bronzeBird.lock(bigQiao)`
+
+```javascript
+if(leastWind.help(zhouyu)) {
+    season=spring;
+    bronzeBird.lock(bigQiao);
+    bronzeBird.lock(smallQiao);
+}
+```
+
+**Answer**: 东风不与周郎便，铜雀春深锁二乔
+
+*Had the east wind not favoured young Zhou, the two Qiao sisters would be locked in the Bronze Sparrow Terrace, deep in spring.*
+
+**Explanation**: This code pictures the east wind helping Zhou Yu and the two Qiao sisters locked in the Bronze Sparrow Terrace. `leastWind.help(zhouyu)` stands for the east wind helping Zhou Yu, while `bronzeBird.lock(bigQiao)` and `bronzeBird.lock(smallQiao)` point to the elder and younger Qiao being locked away in the terrace.
+
+**Source**: Du Mu, *Red Cliff*
+
+## 7. `hold ? fish : palm`
+
+```javascript
+hold ? fish : palm;
+```
+
+**Answer**: 鱼与熊掌不可兼得
+
+*You can't have both the fish and the bear's paw.*
+
+**Explanation**: The ternary `hold ? fish : palm` is a choice of one or the other: choose the fish and you can't have the bear's paw, and vice versa.
+
+**Source**: Mencius, *Gaozi I: Fish Is What I Want*
+
+## 8. `TheMoon.GetInstance()`
+
+```javascript
+if(this.Head.SetDirection(TheMoon.GetInstance().Position)) {
+    this.Head.SetDirection(GROUND_DIRECTION);
+    this.ThinkAbout(this.OriginalPlace);
+}
+```
+
+**Answer**: 举头望明月，低头思故乡
+
+*I raise my head to gaze at the bright moon, then lower it, thinking of home.*
+
+**Explanation**: This code describes turning the head toward the moon (`this.Head.SetDirection(TheMoon.GetInstance().Position)`), then turning it toward the ground (`this.Head.SetDirection(GROUND_DIRECTION)`) and thinking of the place one came from (`this.ThinkAbout(this.OriginalPlace)`). That's the scene in the poem: first looking up at the bright moon, then lowering the head and missing home.
+
+**Source**: Li Bai, *Quiet Night Thoughts*
+
+## 9. `others.rejoice()`
+
+```javascript
+if(others.rejoice()==true) (self.rejoice());
+else (self.worry());
+```
+
+**Answer**: 乐人之乐, 人亦乐其乐；忧人之忧, 人亦忧其忧
+
+*Rejoice in others' joy, and they will rejoice in yours; grieve at others' sorrow, and they will grieve at yours.*
+
+**Explanation**: The code says: when others are happy, you are happy too (`self.rejoice()`), and when others are sad, you worry too (`self.worry()`). That fits the line very well: caring about others and sharing their feelings.
+
+**Source**: Mencius, *King Hui of Liang II*
+
+## 10. `building.level++`
+
+```javascript
+if(sight.getRange()<=1000) building.level++;
+```
+
+**Answer**: 欲穷千里目，更上一层楼
+
+*To see a thousand li further, climb one more storey.*
+
+**Explanation**: When the view reaches 1000 or less, the building's level goes up: to see further, you have to climb higher. It echoes "climb one more storey": broadening your view by always raising yourself.
+
+**Source**: Wang Zhihuan, *On the Stork Tower*
+
+---
+
+If I got anything wrong, corrections and additions are welcome!

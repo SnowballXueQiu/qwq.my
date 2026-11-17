@@ -1,0 +1,88 @@
+---
+title: "How to Set Up Your Own Server with MCSL 2"
+date: 2024-12-27
+summary: "Set up your own Minecraft server with the MCSL 2 launcher, from downloading it to port forwarding."
+tags: [minecraft, server]
+---
+
+## 1. Download
+
+Go to [the download page](https://drive.zyghit.cn/s/y1Fk?path=%2F) and pick the version for your system. I'll use Windows for this walkthrough:
+
+![The download page: pick the Windows archive](/blog/how-to-use-mcsl2-to-build-your-own-server/01.webp)
+
+If your browser blocks the download, choose "Keep" or "Allow" to continue. If your connection is slow, a download manager can speed things up.
+
+---
+
+## 2. Open it
+
+Extract the archive and move it somewhere sensible, then find `MCSL2.exe` in the folder and double-click it:
+
+![Find MCSL2.exe in the extracted folder](/blog/how-to-use-mcsl2-to-build-your-own-server/02.webp)
+
+If a firewall prompt pops up, choose "Allow access". If it asks for administrator rights, right-click and choose "Run as administrator".
+
+---
+
+## 3. Configure a new server
+
+Click the **New** (新建) icon in the interface. I suggest choosing **Simple mode** (简易模式) and configuring it to suit your needs. As an example I'll use a Purpur 1.21.1 server, with memory set to 1024M–4096M (1G = 1024M) and Java 21.0.2.
+
+If you don't have Java or a server jar yet, use the **Download Java** (下载 Java) and **Download core** (下载核心) buttons in the interface (Bedrock Edition is supported too; see inside the app).
+
+!["New" (新建) on the left of the home page](/blog/how-to-use-mcsl2-to-build-your-own-server/03.webp)
+
+![Simple mode: choose Java, set the memory, download a core, then save](/blog/how-to-use-mcsl2-to-build-your-own-server/04.webp)
+
+### Server versions and the Java they need
+
+| Server version                | Java version              |
+|-------------------------------|---------------------------|
+| 1.0 - 1.11.x                  | Java 6 / Java 7 / Java 8  |
+| 1.12 (17w13a) - 1.16.5        | Java 8                    |
+| 1.17 (21w19a) - 1.17.1        | Java 16 / Java 17         |
+| 1.18 (1.18-pre2) - 1.20.4     | Java 17                   |
+| 1.20.5 (24w14a)               | Java 21                   |
+
+If you're unsure what an option means while configuring, check the hints in the interface or the relevant documentation.
+
+---
+
+## 4. Start the server
+
+Click **Manage** (管理), find the server you just configured, click **Start** (启动) and **accept the EULA**. Wait a moment; when it says "Server started; see the quick terminal for details" (服务器启动完毕，详情请到快捷终端查看。), you can join.
+
+In your Minecraft client, add a server with the address `127.0.0.1:25565` and you're in. You can also change the port and other settings in `server.properties`; see the [Minecraft Wiki](https://minecraft.wiki/w/Server.properties) for details.
+
+!["Select server" (选择服务器) in the bottom right of the home page](/blog/how-to-use-mcsl2-to-build-your-own-server/05.webp)
+
+![The Manage page: find the server you just set up and click "Start" (启动)](/blog/how-to-use-mcsl2-to-build-your-own-server/06.webp)
+
+![Started: a notice pops up in the bottom right](/blog/how-to-use-mcsl2-to-build-your-own-server/07.webp)
+
+If the server fails to start, check the log files or try a different Java version.
+
+---
+
+## 5. Set up port forwarding
+
+If you want friends to join your server, you need to set up port forwarding (NAT traversal). There are several platforms to choose from, such as Sakura Frp, whose website has fairly detailed tutorials.
+
+Once port forwarding is set up, friends can connect to your server through a public address. Make sure you pick a suitable port and configure your router correctly.
+
+And that's it: you're now running a Minecraft server of your own!
+
+---
+
+## 6. More information
+
+1. Official website: [mcsl.com.cn](https://mcsl.com.cn/)
+2. GitHub: [MCSLTeam/MCSL2](https://github.com/MCSLTeam/MCSL2)
+3. Official QQ group: [join](https://qm.qq.com/q/JEGxwfmyA2)
+4. Video introduction on Bilibili (in Chinese): [watch](https://www.bilibili.com/video/BV1rN411z7no/)
+
+---
+
+> **Notice**: this open-source project is released under the GPL-3.0 license and is completely free; reselling it or anything similar will be pursued.
+> [Read the license](https://raw.githubusercontent.com/MCSLTeam/MCSL2/master/LICENSE)

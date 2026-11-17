@@ -1,12 +1,20 @@
 {
   "zh": {
     "text": {
-      "zh": "从递推式 aₙ₊₁ = p·aₙ + qⁿ（p ≠ q）出发，先用待定系数法凑出等比数列 bₙ = aₙ + qⁿ / (p − q)，求出通项 aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q)。再追问这种「变换系数」的做法背后是什么：借复数和 2×2 矩阵的对应引出线性变换，把递推写成状态向量乘矩阵 sₙ₊₁ = A·sₙ，用 Aⁿ⁻¹ 右上角的等比求和算出同一个通项。",
-      "en": "Starting from the recurrence aₙ₊₁ = p·aₙ + qⁿ (with p ≠ q), the method of undetermined coefficients builds the geometric sequence bₙ = aₙ + qⁿ / (p − q) and gives aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q). The post then asks what this juggling of coefficients really is: by writing complex numbers as 2×2 matrices it arrives at linear maps, rewrites the recurrence as a state vector times a matrix, sₙ₊₁ = A·sₙ, and recovers the same formula from the geometric sum in the corner of Aⁿ⁻¹."
+      "zh": "从递推式 aₙ₊₁ = p·aₙ + qⁿ（p ≠ q）出发，先用待定系数法凑出等比数列 bₙ = aₙ + qⁿ / (p − q)，求出通项 aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q)。再追问这种「变换系数」的做法背后是什么：借复数和 2×2 矩阵的对应引出线性变换，把递推写成状态向量乘矩阵 sₙ₊₁ = A·sₙ，用 Aⁿ⁻¹ 右上角的等比求和算出同一个通项。"
     },
     "source": {
       "chars": 3373,
       "minhash": "Z1xfAA+2CAAB12oAh18JAE1wTAB7aCgAjR5NABkkQgA4tGwAATlnAPRaGADJvwwAP70AAD+hDABPlhoAUb5aAI+EOQCM1gsADDkaAJZTDAB7rVUAdFQvACg3JACnbiYAGyanAO90MQAmpTYAQe4fAFVXPADiB0IACTdFABVlAQAHXRkAZeNSANA7SwAajEoAt84lAHnSFAA3XAEAo50DADzNJwDpkAAA8dNuAA5OZwC65ywAtvQ6AH6XBQA3LRcAV30aAJztcABLQY4AlvQkAER4GgC8tRAA1s4PAPBBJQB3ygcAC+oOAPujcABVSBAAf8kFAH0VEQA1qR4A9u+HAB3cAQA7lAQAbbINALAGCACZZaAASAIkADKaCABjeyYAOY0uAJ6kAwDCOzwA7z4vAGHSFgCn0E4AyLcJACMDpwADDx4Ag8J4ALcgAwDUXg0Atr80AHlkOABTagcAkwMtAJ8qBAAyqIIAKW4KAKs7CwDILCoAYLsTAOfxFgCVsxEA8QsoANWuCADBpAcA/6gAAJJ9DACF6TUATLJaAIgQBAAIHAgAdoQZAHf/MAAfgwoA0a0rAGpjAwBj7AgASMNIAGPkPACO3QAAQFkPABl+SwCoHUQARIQGAGszXAC1VV0ARP0SACM2JACRtBsAK8oRAEFugQBPqxQASfQdAM7KDwA="
+    }
+  },
+  "en": {
+    "text": {
+      "en": "Starting from the recurrence aₙ₊₁ = p·aₙ + qⁿ (with p ≠ q), the method of undetermined coefficients builds the geometric sequence bₙ = aₙ + qⁿ / (p − q) and gives aₙ = (a₁ + q / (p − q))·pⁿ⁻¹ − qⁿ / (p − q). The post then asks what this juggling of coefficients really is: by writing complex numbers as 2×2 matrices it arrives at linear maps, rewrites the recurrence as a state vector times a matrix, sₙ₊₁ = A·sₙ, and recovers the same formula from the geometric sum in the corner of Aⁿ⁻¹."
+    },
+    "source": {
+      "chars": 5945,
+      "minhash": "3l4MADcyDAAB12oAh18JABzOJQBdVQsA98dWAIuFFQBUYCEA1JMFAOBTAwDJvwwAHoAdAD+hDABUYhMA9h4AAMfRGACtwQIAphQZAKpODwBVLg0AGgAgAKNtJgBLHSAAAIEBADXDCgDdFDAAQe4fACrVVwAuhQgAgEAaAB/8BQAN+wEAzdMOAHDZQwCTKgAAt84lAHnSFAC3iw0AtRYlADzNJwCgWxIAI1cxALdsFQCLzCgAmOQeAAP4EwALxi4AqMMAAC/1BwDvpyEAiFkGAO9+AAADoA4AI3AGAI37DwBLRggAVYgBAGjxCgDTKB4Agi8ZAMESFADyngQAh0VKACaBCgBmAQEAvgsnAIUrBgDNEh4AFloJABP+AACWgxkAULIVAPJ9EAApVh8A5w4EAPQpJQDoLhcA3e4HANHXGgB48QYA4H8FALcgAwDl1xIAjikQACz4HQBM4QAA7hIZAKnVBgCFFhgAWpIOAKs7CwA9UBcAV4QVANsuCACgKF0AYrwEANWuCACHqw8AUFoPAPDkFACB3CkAXgohAIgQBAArRFQAr7QBAHf/MADHHQcA4xQhAGpjAwAAmQEAvGYEAFvxAwC3pgsA1f8PAJIyAwDkrQ0A6RYDALvdBAC4kxgAFcsSAHeqMgC/xCgA/TUsAKlzHQBPqxQARdYVAOoaDgA="
     }
   }
 }

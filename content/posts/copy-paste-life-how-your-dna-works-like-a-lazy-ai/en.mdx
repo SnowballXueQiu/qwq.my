@@ -1,0 +1,173 @@
+---
+title: "Copy-Paste Life: Your DNA Is Basically a Lazy AI"
+date: 2025-03-31
+summary: "How alike are the gene assembly line in your body (the central dogma) and the AI world's recurrent neural networks (RNNs)?"
+tags: [ai, biology]
+---
+
+### **When DNA becomes code: could there be an AI program hiding in your cells?**
+
+You know DNA is life's "source code", but you may never have thought that **it runs on the same underlying logic as TikTok's recommendation algorithm!**
+
+No lofty theory today. Let's just chat, in plain words, about how alike two things are: the gene assembly line in your body (the central dogma), and the AI world's magic tool, the recurrent neural network (RNN).
+
+<Figure n="00" caption="DNA really can be read as code: give each of the four bases a two-bit binary number, and wherever the red line sweeps, bases and binary translate into each other. Move your mouse over the helix and the red line follows you.">
+  <HelixCode lang="en" />
+</Figure>
+
+---
+
+### **1. Your cells are very efficient office workers**
+Imagine your cell is a wage slave working overtime around the clock, and DNA is the PowerPoint deck on its desk that never gets finished. But DNA has one quirk: **it only stores things; it never does any work!** So it came up with a slick routine:
+
+1. **Step one: pass the buck (transcription)**
+   DNA dumps the whole job on its little helper, mRNA: "Go copy this stretch of code and hand it to the protein department next door!"
+   mRNA, baffled: "Boss, this double helix of yours is way too complicated. Can I just copy it out as a single strand?"
+   DNA: "Whatever, just don't make me move."
+
+2. **Step two: translation (translation in the literal sense)**
+   mRNA carries the code out to the cytoplasm and runs into a bunch of translators called ribosomes. A ribosome squints at the code:
+
+   $$
+   \text{AUG} \rightarrow \text{methionine (start)}, \quad \text{UCU} \rightarrow \text{serine}, \quad \ldots
+   $$
+
+   Every three letters stand for one amino acid; string them into a chain, and **a protein is born!**
+
+3. **Step three: the hired hand clocks in**
+   The new protein, looking lost: "So what am I supposed to do now?"
+   DNA, giving orders remotely:
+
+   $$
+   \text{protein} = \begin{cases}
+   \text{enzyme} & \text{catalyses reactions} \\
+   \text{muscle fibre} & \text{moves muscles} \\
+   \text{antibody} & \text{built for fighting}
+   \end{cases}
+   $$
+
+<Figure n="01" caption="The central dogma, start to finish: transcription, the mRNA leaving the nucleus, translation, the stop. Drag the slider to see any step, or swap in another gene. The gene here is only 18 bases long; real genes are much longer.">
+  <CentralDogma lang="en" />
+</Figure>
+
+Put simply, **DNA is the domineering CEO, RNA the errand-running assistant, and proteins the long-suffering staff who do all the work.**
+
+---
+
+### **2. The AI world's "memory master": the RNN's art of slacking off**
+Now a change of scene: why can the keyboard on your phone guess that your next message will be "hahaha"? Credit goes to the **RNN (recurrent neural network)**, an AI model that gets by on a good memory.
+
+#### **A day in the life of an RNN: slacking off while looking busy**
+1. **Input layer: what did the boss say today?**
+   Say you're typing "I want to eat __" (the figure below runs the same sentence in Chinese, 我 · 想 · 吃). The input layer is the word "eat" at this moment:
+
+   $$
+   x^{<t>} = \text{eat}
+   $$
+
+2. **Hidden layer: the slacker's notebook in its head**
+   The RNN's hidden layer is a real character: on the surface it's listening carefully to the boss (the input layer), but secretly it's jotting things down in a little notebook:
+
+   $$
+   h^{<t>} = \tanh(W_{xh}x^{<t>} + W_{hh}h^{<t-1>} + b_h)
+   $$
+
+   - **$h^{<t>}$**: the hidden state at this moment (the AI's "working memory")
+   - **$W_{xh}$**: input weights (decide how much new information matters)
+   - **$x^{<t>}$**: the current input (say, the word "eat")
+   - **$W_{hh}$**: recurrent weights (decide how much memory is kept)
+   - **$h^{<t-1>}$**: the memory from the previous step (yesterday's progress)
+   - **$b_h$**: bias (the AI's "default attitude to work")
+   - **$\tanh$**: activation function (keeps the memory values from blowing up)
+
+   Don't worry if it doesn't make sense: **just think of it as the AI quietly writing a cheat sheet.**
+
+3. **Output layer: talking nonsense with a straight face**
+   Going by its cheat sheet, the RNN starts its act:
+
+   $$
+   y^{<t>} = \text{softmax}(W_{hy}h^{<t>} + b_y)
+   $$
+
+   - **$y^{<t>}$**: the prediction (say, the probability of "barbecue")
+   - **$W_{hy}$**: output weights (turn memory into a prediction)
+   - **softmax**: normalises probabilities (makes sure all the options add up to 1)
+   - **$b_y$**: output bias (the AI's "prediction preferences")
+
+   "Based on past records, there's an 80% chance this person continues with 'barbecue' and a 20% chance with 'going on a diet', but the latter is just inhumane, so let's go with 'barbecue'!"
+
+<Figure n="02" caption="An RNN unrolled over time: every step uses the same weights to combine the new word with the memory h from the step before, then guesses the next word. Switch the memory off and it can only see the word in front of it. A sketch: the weights are random and the probabilities are made up.">
+  <RnnUnroll lang="en" />
+</Figure>
+
+---
+
+### **3. Shocking! DNA and the RNN are long-lost brothers?**
+Put the two side by side and you'll find that **life and AI are copying each other's homework!**
+
+| Biology                              | The AI's slick moves                             | In maths |
+|--------------------------------------|--------------------------------------------------|---------|
+| DNA stays home and does no work      | The input layer passes data on without thinking  | $\text{DNA} \to \text{RNA}$ |
+| RNA relays the job and takes the blame | The hidden layer keeps secret accounts         | $h_t = f(x_t, h_{t-1})$ |
+| Proteins work themselves to the bone | The output layer is forced to produce results    | $y_t = g(h_t)$ |
+
+#### **1. The assembly-line routine works anywhere in the universe**
+Cells and AI alike run the classic play of **"the boss passes the buck → middle management muddles through → the bottom rung does the work"**. The difference is that DNA's version has been evolving for 3.8 billion years, while the RNN is something a programmer dreamed up over a cup of coffee…
+
+#### **2. A bad memory brings the whole thing down**
+If mRNA leaves out part of DNA's instructions:
+
+$$
+\text{mutant protein} = \text{original protein} + \text{garbage}
+$$
+
+If an RNN forgets what came before:
+
+$$
+y^{<t>} = \text{I love Beijing roast duck} \quad (\text{should be: Tiananmen})
+$$
+
+(That's a famous Chinese children's song, *I Love Beijing Tiananmen*.) **See? People and AI crash in exactly the same way when their memory fails!**
+
+#### **3. Adaptation? It's really just giving up**
+Enzymes go on strike in the heat:
+
+$$
+\text{enzyme activity} = \begin{cases}
+100\% & \text{at 37°C} \\
+0\% & \text{in a hotpot}
+\end{cases}
+$$
+
+An RNN meets a rare word:
+
+$$
+y^{<t>} = \text{[UNK]} \quad (\text{unknown token})
+$$
+
+**At heart they're both saying: "This one's beyond the syllabus, I'll just take a wild guess…"**
+
+---
+
+### **4. A lesson for humans: is slacking off the real productive force?**
+From cells to AI, every system proves one truth: **those who can pass the buck are the ones who survive!**
+- DNA survives by passing the buck to RNA:
+
+  $$
+  \text{DNA} \xrightarrow{\text{transcription}} \text{RNA} \xrightarrow{\text{translation}} \text{protein}
+  $$
+
+- The RNN survives by keeping secret accounts in its hidden layer:
+
+  $$
+  h^{<t>} = \tanh(\text{current input} + \text{last memory})
+  $$
+
+So the next time your boss says you're inefficient, tell them with your head held high: **"I'm copying DNA's optimal survival strategy!"**
+
+Now look at it the other way round: isn't the RNN's process strikingly like the **translation** you learned about in high-school biology?
+
+---
+
+**One last hot take**:
+> Biology spent 3.8 billion years writing an RNN; humans knocked off a DNA in 30. **When it comes to copying, humans are faster!**

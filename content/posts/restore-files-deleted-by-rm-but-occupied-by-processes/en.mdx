@@ -1,0 +1,113 @@
+---
+title: "Recovering Files Deleted by rm but Still Held by a Process"
+date: 2024-07-13
+summary: "Termius autocompleted cd into rm -rf. If a process still holds the files open, you can fish them back out of /proc."
+tags: [linux, server]
+---
+
+> Something very unlucky happened last month: while I was happily getting ready to write a menu system for my Minecraft server, Termius, for reasons unknown, autocompleted the `cd ./server` I meant to type into `rm -rf ./server`. Luckily it ended with a close shave, and I got back more than 95% of the data.
+
+---
+
+## When this works
+
+- **The file is still open in a running process.** This also means that while you recover, you mustn't kill that process or shut the machine down.
+
+## Steps
+
+1. A file is deleted by mistake, but a process still has it open.
+
+   ```bash
+   $ rm test.sh
+   ```
+
+2. Use lsof to list files that have been deleted but are still held by a process:
+
+   ```bash
+   $ lsof | grep -i delete | grep speed
+   sh  6567  root  4r  REG  253,0  865  /home/test.sh(deleted)
+   ```
+
+   - The first field, `sh`, is the process name; the second, `6567`, is the process ID.
+
+3. Go into the process's directory:
+
+   ```bash
+   $ cd /proc/6567/fd
+   $ ls -la
+   lr-x------. 1 root root 64 July 13 02:10 4 -> /home/test.sh (deleted)
+   ```
+
+   - The ninth field, `4`, is the file descriptor.
+
+4. Recover it:
+
+   ```bash
+   $ cat 4 > /home/test.sh
+   ```
+
+---
+
+## Recovering a folder
+
+- If what got deleted was a whole folder, recovering by hand like this is far too tedious, especially when there are lots of small files. So let's use a small program to recover them in bulk.
+
+- Before that, you need to export every file from step 2 that needs recovering into a log file; I won't go into that here.
+
+    ```rust
+    use std::fs;
+    use std::io::Read;
+
+    fn main() {
+        let mut log_file = fs::File::open("/home/deleted_files.log").unwrap(); // path to the list of files to recover
+        let mut logs = String::new();
+        log_file.read_to_string(&mut logs).unwrap();
+        let mut command = String::new();
+        let mut paths = Vec::new();
+
+        let logs = logs.split("\n");
+
+        for log in logs {
+            let log = log.split_whitespace().collect::<Vec<&str>>();
+
+            if log.len() < 12 {
+                continue;
+            }
+
+            let number = log[8]; // 8 is the column holding the file descriptor; adjust it to match your file
+            let path = log[10]; // 10 is the column holding the original path; adjust it to match your file
+
+            if !path.starts_with("/home") { // the folder you're recovering into
+                continue;
+            }
+
+            println!("{}: {}", number, path);
+            command.push_str(format!("cat {} > ~/recovery{}\n", number, path).as_str());
+
+            let path = path.split("/").collect::<Vec<&str>>();
+            let path = path[..path.len() - 1].join("/");
+            let path = format!("~/recovery{}", path);
+
+            if !paths.contains(&path) {
+                paths.push(path);
+            }
+        }
+
+        let mut complete_cmd = String::new();
+
+        for path in paths {
+            complete_cmd.push_str(format!("mkdir -p {}\n", path).as_str());
+        }
+
+        println!("{}", complete_cmd);
+        complete_cmd.push_str(&command);
+
+        fs::write("recovery.sh", complete_cmd).unwrap();
+    }
+    ```
+
+- Finally, run the generated `recovery.sh`, and every file comes back.
+
+---
+
+**Note**: on a Minecraft server, player data can't be recovered directly, and this method can't guarantee that every deleted file comes back. Please keep backups of your files, so that regret doesn't become the outcome of a slip of the keyboard!

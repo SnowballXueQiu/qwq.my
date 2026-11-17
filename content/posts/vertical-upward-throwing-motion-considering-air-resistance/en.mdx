@@ -1,0 +1,146 @@
+---
+title: "Throwing a Ball Straight Up, with Air Resistance"
+date: 2024-07-11
+summary: "With air resistance, how high does a ball thrown straight up go? From Newton's second law, integrating all the way to an expression for H."
+tags: [physics, math]
+---
+
+## Background
+
+**Vertical upward throw**: an object is thrown straight up with some initial speed and, ignoring air resistance, moves under gravity alone.
+
+To find the highest point the ball reaches, the usual approach is: with initial speed $v_0$ and gravitational acceleration $g$, the maximum height is
+
+$$
+H = \frac{v_0^2}{2g}
+$$
+
+So what happens if we change the problem and take into account how air resistance affects the throw?
+
+## The problem
+
+### Given
+
+Air resistance follows
+
+$$
+f = \frac{1}{2}\,c\rho S v^2
+$$
+
+- where $c$ is the drag coefficient, $\rho$ the density of air, $S$ the object's frontal area, and $v$ its speed relative to the air.
+- The ball has mass $m$, is thrown straight up with initial speed $v_0$, and gravitational acceleration is $g$.
+- $c$, $\rho$ and $S$ are all treated as constants, and the ball's diameter $d \ll H$.
+
+Find the maximum height $H$ the ball reaches.
+
+## Solution
+
+### 1. Set up the equation
+
+Take **downward** as positive. On the way up the ball moves upward ($v < 0$), and air resistance opposes the motion, so it points down, just like gravity. By Newton's second law, $F = ma$:
+
+$$
+ma = mg + \frac{1}{2}\,c\rho S v^2
+$$
+
+Let $\lambda = \frac{1}{2}c\rho S$, and then $\mu = \frac{\lambda}{m} = \frac{c\rho S}{2m}$. Since $a = \dot v = \frac{\mathrm{d}v}{\mathrm{d}t}$, the equation becomes
+
+$$
+\frac{\mathrm{d}v}{\mathrm{d}t} = g + \mu v^2
+$$
+
+### 2. Find the velocity
+
+Separate the variables:
+
+$$
+\frac{\mathrm{d}v}{g + \mu v^2} = \mathrm{d}t
+$$
+
+On the left, let $u = \sqrt{\frac{\mu}{g}}\,v$, so $\mathrm{d}v = \sqrt{\frac{g}{\mu}}\,\mathrm{d}u$:
+
+$$
+\int \frac{\mathrm{d}v}{g + \mu v^2}
+= \frac{1}{g}\sqrt{\frac{g}{\mu}} \int \frac{\mathrm{d}u}{1 + u^2}
+= \frac{1}{\sqrt{\mu g}} \arctan u
+$$
+
+Integrating both sides gives
+
+$$
+\frac{1}{\sqrt{\mu g}} \arctan\!\left(\sqrt{\frac{\mu}{g}}\,v\right) = t + C_1
+\tag{1}
+$$
+
+At $t = 0$, $v = -v_0$; substituting into $(1)$:
+
+$$
+C_1 = -\frac{1}{\sqrt{\mu g}} \arctan\!\left(\sqrt{\frac{\mu}{g}}\,v_0\right)
+\tag{2}
+$$
+
+At the top, $v = 0$, which takes a time of
+
+$$
+t_{\text{top}} = -C_1 = \frac{1}{\sqrt{\mu g}} \arctan\!\left(\sqrt{\frac{\mu}{g}}\,v_0\right)
+$$
+
+Now rewrite $(1)$ as an explicit expression for $v$ in terms of $t$:
+
+$$
+v = \sqrt{\frac{g}{\mu}}\,\tan\!\left[\sqrt{\mu g}\,(t + C_1)\right]
+$$
+
+### 3. Find the displacement
+
+From $v = \dot x = \frac{\mathrm{d}x}{\mathrm{d}t}$, let $\theta = \sqrt{\mu g}\,(t + C_1)$, so $\mathrm{d}t = \frac{\mathrm{d}\theta}{\sqrt{\mu g}}$:
+
+$$
+\begin{aligned}
+x &= \sqrt{\frac{g}{\mu}} \int \tan\theta \,\mathrm{d}t
+   = \sqrt{\frac{g}{\mu}} \cdot \frac{1}{\sqrt{\mu g}} \int \tan\theta \,\mathrm{d}\theta \\
+  &= -\frac{1}{\mu} \ln\left|\cos\theta\right| + C_2
+\end{aligned}
+\tag{3}
+$$
+
+### 4. Find the maximum height
+
+With downward positive, $x$ decreases as the ball rises, so the maximum height is the difference between the coordinates of the starting point and the top:
+
+$$
+H = x\big|_{t = 0} - x\big|_{t = t_{\text{top}}}
+$$
+
+- At the top, $t + C_1 = 0$, so $\theta = 0$ and $\cos\theta = 1$; by $(3)$, $x = C_2$.
+- At the start, $\theta = \sqrt{\mu g}\,C_1$; with $(2)$, $\theta = -\arctan\!\left(\sqrt{\frac{\mu}{g}}\,v_0\right)$.
+
+So
+
+$$
+H = -\frac{1}{\mu} \ln \cos\!\left[\arctan\!\left(\sqrt{\frac{\mu}{g}}\,v_0\right)\right]
+$$
+
+Using $\cos(\arctan u) = \frac{1}{\sqrt{1 + u^2}}$, this simplifies to
+
+$$
+H = \frac{1}{2\mu} \ln\!\left(1 + \frac{\mu v_0^2}{g}\right)
+$$
+
+Substituting back $\mu = \frac{c\rho S}{2m}$ gives
+
+$$
+\boxed{\,H = \frac{m}{c\rho S} \ln\!\left(1 + \frac{c\rho S\, v_0^2}{2mg}\right)\,}
+$$
+
+which is the answer.
+
+### 5. Check
+
+When resistance is very small ($c\rho S \to 0$), using $\ln(1 + u) \approx u$:
+
+$$
+H \approx \frac{m}{c\rho S} \cdot \frac{c\rho S\, v_0^2}{2mg} = \frac{v_0^2}{2g}
+$$
+
+which is exactly the result without air resistance. And since $\ln(1 + u) < u$, with air resistance the ball always rises less than $v_0^2/(2g)$, just as you'd expect.
