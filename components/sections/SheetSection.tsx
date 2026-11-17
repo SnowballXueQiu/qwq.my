@@ -31,6 +31,7 @@ export function SheetSection({
       <section
         id={id}
         data-sheet={id}
+        data-rail={`${sheetNumber(id)} ${title}`}
         aria-labelledby={`${id}-title`}
         className="relative"
         style={{ height: `${length * 100}svh` }}
@@ -50,6 +51,7 @@ export function SheetSection({
     <section
       id={id}
       data-sheet={id}
+      data-rail={`${sheetNumber(id)} ${title}`}
       aria-labelledby={`${id}-title`}
       className={`relative ${className}`}
       style={{

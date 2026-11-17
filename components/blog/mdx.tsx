@@ -64,9 +64,10 @@ export const mdxComponents: MDXComponents = {
   figure: (props) =>
     "data-rehype-pretty-code-figure" in props ? <CodeFigure lang={languageOf(props.children)} {...props} /> : <figure {...props} />,
   h2: ({ children }) => {
-    const id = slugify(textOf(children));
+    const text = textOf(children);
+    const id = slugify(text);
     return (
-      <h2 id={id} className="group">
+      <h2 id={id} data-rail={text} className="group">
         <a href={`#${id}`} className="no-underline">
           {children}
           <span aria-hidden className="ml-2 text-accent opacity-0 transition-opacity group-hover:opacity-100">

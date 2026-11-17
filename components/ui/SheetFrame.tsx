@@ -6,6 +6,7 @@ import { LangToggle } from "./LangToggle";
 import { MenuButton } from "./MenuButton";
 import { SoundToggle } from "@/components/sound/SoundToggle";
 import { QwQLogo } from "./QwQLogo";
+import { ScrollRail } from "./ScrollRail";
 import { SheetNav } from "./SheetNav";
 import { TerminalButton } from "./TerminalButton";
 import { TitleBlock } from "./TitleBlock";
@@ -68,6 +69,7 @@ export function SheetFrame({
       <ZoneStrip side="bottom" />
       <ZoneStrip side="left" />
       <ZoneStrip side="right" />
+      <ScrollRail />
 
       <div
         className="absolute flex flex-col justify-between border-[1.5px] border-ink"

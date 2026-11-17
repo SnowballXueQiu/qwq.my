@@ -549,6 +549,142 @@ html.game-open .hud {
   opacity: 0.6;
 }
 
+/* The page scrollbar is our own (components/ui/ScrollRail.tsx), drawn into the frame's
+   right margin; the browser's is hidden, so pages also keep one width scrolling or not. */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+.rail {
+  position: absolute;
+  top: calc(var(--frame-inset) + var(--frame-gutter));
+  bottom: calc(var(--frame-inset) + var(--frame-gutter));
+  right: var(--frame-inset);
+  width: var(--frame-gutter);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: pointer;
+}
+.rail[data-idle] {
+  display: none;
+}
+.rail-thumb {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  right: 4px;
+  height: var(--thumb-h, 28px);
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  cursor: grab;
+  transition:
+    left 0.15s,
+    right 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
+}
+/* Grip: three short strokes across the middle. */
+.rail-thumb::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 7px;
+  translate: -50% -50%;
+  background: repeating-linear-gradient(var(--ink) 0 1px, transparent 1px 3px);
+}
+.rail:hover .rail-thumb,
+.rail[data-drag] .rail-thumb {
+  left: 1px;
+  right: 1px;
+}
+.rail[data-drag] .rail-thumb {
+  border-color: var(--accent);
+  background: var(--accent);
+  cursor: grabbing;
+}
+.rail[data-drag] .rail-thumb::after {
+  background: repeating-linear-gradient(var(--paper) 0 1px, transparent 1px 3px);
+}
+.rail-tick {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 9px;
+  margin-top: -4.5px;
+  cursor: pointer;
+}
+.rail-tick::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 0;
+  width: 6px;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.15s;
+}
+.rail-tick:hover::before {
+  width: 100%;
+}
+/* Names float to the left of the margin, inside the sheet. */
+.rail-tip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 8px);
+  translate: 0 -50%;
+  display: none;
+  max-width: 18em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  padding: 2px 6px;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+.rail-tick:hover .rail-tip,
+.rail[data-drag] .rail-readout {
+  display: block;
+}
+.rail-readout {
+  right: calc(100% + 5px);
+  color: var(--accent);
+}
+@media (max-width: 767px) {
+  .rail {
+    top: calc(var(--frame-inset) + 58px);
+    bottom: calc(var(--frame-inset) + 8px);
+    right: calc(var(--frame-inset) + 2px);
+    width: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .rail[data-active] {
+    opacity: 1;
+    transition-duration: 0.1s;
+  }
+  .rail-thumb,
+  .rail:hover .rail-thumb {
+    left: 0;
+    right: 0;
+    border: 0;
+    background: color-mix(in oklab, var(--ink) 55%, transparent);
+  }
+  .rail-thumb::after,
+  .rail-tick {
+    display: none;
+  }
+}
+
 /* Page changes (components/ui/PageTransition.tsx): the old sheet lifts away, the next is
    drawn on from the top edge down. Only the page moves; the scene and frame (root) hold
    still. A wipe, not a flash. */
