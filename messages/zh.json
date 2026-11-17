@@ -102,7 +102,8 @@
     "aigcNote": "本文使用 AI 工具辅助编写，作者已校验，确认内容无误。",
     "tags": "标签",
     "all": "全部",
-    "summary": "AI 摘要"
+    "summary": "AI 摘要",
+    "contents": "本文目录"
   },
   "video": {
     "title": "2026 年度回顾",

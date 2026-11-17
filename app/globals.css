@@ -567,6 +567,112 @@ html.game-open .hud {
   }
 }
 
+/* A post on a wide screen (app/[locale]/blog/[slug]/page.tsx): the post list on the left
+   and the contents on the right, pinned below the HUD readouts while the column scrolls.
+   Narrower screens get the column alone. */
+.post-side {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .post-grid {
+    --side-top: 184px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 680px) minmax(0, 1fr);
+    column-gap: 48px;
+    align-items: start;
+  }
+  .post-column {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .post-side {
+    display: block;
+    position: sticky;
+    top: var(--side-top);
+    grid-row: 1;
+    width: min(100%, 264px);
+    /* Starts where it pins: main's top padding is var(--sheet-pad) + 56px. */
+    margin-top: calc(var(--side-top) - var(--sheet-pad) - 56px);
+  }
+  .post-index {
+    grid-column: 1;
+    justify-self: end;
+  }
+  .post-toc {
+    grid-column: 3;
+    justify-self: start;
+  }
+}
+.side-panel {
+  position: relative;
+  border: 1px solid var(--ink);
+  background: color-mix(in oklab, var(--paper) 92%, transparent);
+  backdrop-filter: blur(2px);
+}
+.side-panel::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-left: 1px solid var(--accent);
+  border-top: 1px solid var(--accent);
+}
+.side-scroll {
+  position: relative;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule) transparent;
+}
+/* The contents stop above the dial and title block in the bottom-right corner. */
+.post-index .side-scroll {
+  max-height: calc(100svh - var(--side-top) - 96px);
+}
+.post-toc .side-scroll {
+  max-height: calc(100svh - var(--side-top) - 260px);
+}
+.side-link {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 8px;
+  border-left: 2px solid transparent;
+  padding: 4px 12px 4px 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.side-link:hover {
+  color: var(--accent);
+}
+.side-link[aria-current] {
+  border-left-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 7%, transparent);
+  color: var(--ink);
+  font-weight: 600;
+}
+.side-link-sub {
+  padding-left: 24px;
+  font-size: 12px;
+}
+.side-no {
+  min-width: 2.2em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+.side-link[aria-current] .side-no {
+  color: var(--accent);
+}
+
 /* The page scrollbar is our own (components/ui/ScrollRail.tsx), drawn into the frame's
    right margin; the browser's is hidden, so pages also keep one width scrolling or not. */
 html {

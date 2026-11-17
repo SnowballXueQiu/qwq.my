@@ -26,14 +26,6 @@ const languageOf = (children: React.ReactNode) => {
   return pre?.props["data-language"];
 };
 
-/** Slug for heading anchors; keeps CJK characters. */
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-|-$/g, "");
-
 const textOf = (node: React.ReactNode): string =>
   typeof node === "string" || typeof node === "number"
     ? String(node)
@@ -68,11 +60,10 @@ export const mdxComponents: MDXComponents = {
   // Highlighted code blocks get line numbers (CSS) and a copy button.
   figure: (props) =>
     "data-rehype-pretty-code-figure" in props ? <CodeFigure lang={languageOf(props.children)} {...props} /> : <figure {...props} />,
-  h2: ({ children }) => {
-    const text = textOf(children);
-    const id = slugify(text);
+  // The id comes from rehypeToc (lib/toc.ts), which also lists the headings.
+  h2: ({ id, children }) => {
     return (
-      <h2 id={id} data-rail={text} className="group">
+      <h2 id={id} data-rail={textOf(children)} className="group">
         <a href={`#${id}`} className="no-underline">
           {children}
           <span aria-hidden className="ml-2 text-accent opacity-0 transition-opacity group-hover:opacity-100">
