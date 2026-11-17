@@ -11,6 +11,10 @@ tags: [ai, biology]
 
 今天咱们不聊高深理论，就用“人话”唠唠：你身体里的基因流水线（中心法则），和AI圈的神器循环神经网络（RNN），到底有多像？  
 
+<Figure n="00" caption="DNA 真的可以当成代码读：给四种碱基各编一个两位二进制数，红线扫过的地方，碱基和二进制互相翻译。把鼠标移到螺旋上，红线跟着你走。">
+  <HelixCode lang="zh" />
+</Figure>
+
 ---
 
 ### **一、你的细胞，是个高效打工人**  
@@ -25,7 +29,7 @@ tags: [ai, biology]
    mRNA带着代码跑到细胞质，碰见一群叫核糖体的翻译官。核糖体眯着眼读代码：  
 
   $$
-   \text{AUG} \rightarrow \text{启动子}, \quad \text{UCU} \rightarrow \text{丝氨酸}, \quad \ldots
+   \text{AUG} \rightarrow \text{甲硫氨酸（起始）}, \quad \text{UCU} \rightarrow \text{丝氨酸}, \quad \ldots
     $$
 
    每三个字母对应一个氨基酸，串成链后——**蛋白质诞生了！**  
@@ -41,6 +45,10 @@ tags: [ai, biology]
    \text{抗体} & \text{打架专用}
    \end{cases}
    $$
+
+<Figure n="01" caption="中心法则走一遍：转录、mRNA 出核、翻译、终止。拖动滑块看任意一步，或者换一段基因。图上的基因只有 18 个碱基，真实的基因要长得多。">
+  <CentralDogma lang="zh" />
+</Figure>
 
 说白了，**DNA是霸道总裁，RNA是跑腿助理，蛋白质就是任劳任怨的工具人员工。**  
 
@@ -87,6 +95,10 @@ tags: [ai, biology]
    - **$b_y$**：输出偏置（AI的"预测偏好"）
 
    “根据历史记录，这人有80%概率接‘烧烤’，20%概率接‘减肥’——但后者太反人类，还是选‘烧烤’吧！”  
+
+<Figure n="02" caption="把 RNN 按时间展开：每一步都用同一套权重，把新输入的字和上一步的记忆 h 合在一起，再猜下一个字。关掉记忆，它就只看得见眼前这一个字。示意图：权重是随机的，概率是编的。">
+  <RnnUnroll lang="zh" />
+</Figure>
 
 ---
 

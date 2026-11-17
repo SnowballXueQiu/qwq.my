@@ -4,11 +4,13 @@ import { isValidElement } from "react";
 import { BeatLab } from "./figures/BeatLab";
 import { Clip } from "./figures/Clip";
 import { DeployDiagram, PipelineDiagram } from "./figures/Diagrams";
+import { CentralDogma, HelixCode } from "./figures/Dna";
 import { EdgeLab } from "./figures/EdgeLab";
 import { FaceGrid } from "./figures/FaceGrid";
 import { Figure } from "./figures/Figure";
 import { GBufferExplorer } from "./figures/GBufferExplorer";
 import { HalftoneLab } from "./figures/HalftoneLab";
+import { RnnUnroll } from "./figures/Rnn";
 import { SceneClock } from "./figures/SceneClock";
 import { SimplifyLab } from "./figures/SimplifyLab";
 import { SplineLab } from "./figures/SplineLab";
@@ -56,6 +58,9 @@ export const mdxComponents: MDXComponents = {
   SimplifyLab,
   PipelineDiagram,
   DeployDiagram,
+  HelixCode,
+  CentralDogma,
+  RnnUnroll,
   // Plain posts: photo sets and boxed asides.
   Gallery,
   Callout,
