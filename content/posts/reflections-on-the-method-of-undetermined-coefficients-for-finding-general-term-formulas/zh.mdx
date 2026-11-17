@@ -21,43 +21,61 @@ tags: [math]
 
 ### 常规方法
 
-我们采用待定系数法求解：
+我们采用待定系数法求解。给定递推关系
 
-给定递推关系 $a_{n+1} = pa_n + q^n$
+$$
+a_{n+1} = pa_n + q^n
+$$
 
-我们的目标是找到一个形式 $a_{n+1} + xq^{n+1} = p(a_n + xq^n)$，这样就可以通过比较两边的形式来确定 $x$，进而找到数列的通项公式。
+我们的目标是找到一个形式
 
-首先，我们把原递推式改写为 $a_{n+1} + xq^{n+1} = pa_n + q^n + xq^{n+1}$
+$$
+a_{n+1} + xq^{n+1} = p\left(a_n + xq^n\right)
+$$
 
-然后，我们希望左边的形式与右边的形式匹配，即 $a_{n+1} + xq^{n+1} = p(a_n + xq^n)$
+这样就可以通过比较两边的形式来确定 $x$，进而找到数列的通项公式。
 
-这意味着 $pa_n + q^n + xq^{n+1} = pa_n + pxq^n$
+首先，我们把原递推式代入左边：
 
-通过对比两边的项，我们可以得出 $q^n + xq^{n+1} = pxq^n$
+$$
+a_{n+1} + xq^{n+1} = pa_n + q^n + xq^{n+1}
+$$
 
-$q^n(1 + xq) = pxq^n$
+然后，我们希望它与右边 $p\left(a_n + xq^n\right) = pa_n + pxq^n$ 匹配。通过对比两边的项，可以得出
 
-从而得到 $1 + xq = px$
+$$
+\begin{aligned}
+q^n + xq^{n+1} &= pxq^n \\
+q^n(1 + xq) &= pxq^n \\
+1 + xq &= px
+\end{aligned}
+$$
 
-即 $x = \frac{1}{p - q}$
+即（这里要求 $p \neq q$）
+
+$$
+x = \frac{1}{p - q}
+$$
 
 所以，如果我们找到了这样的 $x$，那么就可以构造新的数列 $b_n = a_n + xq^n$，该数列将满足一个更简单的递推关系 $b_{n+1} = pb_n$。
 
-最后，我们可以求解新的数列 $b_n$ 的通项公式，再通过 $a_n = b_n - xq^n$ 求得原数列 $a_n$ 的通项公式。
+最后，我们可以求解新的数列 $b_n$ 的通项公式，再通过 $a_n = b_n - xq^n$ 求得原数列 $a_n$ 的通项公式。具体地，我们有
 
-具体地，我们有 $b_n = a_n + \frac{q^n}{p-q}$
+$$
+b_n = a_n + \frac{q^n}{p-q}
+$$
 
-因为 $b_{n+1} = pb_n$，这是一个等比数列，其通项公式为 $b_n = b_1 \cdot p^{n-1}$
+因为 $b_{n+1} = pb_n$，这是一个公比为 $p$ 的等比数列，首项 $b_1 = a_1 + \dfrac{q}{p-q}$，所以
 
-其中 $b_1 = a_1 + \frac{q}{p-q}$
+$$
+b_n = b_1 \cdot p^{n-1} = \left(a_1 + \frac{q}{p-q}\right) p^{n-1}
+$$
 
-因此 $b_n = (a_1 + \frac{q}{p-q}) \cdot p^{n-1}$
+这就是数列 $a_n$ 的通项公式：
 
-所以 $a_n = (a_1 + \frac{q}{p-q}) \cdot p^{n-1} - \frac{q^n}{p-q}$
-
-这就是数列 $a_n$ 的通项公式
-
-$a_n = (a_1 + \frac{q}{p-q}) \cdot p^{n-1} - \frac{q^n}{p-q}$
+$$
+\boxed{a_n = \left(a_1 + \frac{q}{p-q}\right) p^{n-1} - \frac{q^n}{p-q}}
+$$
 
 ## 三、引发思考
 
@@ -65,7 +83,7 @@ $a_n = (a_1 + \frac{q}{p-q}) \cdot p^{n-1} - \frac{q^n}{p-q}$
 
 实际上，复数和向量的线性运算也有类似的性质。例如，复数可以表示为二维向量，而向量的加法和标量乘法等操作都可以通过矩阵来表示。
 
-#### 复数与向量的线性运算
+### 复数与向量的线性运算
 
 复数可以看作二维向量的一个特例，其中实部对应向量的 x 分量，虚部对应 y 分量。复数的加法和乘法运算类似于向量空间中的线性组合。
 
@@ -77,54 +95,98 @@ $a_n = (a_1 + \frac{q}{p-q}) \cdot p^{n-1} - \frac{q^n}{p-q}$
 
 #### 加法
 
-复数的加法可以表示为 $z_1 + z_2 = (a + bi) + (c + di) = (a + c) + (b + d)i$
+复数的加法可以表示为
 
-我们可以通过矩阵来表示这个操作 $\begin{pmatrix} a & b \\ -b & a \end{pmatrix} + \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a+c & b+d \\ -(b+d) & a+c \end{pmatrix}$
+$$
+z_1 + z_2 = (a + bi) + (c + di) = (a + c) + (b + d)i
+$$
+
+我们可以通过矩阵来表示这个操作：
+
+$$
+\begin{pmatrix} a & b \\ -b & a \end{pmatrix} + \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a+c & b+d \\ -(b+d) & a+c \end{pmatrix}
+$$
 
 #### 减法
 
-复数的减法可以表示为 $z_1 - z_2 = (a + bi) - (c + di) = (a - c) + (b - d)i$
+复数的减法可以表示为
 
-同样地，我们可以用矩阵来表示 $\begin{pmatrix} a & b \\ -b & a \end{pmatrix} - \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a-c & b-d \\ -(b-d) & a-c \end{pmatrix}$
+$$
+z_1 - z_2 = (a + bi) - (c + di) = (a - c) + (b - d)i
+$$
+
+同样地，我们可以用矩阵来表示：
+
+$$
+\begin{pmatrix} a & b \\ -b & a \end{pmatrix} - \begin{pmatrix} c & d \\ -d & c \end{pmatrix} = \begin{pmatrix} a-c & b-d \\ -(b-d) & a-c \end{pmatrix}
+$$
 
 ## 四、用矩阵解决最开始的问题
 
-我们再次使用矩阵的方法来解决最初的问题：
+我们再次使用矩阵的方法来解决最初的问题。定义状态向量 $\mathbf{s}_n$，并构造矩阵 $A$：
 
-定义状态向量 $\mathbf{s}_n = \begin{pmatrix} a_n \\ q^n \end{pmatrix}$，构造矩阵 $A = \begin{pmatrix} p & 1 \\ 0 & q \end{pmatrix}$，使得 $\mathbf{s}_{n+1} = A \mathbf{s}_n$
+$$
+\mathbf{s}_n = \begin{pmatrix} a_n \\ q^n \end{pmatrix}, \qquad A = \begin{pmatrix} p & 1 \\ 0 & q \end{pmatrix}
+$$
 
-计算矩阵的幂次 $A^{n-1}$
+使得 $\mathbf{s}_{n+1} = A\,\mathbf{s}_n$，从而 $\mathbf{s}_n = A^{n-1}\mathbf{s}_1$。于是问题变成计算矩阵的幂次 $A^{n-1}$。
 
-$A^{n-1} = \begin{pmatrix} p & 1 \\ 0 & q \end{pmatrix}^{n-1}$
+由于 $A$ 是一个上三角矩阵，其幂次仍然是上三角矩阵，且对角元素分别为 $p$ 和 $q$ 的幂次：
 
-由于 $A$ 是一个上三角矩阵，其幂次仍然是上三角矩阵，且对角元素分别为 $p$ 和 $q$ 的幂次 $A^{n-1} = \begin{pmatrix} p^{n-1} & * \\ 0 & q^{n-1} \end{pmatrix}$
+$$
+A^{n-1} = \begin{pmatrix} p^{n-1} & * \\ 0 & q^{n-1} \end{pmatrix}
+$$
 
-为了找出右上角的元素，我们可以使用数学归纳法 $A^2 = \begin{pmatrix} p^2 & p + q \\ 0 & q^2 \end{pmatrix}$
+为了找出右上角的元素，先算几项：
 
-$A^3 = \begin{pmatrix} p^3 & p^2 + pq + q^2 \\ 0 & q^3 \end{pmatrix}$
+$$
+A^2 = \begin{pmatrix} p^2 & p + q \\ 0 & q^2 \end{pmatrix}, \qquad A^3 = \begin{pmatrix} p^3 & p^2 + pq + q^2 \\ 0 & q^3 \end{pmatrix}
+$$
 
-一般地，$A^{n-1} = \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^kq^{n-2-k} \\ 0 & q^{n-1} \end{pmatrix}$
+一般地（可以用数学归纳法证明），
 
-因此，$ \mathbf{s}_n = A^{n-1} \mathbf{s}_1 $
+$$
+A^{n-1} = \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ 0 & q^{n-1} \end{pmatrix}
+$$
 
-初始条件为 $ a_1 $，对应的初始状态向量为：$ \mathbf{s}_1 = \begin{pmatrix} a_1 \\ q \end{pmatrix} $
+初始条件为 $a_1$，对应的初始状态向量为 $\mathbf{s}_1 = \begin{pmatrix} a_1 \\ q \end{pmatrix}$。将 $A^{n-1}$ 代入：
 
-将 $ A^{n-1} $ 代入：$ \mathbf{s}_n = \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ 0 & q^{n-1} \end{pmatrix} \begin{pmatrix} a_1 \\ q \end{pmatrix} $
+$$
+\begin{aligned}
+\mathbf{s}_n &= \begin{pmatrix} p^{n-1} & \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ 0 & q^{n-1} \end{pmatrix} \begin{pmatrix} a_1 \\ q \end{pmatrix} \\
+&= \begin{pmatrix} a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ q^n \end{pmatrix}
+\end{aligned}
+$$
 
-计算结果：$ \mathbf{s}_n = \begin{pmatrix} a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k \\ q^n \end{pmatrix} $
+取第一个分量：
 
-简化：$ a_n = a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k $
+$$
+a_n = a_1 p^{n-1} + q \sum_{k=0}^{n-2} p^{n-2-k}q^k
+$$
 
-注意到：$ \sum_{k=0}^{n-2} p^{n-2-k}q^k = \sum_{k=0}^{n-2} p^{n-2} \left(\frac{q}{p}\right)^k = p^{n-2} \sum_{k=0}^{n-2} \left(\frac{q}{p}\right)^k $
+注意到其中的和是一个等比数列的和：
 
-这是一个等比数列的和：$ \sum_{k=0}^{n-2} \left(\frac{q}{p}\right)^k = \frac{1 - \left(\frac{q}{p}\right)^{n-1}}{1 - \frac{q}{p}} = \frac{p}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right) $
+$$
+\begin{aligned}
+\sum_{k=0}^{n-2} p^{n-2-k}q^k &= p^{n-2} \sum_{k=0}^{n-2} \left(\frac{q}{p}\right)^k \\
+&= p^{n-2} \cdot \frac{1 - \left(\frac{q}{p}\right)^{n-1}}{1 - \frac{q}{p}} \\
+&= \frac{p^{n-1}}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right)
+\end{aligned}
+$$
 
-因此：$ a_n = a_1 p^{n-1} + q p^{n-2} \cdot \frac{p}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right) $  
-$ a_n = a_1 p^{n-1} + \frac{qp^{n-1}}{p-q} - \frac{q^n}{p-q} $
+因此
 
-提取公共因子：$ a_n = (a_1 + \frac{q}{p-q}) p^{n-1} - \frac{q^n}{p-q} $
+$$
+\begin{aligned}
+a_n &= a_1 p^{n-1} + \frac{q\,p^{n-1}}{p-q} \left(1 - \left(\frac{q}{p}\right)^{n-1}\right) \\
+&= a_1 p^{n-1} + \frac{q\,p^{n-1}}{p-q} - \frac{q^n}{p-q}
+\end{aligned}
+$$
 
+提取公共因子，得到与待定系数法相同的结果：
 
-通过计算 $\mathbf{s}_n$，我们可以得到 $a_n$ 的表达式。
+$$
+\boxed{a_n = \left(a_1 + \frac{q}{p-q}\right) p^{n-1} - \frac{q^n}{p-q}}
+$$
 
 这样，矩阵方法为求解递推数列提供了一种新的视角。
