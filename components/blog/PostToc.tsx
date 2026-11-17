@@ -11,7 +11,9 @@ const NUMERALS = "一二三四五六七八九";
 
 /**
  * A heading that carries its own number ("1. …", "一、…") gives it to the number column
- * instead of showing it twice. Chinese numerals up to 九十九 are read as numbers.
+ * instead of showing it twice, as long as its whole group (the top entries, or the
+ * entries under one of them) is numbered; a mixed group is counted and left as written.
+ * Chinese numerals up to 九十九 are read as numbers.
  */
 function ownNumber(text: string): { n: number; rest: string } | null {
   const digits = /^(\d{1,2})[.．、)）]\s*(?!\d)(.+)$/.exec(text);
@@ -31,15 +33,15 @@ function ownNumber(text: string): { n: number; rest: string } | null {
  */
 export function PostToc({ items, label }: { items: TocItem[]; label: string }) {
   const levels = [...new Set(items.map((it) => it.depth))].sort().slice(0, 2);
-  const shown = items
-    .filter((it) => levels.includes(it.depth))
-    .map((it, i, all) => {
-      const sub = it.depth !== levels[0];
-      const own = ownNumber(it.text);
-      const count = all.slice(0, i + 1).filter((x) => x.depth === levels[0]).length;
-      const no = own ? String(own.n).padStart(sub ? 1 : 2, "0") : sub ? "·" : String(count).padStart(2, "0");
-      return { ...it, sub, no, text: own?.rest ?? it.text };
-    });
+  const base = items.filter((it) => levels.includes(it.depth)).map((it) => ({ ...it, sub: it.depth !== levels[0], own: ownNumber(it.text) }));
+  // Sub-entries are grouped under the entry before them.
+  const group = base.map((_, i) => base.slice(0, i + 1).filter((x) => !x.sub).length);
+  const numbered = (sub: boolean, g: number) => base.every((x, i) => x.sub !== sub || (sub && group[i] !== g) || x.own);
+  const shown = base.map((it, i) => {
+    const own = it.own && numbered(it.sub, group[i]) ? it.own : null;
+    const no = own ? String(own.n).padStart(it.sub ? 1 : 2, "0") : it.sub ? "·" : String(group[i]).padStart(2, "0");
+    return { ...it, no, text: own?.rest ?? it.text };
+  });
   const ids = shown.map((it) => it.id).join(" ");
   const [active, setActive] = useState<string | null>(null);
   const list = useRef<HTMLOListElement>(null);
