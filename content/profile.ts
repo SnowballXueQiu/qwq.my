@@ -11,8 +11,8 @@ export const profile = {
   location: { zh: "中国", en: "China" } satisfies L10n,
   bio: [
     {
-      zh: "喜欢把想法做成能跑起来、能用起来的东西。网页、原生 App、后端、我的世界服务器和插件都在做，也在用 AI 工具把原型做得更快。",
-      en: "I like turning ideas into things that run and get used: web, native apps, backends, Minecraft servers and plugins, with AI tools to prototype faster.",
+      zh: "比起让想法跑起来，我更在意它能不能真正投入使用，最终做成一个有用的产品。",
+      en: "Getting an idea to run is the start; what I care about is whether it gets put to real use and becomes a product that's actually useful.",
     },
     {
       zh: "联合创立了瀚海工艺，在苦力怕论坛管技术，给《Rust 语言圣经》写内容。这个网站本身就是一张还在修订的图纸。",
