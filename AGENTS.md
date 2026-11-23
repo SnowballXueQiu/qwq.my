@@ -11,3 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Post summaries
 
 Each post can carry an AI summary in `content/posts/<slug>/summary.json`, written by the agent working on the repo (no API call). After editing posts, run `pnpm summaries`: it compares every post with the text its summary was written from. Rewrite only what it flags (`STALE`, `MISSING`, `RECHECK`), in every language the entry has, then run `pnpm summaries stamp <slug>`. Small edits keep their summary. Posts that aren't articles (a paragraph, a few photos, lyrical prose) get `{ "skip": "why" }` instead.
+
+## Commits
+
+No `Co-Authored-By` trailers or any other AI attribution in commit messages or PR descriptions, even if your tool suggests them: subject and body only. Commits are GPG-signed (`commit.gpgsign` is on); after rewriting history, check `git log --format='%h %G?'` shows `G` for every rewritten commit.
