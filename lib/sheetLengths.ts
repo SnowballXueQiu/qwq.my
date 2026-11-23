@@ -4,10 +4,11 @@ import { timeline } from "@/content/timeline";
 import type { SheetId } from "./sheets";
 
 /**
- * One stop per milestone, then two for the GitHub city at the end of the road:
- * drive in among the towers, then crane up over the grid.
+ * One stop per milestone, then three for the GitHub city at the end of the
+ * road: drive in among the towers, crane up over the grid, then hold there
+ * long enough to read the year before moving on.
  */
-export const TIMELINE_SLOTS = timeline.length + 2;
+export const TIMELINE_SLOTS = timeline.length + 3;
 
 /**
  * One pace for every "stop" on the ride (skill cards, project screens,

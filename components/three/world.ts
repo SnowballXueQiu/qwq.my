@@ -48,6 +48,8 @@ export const PLAZA_S = {
   street: 4 + T_SLOT * (timeline.length + 0.1),
   /** Camera has finished craning up; the grid reads from above. */
   overhead: 4 + T_SLOT * (timeline.length + 1.45),
+  /** Middle of the overhead hold, where a fling down the road comes to rest. */
+  rest: 4 + T_SLOT * (timeline.length + 2),
   end: 4 + T_SLOT * TIMELINE_SLOTS,
 };
 
@@ -75,9 +77,10 @@ export function beatTimes(): number[] {
 /**
  * From the first milestone to the end of the page, scrolling is continuous:
  * the ride down the road, the city, writing, contact. A hard fling is caught
- * at the writing shot rather than running on to the end.
+ * over the city (so its total gets read) and at the writing shot, rather than
+ * running on to the end.
  */
-export const FLOW = { start: 4 + T_SLOT * 0.5, catches: [5.3], end: 6 + pinned("contact") };
+export const FLOW = { start: 4 + T_SLOT * 0.5, catches: [PLAZA_S.rest, 5.3], end: 6 + pinned("contact") };
 
 /**
  * Where milestone `i` of `n` stands: a little ahead of where the camera is
@@ -164,13 +167,13 @@ export function buildCameraKeys(portrait = false): CameraKey[] {
     // A narrow screen can't hold the whole year at once: fly over it, January to November.
     keys.push(
       { s: 4 + tSlot * (n + 1.4), pos: [px - 19, 36, PLAZA_Z + 36], look: [px - 19, -6, PLAZA_Z + 1], roll: 0 },
-      { s: 4 + tSlot * (n + 1.95), pos: [px + 19, 36, PLAZA_Z + 36], look: [px + 19, -6, PLAZA_Z + 1], roll: 0 },
+      { s: 4 + tSlot * (n + 2.95), pos: [px + 19, 36, PLAZA_Z + 36], look: [px + 19, -6, PLAZA_Z + 1], roll: 0 },
     );
   } else {
     keys.push(
       // Still drifting up while the year reads, so the ride never stalls.
       { s: 4 + tSlot * (n + 1.45), pos: [px + 2, 50, PLAZA_Z + 52], look: [px + 2, -4, PLAZA_Z + 4], roll: 0 },
-      { s: 4 + tSlot * (n + 1.95), pos: [px + 2, 54, PLAZA_Z + 56], look: [px + 2, -4, PLAZA_Z + 3], roll: 0 },
+      { s: 4 + tSlot * (n + 2.95), pos: [px + 2, 56, PLAZA_Z + 58], look: [px + 2, -4, PLAZA_Z + 3], roll: 0 },
     );
   }
   keys.push(

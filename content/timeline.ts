@@ -117,7 +117,7 @@ export const timeline: TimelineEvent[] = [
     date: "2026-11",
     kind: "project",
     title: { zh: "qwq.my 上线", en: "qwq.my goes live" },
-    detail: { zh: "就是你正在看的这张图纸。", en: "The drawing you're looking at." },
+    detail: { zh: "就是你正在看的这个网站。", en: "The site you're looking at." },
   },
 ];
 

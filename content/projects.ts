@@ -18,8 +18,8 @@ export const projects: Project[] = [
     title: "qwq.my",
     year: 2026,
     summary: {
-      zh: "这个网站：一张会被撕开的图纸，后面是一个可以玩的 3D 世界。",
-      en: "This site: a drawing that tears open onto a 3D world you can play with.",
+      zh: "我的个人主页。往下滚，镜头会带你走一遍我的项目、经历和文章。",
+      en: "My personal site. Scroll down and the camera walks you through my projects, timeline and writing.",
     },
     role: { zh: "作者", en: "Author" },
     tags: ["Next.js", "Three.js", "Remotion"],
@@ -43,8 +43,8 @@ export const projects: Project[] = [
     title: "KLPBBS Survey",
     year: 2024,
     summary: {
-      zh: "苦力怕论坛问卷系统的前端，在 wj.klpbbs.com 上线运行。",
-      en: "Frontend of the KLPBBS (Creeper forum) survey system, live at wj.klpbbs.com.",
+      zh: "苦力怕论坛问卷系统的前端。",
+      en: "Frontend of the KLPBBS (Creeper forum) survey system.",
     },
     role: { zh: "前端开发", en: "Frontend" },
     tags: ["Next.js", "React", "Mantine"],
@@ -56,8 +56,8 @@ export const projects: Project[] = [
     title: "Rust Course",
     year: 2024,
     summary: {
-      zh: "《Rust 语言圣经》course.rs，3 万多 Star 的中文 Rust 教程，我是协作者之一。",
-      en: "course.rs, the Chinese Rust book with 30k+ stars; I'm one of its collaborators.",
+      zh: "《Rust 语言圣经》course.rs，3 万多 Star 的中文 Rust 教程，主要负责内容订正与 EPUB 发行。",
+      en: "course.rs, the Chinese Rust book with 30k+ stars. I mainly handle corrections and the EPUB release.",
     },
     role: { zh: "教程协作者", en: "Collaborator" },
     tags: ["Rust", "Docs"],

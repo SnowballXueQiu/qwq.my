@@ -17,8 +17,8 @@ import { useSite } from "@/lib/store";
  * a resize) settles onto the nearest one.
  *
  * From the road on (see FLOW) scrolling is continuous and smooth, except that
- * a fling is caught at the writing shot, and the flow never runs back up past
- * its start: the beats take over there.
+ * a fling is caught over the city and at the writing shot, and the flow never
+ * runs back up past its start: the beats take over there.
  */
 
 /** Quiet time (ms) that ends a wheel gesture. */
@@ -88,14 +88,18 @@ function flowing(lenis: Lenis, y: number, dir: number) {
 
 /**
  * Where continuous scrolling from `from` toward `to` stops: never above the
- * flow's start, and caught at the writing shot when it would run past it.
+ * flow's start, and caught at the city or the writing shot when it would run
+ * past one.
  */
 function flowTarget(lenis: Lenis, from: number, to: number): { y: number; caught: boolean } {
   const start = toY(lenis, FLOW.start);
   if (to < start) return { y: start, caught: true };
-  for (const c of FLOW.catches.map((s) => toY(lenis, s))) {
-    if ((from - c) * (to - c) < 0) return { y: c, caught: true };
-  }
+  // The first catch it would run past, in the direction it's going.
+  const crossed = FLOW.catches
+    .map((s) => toY(lenis, s))
+    .filter((c) => (from - c) * (to - c) < 0)
+    .sort((a, b) => Math.abs(a - from) - Math.abs(b - from));
+  if (crossed.length) return { y: crossed[0], caught: true };
   return { y: Math.min(to, lenis.limit), caught: false };
 }
 
