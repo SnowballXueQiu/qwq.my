@@ -11,3 +11,5 @@ public/video
 Dockerfile
 docker-compose.yml
 data
+public/promo
+out
