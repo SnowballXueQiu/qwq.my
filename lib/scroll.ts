@@ -10,6 +10,8 @@ export const getScrollVelocity = () => instance?.velocity ?? scrollMotion.veloci
 
 export const setLenis = (lenis: Lenis | null) => {
   instance = lenis;
+  // Promo-video capture (video/promo branch): lets the frame grabber drive the page.
+  if (typeof window !== "undefined") (window as unknown as { __lenis?: Lenis | null }).__lenis = lenis;
 };
 
 export const getLenis = () => instance;

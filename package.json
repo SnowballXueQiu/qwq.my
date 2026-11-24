@@ -10,7 +10,10 @@
     "video:studio": "remotion studio",
     "video:render": "pnpm github:snapshot && remotion render YearInReview public/video/year-in-review-2026.mp4 && remotion render YearInReviewEn public/video/year-in-review-2026-en.mp4",
     "github:snapshot": "node scripts/fetch-github.ts",
-    "summaries": "node scripts/summaries.mts"
+    "summaries": "node scripts/summaries.mts",
+    "promo:music": "node remotion/Promo/music/compose.mjs && node remotion/Promo/music/master.mjs",
+    "promo:capture": "node --experimental-websocket remotion/Promo/capture/grab.mjs",
+    "promo:render": "remotion render Promo out/qwq-my-promo-4k60.mp4 --scale=2 --codec=h264 --video-bitrate=45M --audio-bitrate=320k --x264-preset=slow --concurrency=8"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

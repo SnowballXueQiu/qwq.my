@@ -45,3 +45,8 @@ export function clearSheets() {
   spans = [];
   measured = false;
 }
+
+// Promo-video capture (video/promo branch): the frame grabber places the camera by scene time.
+if (typeof window !== "undefined") {
+  (window as unknown as { __film?: object }).__film = { scrollForSceneTime, getSceneTime, measureSheets };
+}

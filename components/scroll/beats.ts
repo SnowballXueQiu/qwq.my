@@ -60,8 +60,11 @@ const state = {
 
 const gliding = () => performance.now() < state.until;
 
+/** Promo-video capture (video/promo branch): the frame grabber places the page itself. */
+const filming = () => typeof window !== "undefined" && "__filming" in window;
+
 function active(lenis: Lenis | null): lenis is Lenis {
-  return !!lenis && hasSheets() && !lenis.isStopped && !useSite.getState().reading;
+  return !!lenis && hasSheets() && !lenis.isStopped && !useSite.getState().reading && !filming();
 }
 
 const toY = (lenis: Lenis, s: number) => Math.min(Math.round(scrollForSceneTime(s)), lenis.limit);

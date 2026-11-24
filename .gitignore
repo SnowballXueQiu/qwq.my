@@ -46,3 +46,6 @@ next-env.d.ts
 
 # local SQLite database (view counts, likes)
 /data/
+
+# promo video: captured footage, rendered music and renders are generated (see remotion/Promo/README.md)
+/public/promo/
