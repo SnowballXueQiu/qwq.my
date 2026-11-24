@@ -35,6 +35,16 @@ pnpm video:studio                            # pick "Promo"
 pnpm promo:render                            # → out/qwq-my-promo-4k60.mp4
 ```
 
+On a Mac, point `CHROME` at Google Chrome and set `CAPTURE_GL=metal` to film on
+the GPU: about 150 ms a 4K frame instead of 1.8 s with SwiftShader, and the
+frames match (virtual time decides what is drawn, not the renderer). For every
+shot, with resume on stalls:
+
+```sh
+export CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" CAPTURE_GL=metal
+bash remotion/Promo/capture/resume.sh survey phone_survey hero_wake …
+```
+
 Footage goes to `public/promo/footage/` (several GB, git-ignored). To check the
 edit before the full captures exist, render stills against the preview
 captures: `npx remotion still Promo f.png --frame=600 --props='{"preview":true}'`.

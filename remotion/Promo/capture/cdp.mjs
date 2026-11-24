@@ -18,8 +18,8 @@ export async function launch({ width, height, dpr = 1, mobile = false }) {
       "--headless=new",
       `--remote-debugging-port=${port}`,
       `--user-data-dir=${profile}`,
-      "--use-angle=swiftshader",
-      "--enable-unsafe-swiftshader",
+      // CAPTURE_GL=metal films on a Mac's GPU, many times faster; the default needs no GPU.
+      ...(process.env.CAPTURE_GL === "metal" ? ["--use-angle=metal"] : ["--use-angle=swiftshader", "--enable-unsafe-swiftshader"]),
       "--ignore-gpu-blocklist",
       "--no-first-run",
       "--hide-scrollbars",
